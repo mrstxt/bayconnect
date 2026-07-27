@@ -47,8 +47,14 @@ export default async function ExpertsPage({ searchParams }: { searchParams: Sear
         }
       />
 
+      <div className="surface-apple mt-8 grid gap-3 p-4 sm:grid-cols-3">
+        <PanelStat value={`${list.length}`} label="Natija" />
+        <PanelStat value={activeCategory ? "Filter" : "Barchasi"} label="Kategoriya" />
+        <PanelStat value={sp.city || "Hamma"} label="Shahar" />
+      </div>
+
       {/* Category chips */}
-      <div className="mt-8 flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
+      <div className="mt-6 flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
         <CategoryChip label="Barchasi" href={makeHref(sp, { category: "" })} active={!activeCategory} />
         {EXPERT_CATEGORIES.map((c) => (
           <CategoryChip
@@ -149,6 +155,15 @@ export default async function ExpertsPage({ searchParams }: { searchParams: Sear
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function PanelStat({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="rounded-2xl bg-white/72 px-4 py-3 ring-1 ring-[#006b55]/10">
+      <div className="text-[20px] font-semibold tracking-tight text-[#123f34]">{value}</div>
+      <div className="mt-0.5 text-[12px] font-medium text-[#7b827f]">{label}</div>
     </div>
   );
 }

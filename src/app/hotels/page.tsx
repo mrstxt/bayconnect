@@ -35,6 +35,12 @@ export default async function HotelsPage({ searchParams }: { searchParams: Searc
         subtitle="Butik mehmonxonalardan zamonaviy 4* mehmonxonalargacha — sizga qulay joyni tanlang."
       />
 
+      <div className="surface-apple mt-8 grid gap-3 p-4 sm:grid-cols-3">
+        <PanelStat value={`${list.length}`} label="Mehmonxona" />
+        <PanelStat value={sp.city || "Hamma"} label="Shahar" />
+        <PanelStat value={sp.sort || "rating"} label="Saralash" />
+      </div>
+
       <form className="filter-panel mt-8 p-4 md:p-5">
         <div className="grid md:grid-cols-12 gap-3">
           <div className="md:col-span-4">
@@ -106,6 +112,15 @@ export default async function HotelsPage({ searchParams }: { searchParams: Searc
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function PanelStat({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="rounded-2xl bg-white/72 px-4 py-3 ring-1 ring-[#006b55]/10">
+      <div className="text-[20px] font-semibold tracking-tight text-[#123f34]">{value}</div>
+      <div className="mt-0.5 text-[12px] font-medium text-[#7b827f]">{label}</div>
     </div>
   );
 }

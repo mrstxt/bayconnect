@@ -41,8 +41,14 @@ export default async function TransferPage({ searchParams }: { searchParams: Sea
         subtitle="Yengil avtodan avtobusgacha — sizga qulay transport turini tanlang."
       />
 
+      <div className="surface-apple mt-8 grid gap-3 p-4 sm:grid-cols-3">
+        <PanelStat value={`${list.length}`} label="Transport" />
+        <PanelStat value={activeType || "Barchasi"} label="Tur" />
+        <PanelStat value={sp.city || "Hamma"} label="Shahar" />
+      </div>
+
       {/* Vehicle type cards */}
-      <div className="mt-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         <TypeCard
           label="Barchasi"
           icon={<GlobeGridIcon size={28} />}
@@ -135,6 +141,15 @@ export default async function TransferPage({ searchParams }: { searchParams: Sea
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function PanelStat({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="rounded-2xl bg-white/72 px-4 py-3 ring-1 ring-[#006b55]/10">
+      <div className="text-[20px] font-semibold tracking-tight text-[#123f34]">{value}</div>
+      <div className="mt-0.5 text-[12px] font-medium text-[#7b827f]">{label}</div>
     </div>
   );
 }
