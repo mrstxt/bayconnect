@@ -83,12 +83,6 @@ export default async function HomePage() {
               Gidlar, transfer va sayohat xizmatlari bir joyda
             </div>
 
-            <div className="animate-fade-up delay-1 mx-auto mt-8 flex max-w-[780px] items-center justify-center">
-              <span className="relative block w-full overflow-hidden rounded-[28px] bg-white/55 px-5 py-5 shadow-[0_24px_70px_rgba(18,63,52,0.12)] ring-1 ring-[#006b55]/10 backdrop-blur-xl md:px-8 md:py-7">
-              
-              </span>
-            </div>
-
             <h1 className="animate-fade-up delay-2 mx-auto mt-8 max-w-4xl text-[38px] font-black leading-[1.02] text-[#123f34] sm:text-[52px] md:text-[72px]">
               O'zbekistonda sayohatni bog'laydigan zamonaviy marketplace.
             </h1>
