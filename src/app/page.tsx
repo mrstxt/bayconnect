@@ -85,14 +85,7 @@ export default async function HomePage() {
 
             <div className="animate-fade-up delay-1 mx-auto mt-8 flex max-w-[780px] items-center justify-center">
               <span className="relative block w-full overflow-hidden rounded-[28px] bg-white/55 px-5 py-5 shadow-[0_24px_70px_rgba(18,63,52,0.12)] ring-1 ring-[#006b55]/10 backdrop-blur-xl md:px-8 md:py-7">
-                <Image
-                  src="/bayconnect.png"
-                  alt="bayConnect"
-                  width={2048}
-                  height={512}
-                  priority
-                  className="mx-auto h-auto w-full max-w-[680px]"
-                />
+              
               </span>
             </div>
 
