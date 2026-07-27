@@ -217,7 +217,7 @@ export default async function ProviderPage({
               </h2>
             </div>
             <Link
-              href={`/providers?category=${p.category}`}
+              href={`/experts?category=${p.category}`}
               className="text-[14px] font-semibold text-[#0717b8] hover:underline underline-offset-4"
             >
               Barchasi →

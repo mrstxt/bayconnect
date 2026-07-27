@@ -10,34 +10,59 @@ export function RegisterForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [error, setError] = useState("");
   const [step, setStep] = useState(1);
+  const [draft, setDraft] = useState<Record<string, string>>({});
+
+  function collect(form: HTMLFormElement) {
+    const next = { ...draft };
+    new FormData(form).forEach((value, key) => {
+      next[key] = String(value);
+    });
+    setDraft(next);
+    return next;
+  }
+
+  function goNext(e: React.MouseEvent<HTMLButtonElement>, nextStep: number) {
+    const form = e.currentTarget.form;
+    if (!form || !form.reportValidity()) return;
+    collect(form);
+    setError("");
+    setStep(nextStep);
+  }
+
+  function goBack(e: React.MouseEvent<HTMLButtonElement>, nextStep: number) {
+    const form = e.currentTarget.form;
+    if (form) collect(form);
+    setError("");
+    setStep(nextStep);
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStatus("loading");
     setError("");
     const form = e.currentTarget;
-    const data = new FormData(form);
+    const data = collect(form);
 
     const payload = {
-      fullName: String(data.get("fullName") ?? ""),
-      category: String(data.get("category") ?? ""),
-      city: String(data.get("city") ?? ""),
-      country: String(data.get("country") ?? "Uzbekistan"),
-      languages: String(data.get("languages") ?? "")
+      fullName: data.fullName ?? "",
+      category: data.category ?? "",
+      city: data.city ?? "",
+      country: data.country ?? "Uzbekistan",
+      languages: (data.languages ?? "")
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean),
-      pricePerDay: Number(data.get("pricePerDay") ?? 0),
-      experienceYears: Number(data.get("experienceYears") ?? 0),
-      bio: String(data.get("bio") ?? ""),
-      phone: String(data.get("phone") ?? ""),
-      email: String(data.get("email") ?? ""),
-      tags: String(data.get("tags") ?? "")
+      pricePerDay: Number(data.pricePerDay ?? 0),
+      experienceYears: Number(data.experienceYears ?? 0),
+      bio: data.bio ?? "",
+      phone: data.phone ?? "",
+      email: data.email ?? "",
+      tags: (data.tags ?? "")
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean),
       avatarEmoji: "",
-      coverColor: String(data.get("coverColor") ?? "orange"),
+      coverColor: data.coverColor ?? "orange",
     };
 
     try {
@@ -81,13 +106,20 @@ export function RegisterForm() {
       {step === 1 ? (
         <div className="space-y-4 animate-fade-up">
           <Field label="To'liq ism">
-            <input name="fullName" required className="input-apple" placeholder="Aziz Karimov" />
+            <input
+              name="fullName"
+              required
+              defaultValue={draft.fullName}
+              className="input-apple"
+              placeholder="Aziz Karimov"
+            />
           </Field>
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label="Telefon">
               <input
                 name="phone"
                 required
+                defaultValue={draft.phone}
                 className="input-apple"
                 placeholder="+998 90 123 45 67"
               />
@@ -97,6 +129,7 @@ export function RegisterForm() {
                 name="email"
                 type="email"
                 required
+                defaultValue={draft.email}
                 className="input-apple"
                 placeholder="you@mail.com"
               />
@@ -104,14 +137,20 @@ export function RegisterForm() {
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label="Shahar">
-              <input name="city" required className="input-apple" placeholder="Samarqand" />
+              <input
+                name="city"
+                required
+                defaultValue={draft.city}
+                className="input-apple"
+                placeholder="Samarqand"
+              />
             </Field>
             <Field label="Davlat">
-              <input name="country" defaultValue="Uzbekistan" className="input-apple" />
+              <input name="country" defaultValue={draft.country ?? "Uzbekistan"} className="input-apple" />
             </Field>
           </div>
           <div className="pt-2 flex justify-end">
-            <button type="button" onClick={() => setStep(2)} className="btn-primary !px-6">
+            <button type="button" onClick={(e) => goNext(e, 2)} className="btn-primary !px-6">
               Davom etish
             </button>
           </div>
@@ -133,7 +172,7 @@ export function RegisterForm() {
                     value={c.key}
                     required
                     className="sr-only"
-                    defaultChecked={c.key === "guide"}
+                    defaultChecked={(draft.category ?? "guide") === c.key}
                   />
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#006b55] ring-1 ring-[#123f34]/5">
                     <CategoryIcon category={c.key} size={20} strokeWidth={1.9} />
@@ -150,6 +189,7 @@ export function RegisterForm() {
                 type="number"
                 min="1"
                 required
+                defaultValue={draft.pricePerDay}
                 className="input-apple"
                 placeholder="60"
               />
@@ -159,7 +199,7 @@ export function RegisterForm() {
                 name="experienceYears"
                 type="number"
                 min="0"
-                defaultValue="0"
+                defaultValue={draft.experienceYears ?? "0"}
                 className="input-apple"
               />
             </Field>
@@ -167,6 +207,7 @@ export function RegisterForm() {
           <Field label="Tillar (vergul bilan)">
             <input
               name="languages"
+              defaultValue={draft.languages}
               className="input-apple"
               placeholder="O'zbek, English, Russian"
             />
@@ -174,15 +215,16 @@ export function RegisterForm() {
           <Field label="Yo'nalishlar / tag'lar">
             <input
               name="tags"
+              defaultValue={draft.tags}
               className="input-apple"
               placeholder="Tarixiy joylar, Muzeylar"
             />
           </Field>
           <div className="pt-2 flex justify-between gap-3">
-            <button type="button" onClick={() => setStep(1)} className="btn-ghost !px-6">
+            <button type="button" onClick={(e) => goBack(e, 1)} className="btn-ghost !px-6">
               Orqaga
             </button>
-            <button type="button" onClick={() => setStep(3)} className="btn-primary !px-6">
+            <button type="button" onClick={(e) => goNext(e, 3)} className="btn-primary !px-6">
               Davom etish
             </button>
           </div>
@@ -196,6 +238,7 @@ export function RegisterForm() {
               name="bio"
               required
               rows={4}
+              defaultValue={draft.bio}
               className="input-apple resize-none"
               placeholder="Qisqacha va jozibali tavsif yozing..."
             />
@@ -217,7 +260,7 @@ export function RegisterForm() {
                     type="radio"
                     name="coverColor"
                     value={c.value}
-                    defaultChecked={c.value === "orange"}
+                    defaultChecked={(draft.coverColor ?? "orange") === c.value}
                     className="sr-only"
                   />
                   <div className={`h-14 bg-gradient-to-br ${c.cls}`} />
@@ -236,7 +279,7 @@ export function RegisterForm() {
           ) : null}
 
           <div className="pt-2 flex justify-between gap-3">
-            <button type="button" onClick={() => setStep(2)} className="btn-ghost !px-6">
+            <button type="button" onClick={(e) => goBack(e, 2)} className="btn-ghost !px-6">
               Orqaga
             </button>
             <button
