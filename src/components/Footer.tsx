@@ -5,9 +5,12 @@ import { ExternalLinkIcon } from "./Icon";
 
 const linkCls = "text-[15px] text-[#123f34] hover:text-[#006b55] transition";
 
+// Modul yuklanganda bir marta hisoblanadi (ISR revalidate'da yangilanadi).
+const YEAR = new Date().getFullYear();
+
 export function Footer() {
   return (
-    <footer className="mt-24 border-t border-[#123f34]/[0.06] bg-[#f8eee5]/80">
+    <footer className="defer-paint mt-24 border-t border-[#123f34]/[0.06] bg-[#f8eee5]/80">
       <div className="mx-auto max-w-6xl px-5 py-16">
         <a
           href={PARTNER_URL}
@@ -120,7 +123,7 @@ export function Footer() {
 
         <div className="mt-14 pt-6 border-t border-[#123f34]/[0.06] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <p className="text-[13px] text-[#7b827f]">
-            Copyright © {new Date().getFullYear()} bayConnect. Barcha huquqlar himoyalangan.
+            Copyright © {YEAR} bayConnect. Barcha huquqlar himoyalangan.
           </p>
           <p className="text-[13px] text-[#7b827f]">O'zbekiston · Markaziy Osiyo</p>
         </div>

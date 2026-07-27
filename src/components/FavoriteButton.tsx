@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { FAVORITES_EVENT, isFavorite, toggleFavorite } from "@/lib/favorites";
+import { useEffect, useRef, useState } from "react";
+import { toggleFavorite } from "@/lib/favorites";
+import { useIsFavorite } from "@/lib/useFavorites";
 import { HeartIcon } from "./Icon";
 
 export function FavoriteButton({
@@ -11,28 +12,32 @@ export function FavoriteButton({
   providerId: number;
   className?: string;
 }) {
-  const [fav, setFav] = useState(false);
+  const fav = useIsFavorite(providerId);
   const [pulse, setPulse] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Memory leak tuzatildi: ilgari setTimeout tozalanmasdi va komponent
+  // unmount bo'lgach "setState on unmounted component" holati yuzaga kelardi.
   useEffect(() => {
-    setFav(isFavorite(providerId));
-    const onChange = () => setFav(isFavorite(providerId));
-    window.addEventListener(FAVORITES_EVENT, onChange);
-    return () => window.removeEventListener(FAVORITES_EVENT, onChange);
-  }, [providerId]);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   return (
     <button
       type="button"
       aria-label={fav ? "Sevimlilardan olib tashlash" : "Sevimlilarga qo'shish"}
+      aria-pressed={fav}
       onClick={(e) => {
+        // Karta <Link> ichida — navigatsiyani to'xtatamiz.
         e.preventDefault();
         e.stopPropagation();
         const next = toggleFavorite(providerId);
-        setFav(next);
         if (next) {
           setPulse(true);
-          setTimeout(() => setPulse(false), 300);
+          if (timerRef.current) clearTimeout(timerRef.current);
+          timerRef.current = setTimeout(() => setPulse(false), 300);
         }
       }}
       className={`inline-flex items-center justify-center rounded-full glass w-9 h-9 transition-transform active:scale-90 ${

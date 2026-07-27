@@ -1,8 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
-import { db } from "@/db";
-import { providers } from "@/db/schema";
-import { desc, sql } from "drizzle-orm";
+import { getFeaturedProviders, getProviderStats } from "@/lib/queries";
 import { ProviderCard } from "@/components/ProviderCard";
 import {
   EXPERT_CATEGORIES,
@@ -29,7 +26,13 @@ import {
   GlobeGridIcon,
 } from "@/components/Icon";
 
-export const dynamic = "force-dynamic";
+/**
+ * ISR: sahifa 5 daqiqada bir marta qayta generatsiya qilinadi.
+ * Ilgari `force-dynamic` edi — har bir tashrifda 2 ta DB so'rovi ketardi va
+ * hech qanday kesh ishlamasdi. Endi birinchi foydalanuvchi sahifani "isitadi",
+ * qolganlari tayyor HTML'ni CDN'dan oladi.
+ */
+export const revalidate = 300;
 
 const EXPERT_ICON_NODES = {
   guide: GuideIcon,
@@ -39,20 +42,10 @@ const EXPERT_ICON_NODES = {
 } as const;
 
 export default async function HomePage() {
-  const [featured, statsRow] = await Promise.all([
-    db.select().from(providers).orderBy(desc(providers.rating), desc(providers.reviewsCount)).limit(6),
-    db
-      .select({
-        total: sql<number>`count(*)::int`,
-        verified: sql<number>`count(*) filter (where ${providers.verified} = true)::int`,
-        guides: sql<number>`count(*) filter (where ${providers.category} = 'guide')::int`,
-        transfers: sql<number>`count(*) filter (where ${providers.category} = 'transfer')::int`,
-        hotels: sql<number>`count(*) filter (where ${providers.category} = 'hotel')::int`,
-      })
-      .from(providers),
+  const [featured, stats] = await Promise.all([
+    getFeaturedProviders(6),
+    getProviderStats(),
   ]);
-
-  const stats = statsRow[0] ?? { total: 0, verified: 0, guides: 0, transfers: 0, hotels: 0 };
 
   const quickAccess = [
     { href: "/experts?category=guide", Icon: GuideIcon, title: "Gidlar", sub: "Tarix va madaniyat" },
@@ -93,31 +86,31 @@ export default async function HomePage() {
             </p>
 
             <div className="animate-fade-up delay-4 mt-8 flex flex-wrap items-center justify-center gap-3">
-              <Link href="/experts" className="btn-primary !px-7 !py-3.5 text-[15px]">
-                Xizmat topish
+              <Link href="/experts" className="btn-primary !px-7 !py-4 text-[15px]">
+                Mutaxassislarni ko'rish
               </Link>
               <a
                 href={PARTNER_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#0717b8] px-7 py-3.5 text-[15px] font-semibold text-white shadow-[0_12px_28px_rgba(7,23,184,0.20)] transition hover:scale-[1.02] hover:bg-[#06139d]"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#06139d] px-7 py-4 text-[15px] font-semibold text-white shadow-[0_12px_28px_rgba(7,23,184,0.20)] transition hover:scale-[1.02] hover:bg-[#ff2d5d]"
               >
-                Turlar — {PARTNER_NAME}
+                Tur paketlar — {PARTNER_NAME}
                 <ExternalLinkIcon size={15} strokeWidth={2} />
               </a>
             </div>
 
-            <div className="animate-fade-up delay-5 mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[13px] font-medium text-[#506861]">
+            <div className="animate-fade-up delay-5 mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[13px] font-medium text-[#06139d]">
               <span className="inline-flex items-center gap-1.5">
-                <CheckIcon size={14} strokeWidth={2} className="text-[#006b55]" />
+                <CheckIcon size={20} strokeWidth={2} className="text-[#06139d]" />
                 Tekshirilgan profillar
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <CheckIcon size={14} strokeWidth={2} className="text-[#006b55]" />
+                <CheckIcon size={20} strokeWidth={2} className="text-[#06139d]" />
                 Shaffof narxlar
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <CheckIcon size={14} strokeWidth={2} className="text-[#006b55]" />
+                <CheckIcon size={20} strokeWidth={2} className="text-[#06139d]" />
                 Tez zayavka
               </span>
             </div>
@@ -133,7 +126,8 @@ export default async function HomePage() {
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`animate-fade-up delay-${i + 1} identity-card group relative p-4 transition hover:-translate-y-1`}
+                    style={{ animationDelay: `${(i + 1) * 0.08}s` }}
+                    className="animate-fade-up identity-card group relative p-4 transition hover:-translate-y-1"
                   >
                     <span className="absolute right-3 top-3 text-[#0717b8]">
                       <ExternalLinkIcon size={13} strokeWidth={2} />
@@ -148,7 +142,8 @@ export default async function HomePage() {
                   <Link
                     key={item.title}
                     href={item.href}
-                    className={`animate-fade-up delay-${i + 1} identity-card group p-4 transition hover:-translate-y-1`}
+                    style={{ animationDelay: `${(i + 1) * 0.08}s` }}
+                    className="animate-fade-up identity-card group p-4 transition hover:-translate-y-1"
                   >
                     <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#006b55] text-white">
                       <item.Icon size={22} />
@@ -208,7 +203,7 @@ export default async function HomePage() {
       </Section>
 
       {/* SERVICES */}
-      <Section className="py-16">
+      <Section className="defer-paint py-16">
         <SectionHeading
           eyebrow="Xizmatlar"
           title="bayConnect'da nimalar bor?"
@@ -233,7 +228,7 @@ export default async function HomePage() {
       </Section>
 
       {/* EXPERTS */}
-      <Section className="py-16">
+      <Section className="defer-paint py-16">
         <SectionHeading
           eyebrow="Mutaxassislar"
           title="Sayohatingizga hamroh tanlang"
@@ -276,7 +271,7 @@ export default async function HomePage() {
       </Section>
 
       {/* TRANSFER TYPES */}
-      <Section className="py-16">
+      <Section className="defer-paint py-16">
         <SectionHeading
           eyebrow="Transfer"
           title="Yengil avtodan avtobusgacha."
@@ -310,7 +305,7 @@ export default async function HomePage() {
       </Section>
 
       {/* PARTNER PROMO — bayTrip */}
-      <Section className="py-16">
+      <Section className="defer-paint py-16">
         <a
           href={PARTNER_URL}
           target="_blank"
@@ -344,7 +339,7 @@ export default async function HomePage() {
       </Section>
 
       {/* TOP EXPERTS */}
-      <Section className="py-16">
+      <Section className="defer-paint py-16">
         <SectionHeading
           eyebrow="Tanlanganlar"
           title="Yulduzli mutaxassislar"
@@ -363,7 +358,7 @@ export default async function HomePage() {
       </Section>
 
       {/* HOW IT WORKS */}
-      <section className="mt-16 border-y border-[#006b55]/10 bg-[#f8eee5] py-20">
+      <section className="defer-paint mt-16 border-y border-[#006b55]/10 bg-[#f8eee5] py-20">
         <div className="mx-auto max-w-6xl px-5">
           <SectionHeading
             align="center"
@@ -391,7 +386,7 @@ export default async function HomePage() {
       </section>
 
       {/* CTA */}
-      <Section className="py-16">
+      <Section className="defer-paint py-16">
         <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#006b55] via-[#0b5e4d] to-[#123f34] text-white p-8 md:p-14 apple-shadow-lg">
           <div className="absolute -top-20 -right-16 w-72 h-72 rounded-full bg-white/15 blur-3xl" />
           <div className="absolute -bottom-24 -left-10 w-72 h-72 rounded-full bg-black/10 blur-3xl" />

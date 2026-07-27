@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { RegisterForm } from "./RegisterForm";
+
+export const metadata: Metadata = {
+  title: "Mutaxassis bo'lib ro'yxatdan o'tish",
+  description:
+    "bayConnect'ga qo'shiling: profilingizni bepul yarating va yangi mijozlar sizni to'g'ridan-to'g'ri topsin.",
+  alternates: { canonical: "/register" },
+};
 
 export default function RegisterPage() {
   return (
@@ -40,7 +48,7 @@ export default function RegisterPage() {
 
       <p className="mt-8 text-center text-[13px] text-[#86868b]">
         Allaqachon ro'yxatdan o'tganmisiz?{" "}
-        <Link href="/providers" className="font-semibold text-[#0717b8] hover:underline underline-offset-4">
+        <Link href="/experts" className="font-semibold text-[#0717b8] hover:underline underline-offset-4">
           Katalogni ko'ring
         </Link>
       </p>

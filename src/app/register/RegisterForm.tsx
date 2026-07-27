@@ -38,30 +38,33 @@ export function RegisterForm() {
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    // Ikki marta bosishdan himoya.
+    if (status === "loading") return;
+
     setStatus("loading");
     setError("");
     const form = e.currentTarget;
     const data = collect(form);
+
+    const toList = (value: string | undefined) =>
+      (value ?? "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .slice(0, 12);
 
     const payload = {
       fullName: data.fullName ?? "",
       category: data.category ?? "",
       city: data.city ?? "",
       country: data.country ?? "Uzbekistan",
-      languages: (data.languages ?? "")
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
+      languages: toList(data.languages),
       pricePerDay: Number(data.pricePerDay ?? 0),
       experienceYears: Number(data.experienceYears ?? 0),
       bio: data.bio ?? "",
       phone: data.phone ?? "",
       email: data.email ?? "",
-      tags: (data.tags ?? "")
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
-      avatarEmoji: "",
+      tags: toList(data.tags),
       coverColor: data.coverColor ?? "orange",
     };
 
@@ -71,13 +74,22 @@ export function RegisterForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
+      const json = (await res.json().catch(() => ({}))) as { id?: number; error?: string };
+
       if (!res.ok) {
-        const j = (await res.json().catch(() => ({}))) as { error?: string };
-        throw new Error(j.error ?? "Xatolik");
+        throw new Error(json.error ?? "Xatolik yuz berdi");
       }
-      const j = (await res.json()) as { id: number };
-      router.push(`/providers/${j.id}`);
+      if (typeof json.id !== "number") {
+        throw new Error("Server noto'g'ri javob qaytardi");
+      }
+
+      // Navigatsiya boshlanguncha tugma "Yaratilmoqda..." holatida qoladi —
+      // bu ataylab: foydalanuvchi formani qayta yubormasligi uchun.
+      router.push(`/providers/${json.id}`);
     } catch (err) {
+      // MUHIM: bu yerda status qayta "error"ga qaytariladi, aks holda
+      // xatodan keyin tugma abadiy "Yaratilmoqda..." bo'lib qolardi.
       setStatus("error");
       setError(err instanceof Error ? err.message : "Xatolik");
     }

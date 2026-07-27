@@ -1,31 +1,64 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ProviderCard } from "@/components/ProviderCard";
+import { Pagination } from "@/components/Pagination";
 import { CITIES } from "@/lib/brand";
 import { EmptyState, SectionHeading } from "@/components/ui";
-import { listProviders } from "@/lib/queries";
+import { listProviders, PAGE_SIZE } from "@/lib/queries";
 import { HotelIcon } from "@/components/Icon";
+import {
+  buildHref,
+  safePage,
+  safePrice,
+  safeQuery,
+  safeSort,
+  type ListSearchParams,
+} from "@/lib/searchParams";
 
-export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  title: "Mehmonxonalar — butik va zamonaviy joylashuv | bayConnect",
+  description:
+    "Toshkent, Samarqand, Buxoro va Xivadagi butik hamda zamonaviy mehmonxonalarni narx va reyting bo'yicha solishtiring.",
+  alternates: { canonical: "/hotels" },
+};
 
-type SearchParams = Promise<{
-  city?: string;
-  q?: string;
-  min?: string;
-  max?: string;
-  sort?: string;
-}>;
+export const revalidate = 120;
 
-export default async function HotelsPage({ searchParams }: { searchParams: SearchParams }) {
+const SORT_LABELS: Record<string, string> = {
+  rating: "Reyting",
+  reviews: "Sharhlar",
+  price_asc: "Arzon",
+  price_desc: "Qimmat",
+  newest: "Yangi",
+};
+
+export default async function HotelsPage({
+  searchParams,
+}: {
+  searchParams: Promise<ListSearchParams>;
+}) {
   const sp = await searchParams;
 
-  const list = await listProviders({
+  const city = sp.city && CITIES.includes(sp.city as (typeof CITIES)[number]) ? sp.city : undefined;
+  const q = safeQuery(sp.q);
+  const min = safePrice(sp.min);
+  const max = safePrice(sp.max);
+  const sort = safeSort(sp.sort);
+  const page = safePage(sp.page);
+
+  const { items, total, totalPages } = await listProviders({
     category: "hotel",
-    city: sp.city,
-    q: sp.q,
-    min: sp.min,
-    max: sp.max,
-    sort: sp.sort,
+    city,
+    q,
+    min,
+    max,
+    sort,
+    page,
   });
+
+  const clean = { city, q, min, max, sort: sp.sort, page: String(page) };
+  const rangeFrom = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const rangeTo = Math.min(page * PAGE_SIZE, total);
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-10 md:py-14">
@@ -36,9 +69,9 @@ export default async function HotelsPage({ searchParams }: { searchParams: Searc
       />
 
       <div className="surface-apple mt-8 grid gap-3 p-4 sm:grid-cols-3">
-        <PanelStat value={`${list.length}`} label="Mehmonxona" />
-        <PanelStat value={sp.city || "Hamma"} label="Shahar" />
-        <PanelStat value={sp.sort || "rating"} label="Saralash" />
+        <PanelStat value={String(total)} label="Mehmonxona" />
+        <PanelStat value={city || "Hamma"} label="Shahar" />
+        <PanelStat value={SORT_LABELS[sort] ?? "Reyting"} label="Saralash" />
       </div>
 
       <form className="filter-panel mt-8 p-4 md:p-5">
@@ -46,29 +79,49 @@ export default async function HotelsPage({ searchParams }: { searchParams: Searc
           <div className="md:col-span-4">
             <input
               name="q"
-              defaultValue={sp.q ?? ""}
+              defaultValue={q ?? ""}
+              maxLength={80}
               placeholder="Mehmonxona nomi yoki tavsif"
+              aria-label="Qidiruv"
               className="input-apple"
             />
           </div>
           <div className="md:col-span-2">
-            <select name="city" defaultValue={sp.city ?? ""} className="input-apple">
+            <select name="city" defaultValue={city ?? ""} aria-label="Shahar" className="input-apple">
               <option value="">Barcha shaharlar</option>
-              {CITIES.map((city) => (
-                <option key={city} value={city}>
-                  {city}
+              {CITIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
                 </option>
               ))}
             </select>
           </div>
           <div className="md:col-span-2">
-            <input name="min" type="number" min="0" defaultValue={sp.min ?? ""} placeholder="Min $/kun" className="input-apple" />
+            <input
+              name="min"
+              type="number"
+              min="0"
+              inputMode="numeric"
+              defaultValue={min ?? ""}
+              placeholder="Min $/kun"
+              aria-label="Eng past narx"
+              className="input-apple"
+            />
           </div>
           <div className="md:col-span-2">
-            <input name="max" type="number" min="0" defaultValue={sp.max ?? ""} placeholder="Max $/kun" className="input-apple" />
+            <input
+              name="max"
+              type="number"
+              min="0"
+              inputMode="numeric"
+              defaultValue={max ?? ""}
+              placeholder="Max $/kun"
+              aria-label="Eng yuqori narx"
+              className="input-apple"
+            />
           </div>
           <div className="md:col-span-2">
-            <select name="sort" defaultValue={sp.sort ?? "rating"} className="input-apple">
+            <select name="sort" defaultValue={sort} aria-label="Saralash" className="input-apple">
               <option value="rating">Yuqori reyting</option>
               <option value="reviews">Ko'p sharh</option>
               <option value="price_asc">Arzonroq</option>
@@ -77,7 +130,9 @@ export default async function HotelsPage({ searchParams }: { searchParams: Searc
           </div>
         </div>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-[13px] text-[#86868b]">{list.length} ta mehmonxona</p>
+          <p className="text-[13px] text-[#86868b]">
+            {total > 0 ? `${rangeFrom}–${rangeTo} / ${total} ta mehmonxona` : "Natija yo'q"}
+          </p>
           <div className="flex gap-2">
             <Link
               href="/hotels"
@@ -92,7 +147,7 @@ export default async function HotelsPage({ searchParams }: { searchParams: Searc
         </div>
       </form>
 
-      {list.length === 0 ? (
+      {items.length === 0 ? (
         <div className="mt-10">
           <EmptyState
             icon={<HotelIcon size={28} />}
@@ -106,11 +161,18 @@ export default async function HotelsPage({ searchParams }: { searchParams: Searc
           />
         </div>
       ) : (
-        <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {list.map((p) => (
-            <ProviderCard key={p.id} p={p} />
-          ))}
-        </div>
+        <>
+          <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {items.map((p) => (
+              <ProviderCard key={p.id} p={p} />
+            ))}
+          </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            makeHref={(n) => buildHref("/hotels", clean, { page: n })}
+          />
+        </>
       )}
     </div>
   );

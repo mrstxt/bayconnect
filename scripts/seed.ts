@@ -1,8 +1,25 @@
 import "dotenv/config";
-import { db } from "../src/db";
-import { providers, reviews, posts } from "../src/db/schema";
+import { db, getPool } from "../src/db";
+import { providers, reviews, posts, bookings } from "../src/db/schema";
 
+/**
+ * Demo ma'lumot to'ldiruvchi skript.
+ *
+ * DIQQAT: bu skript providers / reviews / posts / bookings jadvallarini
+ * TOZALAB, qaytadan to'ldiradi. Production bazada ishlatmang!
+ * Himoya sifatida NODE_ENV=production bo'lsa ishga tushmaydi
+ * (majburan kerak bo'lsa: ALLOW_PROD_SEED=1).
+ */
 async function main() {
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_PROD_SEED !== "1") {
+    throw new Error(
+      "Production muhitida seed bloklandi. Haqiqatan kerak bo'lsa ALLOW_PROD_SEED=1 qo'ying.",
+    );
+  }
+
+  console.log("Eski demo ma'lumotlar tozalanmoqda...");
+  // Tartib muhim: foreign key bog'liqligi bo'lgan jadvallar avval o'chadi.
+  await db.delete(bookings);
   await db.delete(reviews);
   await db.delete(providers);
   await db.delete(posts);
@@ -21,7 +38,7 @@ async function main() {
         experienceYears: 8,
         bio: "Registon, Shohi Zinda va Bibi Xonim bo'yicha professional gid. Tarixiy ma'lumotlarni jonli tarzda yetkazib beraman.",
         phone: "+998 90 123 45 67",
-        email: "aziz.guide@bayclub.uz",
+        email: "aziz.guide@bayconnect.uz",
         avatarEmoji: "🕌",
         coverColor: "orange",
         tags: ["Tarixiy joylar", "Muzeylar", "Piyoda"],
@@ -38,7 +55,7 @@ async function main() {
         experienceYears: 6,
         bio: "Buxoroning eski shahar qismi va hunarmandchilik ustaxonalari bo'yicha yakka va guruh ekskursiyalari.",
         phone: "+998 91 222 33 44",
-        email: "dilnoza@bayclub.uz",
+        email: "dilnoza@bayconnect.uz",
         avatarEmoji: "🌸",
         coverColor: "yellow",
         tags: ["Hunarmandchilik", "Madaniyat"],
@@ -55,7 +72,7 @@ async function main() {
         experienceYears: 11,
         bio: "Tog'li hududlar bo'yicha treking va ekstremal turizm gidi. Chimyon, Beldersoy, Amirsoy.",
         phone: "+998 99 777 66 55",
-        email: "rustam.mountain@bayclub.uz",
+        email: "rustam.mountain@bayconnect.uz",
         avatarEmoji: "🏔️",
         coverColor: "dark",
         tags: ["Treking", "Tog'lar"],
@@ -74,7 +91,7 @@ async function main() {
         experienceYears: 12,
         bio: "Ishbilarmonlik uchrashuvlari va turistik ekskursiyalar bo'yicha sinxron tarjimon.",
         phone: "+998 97 444 55 66",
-        email: "bekzod.translate@bayclub.uz",
+        email: "bekzod.translate@bayconnect.uz",
         avatarEmoji: "🗣️",
         coverColor: "dark",
         tags: ["Sinxron", "Biznes"],
@@ -91,7 +108,7 @@ async function main() {
         experienceYears: 5,
         bio: "Arab va ingliz tillari bo'yicha ekskursiya tarjimoni. Sayyohlar uchun qulay.",
         phone: "+998 93 111 09 09",
-        email: "zarina.t@bayclub.uz",
+        email: "zarina.t@bayconnect.uz",
         avatarEmoji: "🌸",
         coverColor: "orange",
         tags: ["Arab", "Ekskursiya"],
@@ -110,7 +127,7 @@ async function main() {
         experienceYears: 7,
         bio: "Sayohat fotografi. Sizning sayohatingizni professional kadrlarda saqlab qolamiz.",
         phone: "+998 90 999 88 77",
-        email: "malika.photo@bayclub.uz",
+        email: "malika.photo@bayconnect.uz",
         avatarEmoji: "📸",
         coverColor: "orange",
         tags: ["Portret", "Landshaft"],
@@ -127,7 +144,7 @@ async function main() {
         experienceYears: 6,
         bio: "Xiva Ichan-Qal'a fonida go'zal sayohat suratlari va videolar.",
         phone: "+998 94 200 30 40",
-        email: "otabek.photo@bayclub.uz",
+        email: "otabek.photo@bayconnect.uz",
         avatarEmoji: "🎞️",
         coverColor: "yellow",
         tags: ["Video", "Drone"],
@@ -184,7 +201,7 @@ async function main() {
         capacity: 4,
         bio: "Aeroport transferi, shaharlararo qulay yo'lovchi tashish. Yangi Cobalt, Gentra.",
         phone: "+998 93 555 66 77",
-        email: "sardor.transfer@bayclub.uz",
+        email: "sardor.transfer@bayconnect.uz",
         avatarEmoji: "🚗",
         coverColor: "blue",
         tags: ["Aeroport", "24/7"],
@@ -203,7 +220,7 @@ async function main() {
         capacity: 7,
         bio: "Samarqand — Buxoro — Xiva yo'nalishlari bo'yicha komfort minivan xizmati.",
         phone: "+998 94 111 22 33",
-        email: "jamshid.transfer@bayclub.uz",
+        email: "jamshid.transfer@bayconnect.uz",
         avatarEmoji: "🚐",
         coverColor: "blue",
         tags: ["Minivan", "Guruh"],
@@ -222,7 +239,7 @@ async function main() {
         capacity: 4,
         bio: "Buxoro shahri bo'ylab va yaqin viloyatlarga xavfsiz sedan xizmati.",
         phone: "+998 95 321 21 21",
-        email: "umid.taxi@bayclub.uz",
+        email: "umid.taxi@bayconnect.uz",
         avatarEmoji: "🚕",
         coverColor: "orange",
         tags: ["Shahar ichi", "Sedan"],
@@ -260,7 +277,7 @@ async function main() {
         capacity: 5,
         bio: "Tog' yo'llari va Orolqumga yo'ltanlamas SUV bilan ekspeditsiya.",
         phone: "+998 90 777 22 22",
-        email: "sanjar.suv@bayclub.uz",
+        email: "sanjar.suv@bayconnect.uz",
         avatarEmoji: "🚙",
         coverColor: "dark",
         tags: ["Tog'", "Ekspeditsiya"],
@@ -407,11 +424,17 @@ async function main() {
     },
   ]);
 
-  console.log(`Seeded ${inserted.length} providers, 5 posts`);
-  process.exit(0);
+  console.log(`✓ Seeded ${inserted.length} providers va blog postlari`);
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+main()
+  .then(async () => {
+    // Pool'ni toza yopamiz — process.exit(0) yozuvni yarim yo'lda uzib qo'yishi mumkin.
+    await getPool().end();
+    process.exit(0);
+  })
+  .catch(async (e) => {
+    console.error("Seed xatosi:", e);
+    await getPool().end().catch(() => {});
+    process.exit(1);
+  });

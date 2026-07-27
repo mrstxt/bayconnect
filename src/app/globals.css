@@ -428,3 +428,92 @@ body {
     0 1px 0 rgba(255, 255, 255, 0.9) inset,
     0 12px 34px rgba(18, 63, 52, 0.07);
 }
+
+/* ---------------------------------------------------------------------------
+   Header / ScrollTop holatlari.
+   Bu klasslar JS tomonidan to'g'ridan-to'g'ri almashtiriladi (React render'siz),
+   shuning uchun scroll paytida hech qanday qayta render bo'lmaydi.
+--------------------------------------------------------------------------- */
+.site-header {
+  background: transparent;
+}
+
+.site-header.header-scrolled {
+  background: rgba(255, 250, 246, 0.76);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(18, 63, 52, 0.06);
+  box-shadow: 0 12px 34px rgba(18, 63, 52, 0.08);
+}
+
+.scrolltop-btn {
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
+}
+
+.scrolltop-btn.scrolltop-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Gorizontal chip qatorlarida scrollbar ko'rinmasin.
+   Ilgari `scrollbar-none` klassi ishlatilgan, lekin hech qayerda
+   e'lon qilinmagan edi — ya'ni umuman ishlamasdi. */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Skip-link: klaviatura foydalanuvchilari menyuni o'tkazib yuborishi uchun. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  background: #006b55;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Tailwind 4 da line-clamp allaqachon bor, lekin biz yuqorida qo'lda yozgan
+   variantlarga `overflow: hidden` bilan birga text-overflow qo'shamiz. */
+.line-clamp-2,
+.line-clamp-3 {
+  overflow: hidden;
+}
+
+/* Animatsiyani kamaytirish so'ralgan bo'lsa — hurmat qilamiz (a11y + perf). */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Content-visibility: ekrandan tashqaridagi og'ir bloklar birinchi
+   bo'yashda hisoblanmaydi → LCP va TBT yaxshilanadi. */
+.defer-paint {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 640px;
+}

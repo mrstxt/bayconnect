@@ -1,9 +1,8 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { db } from "@/db";
-import { posts } from "@/db/schema";
-import { desc, eq, ne } from "drizzle-orm";
 import { coverBg } from "@/lib/brand";
+import { getAllPostSlugs, getPostBySlug } from "@/lib/queries";
 import { BookOpenIcon, LightbulbIcon, PinIcon, MoonIcon } from "@/components/Icon";
 
 const POST_ICONS: Record<string, (p: { size?: number }) => React.JSX.Element> = {
@@ -18,19 +17,53 @@ function PostIcon({ category, size = 30 }: { category: string; size?: number }) 
   return <Comp size={size} />;
 }
 
-export const dynamic = "force-dynamic";
+export const revalidate = 600;
+
+/**
+ * Build vaqtida barcha maqolalar statik HTML'ga aylantiriladi.
+ * Natijada blog postlari CDN'dan deyarli bir zumda ochiladi.
+ * DB mavjud bo'lmasa (masalan CI'da) build yiqilmasligi uchun try/catch bor.
+ */
+export async function generateStaticParams() {
+  try {
+    const slugs = await getAllPostSlugs();
+    return slugs.map((slug) => ({ slug }));
+  } catch {
+    return [];
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const data = await getPostBySlug(slug);
+  if (!data) return { title: "Maqola topilmadi | bayConnect" };
+
+  const { post } = data;
+  return {
+    title: `${post.title} | bayConnect Blog`,
+    description: post.excerpt.slice(0, 155),
+    alternates: { canonical: `/blog/${post.slug}` },
+    openGraph: {
+      title: post.title,
+      description: post.excerpt.slice(0, 155),
+      type: "article",
+    },
+  };
+}
 
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [post] = await db.select().from(posts).where(eq(posts.slug, slug));
-  if (!post) notFound();
+  const data = await getPostBySlug(slug);
+  if (!data) notFound();
 
-  const more = await db
-    .select()
-    .from(posts)
-    .where(ne(posts.id, post.id))
-    .orderBy(desc(posts.createdAt))
-    .limit(3);
+  const { post, more } = data;
+
+  // Bo'sh qatorlarni tashlab yuboramiz — aks holda bo'sh <p> lar chiqadi.
+  const paragraphs = post.body.split("\n").filter((line) => line.trim().length > 0);
 
   return (
     <div className="mx-auto max-w-3xl px-5 py-10 md:py-14">
@@ -42,7 +75,11 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         <span className="text-[#123f34] truncate">{post.title}</span>
       </div>
 
-      <div className={`mt-5 relative h-52 md:h-72 rounded-[28px] overflow-hidden ${coverBg(post.coverColor)} flex items-center justify-center apple-shadow`}>
+      <div
+        className={`mt-5 relative h-52 md:h-72 rounded-[28px] overflow-hidden ${coverBg(
+          post.coverColor,
+        )} flex items-center justify-center apple-shadow`}
+      >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.35),transparent_55%)]" />
         <span className="flex items-center justify-center w-28 h-28 rounded-3xl bg-white/90 text-[#123f34] shadow-sm">
           <PostIcon category={post.category} size={52} />
@@ -59,8 +96,13 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         <p className="mt-4 text-[19px] leading-relaxed text-[#6e6e73]">{post.excerpt}</p>
       </div>
 
-      <article className="mt-8 prose prose-lg max-w-none text-[17px] leading-[1.75] text-[#123f34]/90">
-        {post.body.split("\n").map((par, i) => (
+      {/*
+        Eslatma: ilgari bu yerda `prose` klasslari bor edi, lekin
+        @tailwindcss/typography plugini o'rnatilmagan — ular hech narsa
+        qilmasdi. Endi to'g'ridan-to'g'ri o'z stilimiz.
+      */}
+      <article className="mt-8 max-w-none text-[17px] leading-[1.75] text-[#123f34]/90">
+        {paragraphs.map((par, i) => (
           <p key={i} className="mb-5">
             {par}
           </p>
@@ -72,11 +114,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           <h2 className="text-[22px] font-semibold tracking-tight">Yana o'qing</h2>
           <div className="mt-6 grid sm:grid-cols-3 gap-4">
             {more.map((m) => (
-              <Link
-                key={m.id}
-                href={`/blog/${m.slug}`}
-                className="surface-apple group p-4 card-lift"
-              >
+              <Link key={m.id} href={`/blog/${m.slug}`} className="surface-apple group p-4 card-lift">
                 <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#fff7ef] text-[#006b55] ring-1 ring-[#123f34]/5">
                   <PostIcon category={m.category} size={22} />
                 </span>

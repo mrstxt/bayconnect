@@ -1,7 +1,7 @@
 // bayConnect brand tokens
 export const brand = {
   name: "bayConnect",
-  tagline: "Sayohat xizmatlari bilan bog'lovchi platforma",
+  tagline: "Barchasi bir platformda",
   colors: {
     coral: "#FF6B4A",
     coralDark: "#E05235",

@@ -14,7 +14,7 @@ export default function NotFound() {
         <Link href="/" className="btn-primary">
           Bosh sahifa
         </Link>
-        <Link href="/providers" className="btn-ghost">
+        <Link href="/experts" className="btn-ghost">
           Katalog
         </Link>
       </div>

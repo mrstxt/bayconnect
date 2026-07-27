@@ -1,22 +1,57 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { db } from "@/db";
-import { providers, reviews } from "@/db/schema";
-import { desc, eq, ne, and } from "drizzle-orm";
 import {
   categoryLabel,
   coverBg,
   formatPrice,
   formatRating,
 } from "@/lib/brand";
+import { getProviderPageData } from "@/lib/queries";
 import { ProviderCard } from "@/components/ProviderCard";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { Badge } from "@/components/ui";
-import { CategoryIcon, StarIcon, CheckBadgeIcon, SparkleIcon } from "@/components/Icon";
+import { CategoryIcon, StarIcon, CheckBadgeIcon } from "@/components/Icon";
 import { BookingForm } from "./BookingForm";
 import { MobileBookBar } from "./MobileBookBar";
 
-export const dynamic = "force-dynamic";
+/** Profil sahifasi 5 daqiqada bir marta yangilanadi (ISR). */
+export const revalidate = 300;
+
+/**
+ * `id` ni xavfsiz butun songa aylantiradi.
+ * Eski kodda `Number.isFinite` ishlatilgan edi — u "12.9" va "1e3" kabi
+ * qiymatlarni ham o'tkazib yuborib, Postgres'ga xato tur bilan so'rov ketardi.
+ */
+function parseId(raw: string): number | null {
+  if (!/^\d+$/.test(raw)) return null;
+  const n = Number(raw);
+  return Number.isSafeInteger(n) && n > 0 ? n : null;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const providerId = parseId(id);
+  if (!providerId) return { title: "Mutaxassis topilmadi | bayConnect" };
+
+  const data = await getProviderPageData(providerId);
+  if (!data) return { title: "Mutaxassis topilmadi | bayConnect" };
+
+  const { profile } = data;
+  const title = `${profile.fullName} — ${categoryLabel(profile.category)}, ${profile.city} | bayConnect`;
+  const description = profile.bio.slice(0, 155);
+
+  return {
+    title,
+    description,
+    alternates: { canonical: `/providers/${profile.id}` },
+    openGraph: { title, description, type: "profile" },
+  };
+}
 
 export default async function ProviderPage({
   params,
@@ -24,31 +59,47 @@ export default async function ProviderPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const providerId = Number(id);
-  if (!Number.isFinite(providerId)) notFound();
+  const providerId = parseId(id);
+  if (!providerId) notFound();
 
-  const [p] = await db.select().from(providers).where(eq(providers.id, providerId));
-  if (!p) notFound();
+  const data = await getProviderPageData(providerId);
+  if (!data) notFound();
 
-  const [reviewList, similar] = await Promise.all([
-    db
-      .select()
-      .from(reviews)
-      .where(eq(reviews.providerId, providerId))
-      .orderBy(desc(reviews.createdAt))
-      .limit(20),
-    db
-      .select()
-      .from(providers)
-      .where(and(eq(providers.category, p.category), ne(providers.id, p.id)))
-      .orderBy(desc(providers.rating))
-      .limit(3),
-  ]);
+  const { profile: p, reviewList, similar } = data;
+
+  // Google uchun strukturaviy ma'lumot (rich results).
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: p.fullName,
+    description: p.bio,
+    serviceType: categoryLabel(p.category),
+    areaServed: { "@type": "City", name: p.city },
+    offers: {
+      "@type": "Offer",
+      price: p.pricePerDay,
+      priceCurrency: "USD",
+    },
+    ...(p.reviewsCount > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: Number(p.rating),
+            reviewCount: p.reviewsCount,
+          },
+        }
+      : {}),
+  };
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-8 md:py-12">
+      <script
+        type="application/ld+json"
+
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="flex items-center gap-2 text-[13px] text-[#86868b]">
-        <Link href="/providers" className="hover:text-[#006b55] transition">
+        <Link href="/experts" className="hover:text-[#006b55] transition">
           Mutaxassislar
         </Link>
         <span>/</span>

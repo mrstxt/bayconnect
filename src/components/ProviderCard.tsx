@@ -1,5 +1,6 @@
 import Link from "next/link";
-import type { Provider } from "@/db/schema";
+import { memo } from "react";
+import type { ProviderCardRow } from "@/lib/queries";
 import {
   categoryGradient,
   categoryLabel,
@@ -10,8 +11,17 @@ import {
 import { FavoriteButton } from "./FavoriteButton";
 import { CategoryIcon, CheckBadgeIcon, StarIcon, PinIcon, UsersIcon } from "./Icon";
 
-export function ProviderCard({ p, priority = false }: { p: Provider; priority?: boolean }) {
+const ALLOWED_COVERS = new Set(["yellow", "blue", "dark", "orange"]);
+
+function ProviderCardImpl({
+  p,
+  priority = false,
+}: {
+  p: ProviderCardRow;
+  priority?: boolean;
+}) {
   const isTransfer = p.category === "transfer";
+  const cover = ALLOWED_COVERS.has(p.coverColor) ? p.coverColor : "orange";
 
   return (
     <Link
@@ -27,7 +37,7 @@ export function ProviderCard({ p, priority = false }: { p: Provider; priority?: 
       <div className="flex items-start gap-4 pr-11">
         <span
           className="shrink-0 flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-sm transition-transform duration-300 group-hover:scale-105"
-          style={{ background: categoryGradient(p.coverColor === "yellow" ? "yellow" : p.coverColor === "blue" ? "blue" : p.coverColor === "dark" ? "dark" : "orange") }}
+          style={{ background: categoryGradient(cover) }}
         >
           <CategoryIcon
             category={p.category}
@@ -99,3 +109,9 @@ export function ProviderCard({ p, priority = false }: { p: Provider; priority?: 
     </Link>
   );
 }
+
+/**
+ * memo: ro'yxat sahifalarida 12 ta karta bir xil props bilan qayta render
+ * bo'lmasligi uchun (masalan Header holati o'zgarganda).
+ */
+export const ProviderCard = memo(ProviderCardImpl);

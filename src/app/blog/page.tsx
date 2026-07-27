@@ -1,7 +1,6 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { db } from "@/db";
-import { posts } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { listPosts } from "@/lib/queries";
 import { EmptyState, SectionHeading } from "@/components/ui";
 import {
   BookOpenIcon,
@@ -10,6 +9,16 @@ import {
   MoonIcon,
   ClockIcon,
 } from "@/components/Icon";
+
+export const metadata: Metadata = {
+  title: "Blog — sayohat maslahatlari va marshrutlar | bayConnect",
+  description:
+    "O'zbekiston bo'ylab sayohat maslahatlari, marshrutlar va hikoyalar. Gid tanlash, mahalliy taomlar va manzillar haqida.",
+  alternates: { canonical: "/blog" },
+};
+
+/** Blog kamdan-kam o'zgaradi — 10 daqiqalik ISR yetarli. */
+export const revalidate = 600;
 
 const POST_ICONS: Record<string, (p: { size?: number }) => React.JSX.Element> = {
   guide: BookOpenIcon,
@@ -23,28 +32,26 @@ function PostIcon({ category, size = 30 }: { category: string; size?: number }) 
   return <Comp size={size} />;
 }
 
-export const dynamic = "force-dynamic";
-
 const CATEGORIES = [
   { key: "", label: "Barchasi" },
   { key: "guide", label: "Qo'llanma" },
   { key: "tips", label: "Maslahat" },
   { key: "destination", label: "Manzil" },
   { key: "story", label: "Hikoya" },
-];
+] as const;
 
-type SearchParams = Promise<{ category?: string }>;
+const CATEGORY_KEYS = new Set<string>(CATEGORIES.map((c) => c.key).filter(Boolean));
 
-export default async function BlogPage({ searchParams }: { searchParams: SearchParams }) {
+export default async function BlogPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
   const sp = await searchParams;
-  const active = sp.category ?? "";
+  // Faqat ma'lum kategoriyalar — ixtiyoriy satr to'g'ridan-to'g'ri SQL'ga ketmasin.
+  const active = sp.category && CATEGORY_KEYS.has(sp.category) ? sp.category : "";
 
-  const list = await db
-    .select()
-    .from(posts)
-    .where(active ? eq(posts.category, active) : undefined)
-    .orderBy(desc(posts.createdAt));
-
+  const list = await listPosts(active || undefined);
   const [featured, ...rest] = list;
 
   return (
@@ -55,7 +62,7 @@ export default async function BlogPage({ searchParams }: { searchParams: SearchP
         subtitle="Maslahatlar, marshrutlar va O'zbekiston bo'ylab hikoyalar."
       />
 
-      <div className="mt-8 flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+      <div className="mt-8 flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
         {CATEGORIES.map((c) => (
           <Link
             key={c.key || "all"}
@@ -73,7 +80,11 @@ export default async function BlogPage({ searchParams }: { searchParams: SearchP
 
       {list.length === 0 ? (
         <div className="mt-10">
-          <EmptyState icon={<BookOpenIcon size={28} />} title="Hozircha post yo'q" description="Yaqinda yangi maqolalar chiqadi." />
+          <EmptyState
+            icon={<BookOpenIcon size={28} />}
+            title="Hozircha post yo'q"
+            description="Yaqinda yangi maqolalar chiqadi."
+          />
         </div>
       ) : (
         <div className="mt-10 grid gap-6">
@@ -94,7 +105,9 @@ export default async function BlogPage({ searchParams }: { searchParams: SearchP
                   {featured.title}
                 </h2>
                 <p className="mt-4 text-[15px] leading-relaxed text-[#5f6864]">{featured.excerpt}</p>
-                <div className="mt-6 text-[13px] font-semibold text-[#0717b8]">O'qishni davom ettirish →</div>
+                <div className="mt-6 text-[13px] font-semibold text-[#0717b8]">
+                  O'qishni davom ettirish →
+                </div>
               </div>
             </Link>
           ) : null}
@@ -102,11 +115,7 @@ export default async function BlogPage({ searchParams }: { searchParams: SearchP
           {rest.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
               {rest.map((p) => (
-                <Link
-                  key={p.id}
-                  href={`/blog/${p.slug}`}
-                  className="surface-apple group p-5 card-lift"
-                >
+                <Link key={p.id} href={`/blog/${p.slug}`} className="surface-apple group p-5 card-lift">
                   <div className="flex items-start gap-4">
                     <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#fff7ef] text-[#006b55] ring-1 ring-[#123f34]/5">
                       <PostIcon category={p.category} size={24} />
@@ -121,7 +130,9 @@ export default async function BlogPage({ searchParams }: { searchParams: SearchP
                       </h3>
                     </div>
                   </div>
-                  <p className="mt-4 text-[13px] leading-relaxed text-[#5f6864] line-clamp-3">{p.excerpt}</p>
+                  <p className="mt-4 text-[13px] leading-relaxed text-[#5f6864] line-clamp-3">
+                    {p.excerpt}
+                  </p>
                 </Link>
               ))}
             </div>
