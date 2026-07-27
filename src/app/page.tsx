@@ -84,7 +84,7 @@ export default async function HomePage() {
             </div>
 
             <div className="animate-fade-up delay-1 mx-auto mt-8 flex max-w-[780px] items-center justify-center">
-              <span className="relative block w-full overflow-hidden rounded-[8px] bg-white/55 px-5 py-5 shadow-[0_24px_70px_rgba(18,63,52,0.12)] ring-1 ring-[#006b55]/10 backdrop-blur-xl md:px-8 md:py-7">
+              <span className="relative block w-full overflow-hidden rounded-[28px] bg-white/55 px-5 py-5 shadow-[0_24px_70px_rgba(18,63,52,0.12)] ring-1 ring-[#006b55]/10 backdrop-blur-xl md:px-8 md:py-7">
                 <Image
                   src="/bayconnect.png"
                   alt="bayConnect"
@@ -151,7 +151,7 @@ export default async function HomePage() {
                     <span className="absolute right-3 top-3 text-[#0717b8]">
                       <ExternalLinkIcon size={13} strokeWidth={2} />
                     </span>
-                    <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-[#0717b8] text-white">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0717b8] text-white">
                       <item.Icon size={22} />
                     </span>
                     <div className="mt-3 text-[15px] font-semibold tracking-tight text-[#123f34]">{item.title}</div>
@@ -163,7 +163,7 @@ export default async function HomePage() {
                     href={item.href}
                     className={`animate-fade-up delay-${i + 1} identity-card group p-4 transition hover:-translate-y-1`}
                   >
-                    <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-[#006b55] text-white">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#006b55] text-white">
                       <item.Icon size={22} />
                     </span>
                     <div className="mt-3 text-[15px] font-semibold tracking-tight text-[#123f34]">{item.title}</div>
@@ -178,7 +178,7 @@ export default async function HomePage() {
 
       {/* ABOUT */}
       <Section className="py-16">
-        <div className="rounded-[8px] border border-[#006b55]/10 bg-[#fff7ef] p-8 shadow-[0_18px_60px_rgba(18,63,52,0.07)] md:p-14">
+        <div className="surface-apple-strong p-8 md:p-14">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div>
               <div className="text-[12px] font-semibold tracking-[0.14em] uppercase text-[#006b55]">
@@ -264,14 +264,14 @@ export default async function HomePage() {
               <Link
                 key={c.key}
                 href={`/experts?category=${c.key}`}
-                className="group relative overflow-hidden rounded-[8px] border border-[#006b55]/10 bg-white p-5 md:p-6 card-lift"
+                className="surface-apple group relative overflow-hidden p-5 md:p-6 card-lift"
               >
                 <div
                   className="absolute -right-8 -top-8 w-28 h-28 rounded-full opacity-20 blur-2xl transition group-hover:opacity-40"
                   style={{ background: c.color === "dark" ? "#123f34" : c.color === "blue" ? "#0717b8" : "#ff6b4a" }}
                 />
                 <div
-                  className="relative w-12 h-12 rounded-[8px] flex items-center justify-center text-white"
+                  className="relative w-12 h-12 rounded-2xl flex items-center justify-center text-white"
                   style={{ background: categoryGradient(c.color) }}
                 >
                   <Icon size={24} strokeWidth={1.8} />
@@ -305,9 +305,9 @@ export default async function HomePage() {
             <Link
               key={t.key}
               href={`/transfer?type=${t.key}`}
-              className="group rounded-[8px] border border-[#006b55]/10 bg-white p-5 card-lift text-center"
+              className="surface-apple group p-5 card-lift text-center"
             >
-              <span className="mx-auto flex items-center justify-center w-14 h-14 rounded-[8px] bg-[#eef1ff] text-[#0717b8]">
+              <span className="mx-auto flex items-center justify-center w-14 h-14 rounded-2xl bg-[#eef1ff] text-[#0717b8]">
                 <TransferTypeIcon type={t.key} size={28} />
               </span>
               <div className="mt-4 text-[15px] font-semibold tracking-tight">{t.label}</div>
@@ -328,12 +328,12 @@ export default async function HomePage() {
           href={PARTNER_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="group relative overflow-hidden rounded-[8px] bg-gradient-to-br from-[#0717b8] via-[#0d2097] to-[#123f34] text-white p-8 md:p-14 block"
+          className="group relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#0717b8] via-[#0d2097] to-[#123f34] text-white p-8 md:p-14 block apple-shadow-lg"
         >
           <div className="absolute -top-20 -right-16 w-72 h-72 rounded-full bg-[#ffc400]/20 blur-3xl" />
           <div className="absolute -bottom-24 -left-10 w-72 h-72 rounded-full bg-[#ff6b4a]/18 blur-3xl" />
           <div className="relative grid md:grid-cols-[auto_1.4fr_auto] gap-8 items-center">
-            <span className="hidden md:flex items-center justify-center w-16 h-16 rounded-[8px] bg-white/10 text-white">
+            <span className="hidden md:flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 text-white">
               <HandshakeIcon size={32} strokeWidth={1.6} />
             </span>
             <div>
@@ -391,7 +391,7 @@ export default async function HomePage() {
               { step: "02", title: "Tekshiring", desc: "Reyting, sharhlar, tillar va tajribani bir qarashda ko'ring." },
               { step: "03", title: "Bron qiling", desc: "Zayavka yuboring — mutaxassis tez orada siz bilan bog'lanadi." },
             ].map((item) => (
-              <div key={item.step} className="rounded-[8px] bg-white border border-[#006b55]/10 p-7 apple-shadow">
+              <div key={item.step} className="surface-apple p-7">
                 <div className="text-[13px] font-semibold tracking-[0.14em] text-[#006b55]">
                   {item.step}
                 </div>
@@ -405,7 +405,7 @@ export default async function HomePage() {
 
       {/* CTA */}
       <Section className="py-16">
-        <div className="relative overflow-hidden rounded-[8px] bg-gradient-to-br from-[#006b55] via-[#0b5e4d] to-[#123f34] text-white p-8 md:p-14">
+        <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#006b55] via-[#0b5e4d] to-[#123f34] text-white p-8 md:p-14 apple-shadow-lg">
           <div className="absolute -top-20 -right-16 w-72 h-72 rounded-full bg-white/15 blur-3xl" />
           <div className="absolute -bottom-24 -left-10 w-72 h-72 rounded-full bg-black/10 blur-3xl" />
           <div className="relative grid md:grid-cols-[1.4fr_auto] gap-8 items-center">
@@ -443,8 +443,8 @@ function StatCard({
   label: string;
 }) {
   return (
-    <div className="rounded-[8px] bg-white border border-[#006b55]/10 p-5 apple-shadow">
-      <span className="flex items-center justify-center w-11 h-11 rounded-[8px] bg-[#eaf4ef] text-[#006b55]">
+    <div className="surface-apple p-5">
+      <span className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#eaf4ef] text-[#006b55]">
         <Icon size={22} />
       </span>
       <div className="mt-3 text-[32px] font-semibold tracking-tight">{value}</div>
@@ -466,7 +466,7 @@ function FloatingBubble({
 }) {
   return (
     <div
-      className={`identity-bubble ${shape === "tail" ? "identity-bubble-tail" : ""} animate-float absolute z-10 h-24 w-24 items-center justify-center rounded-[8px] ${className}`}
+      className={`identity-bubble ${shape === "tail" ? "identity-bubble-tail" : ""} animate-float absolute z-10 h-24 w-24 items-center justify-center rounded-[30px] ${className}`}
       style={{ color: tone === "blue" ? "#0717b8" : "#006b55", background: tone === "yellow" ? "rgba(255,196,0,0.22)" : "rgba(255,255,255,0.62)" }}
     >
       <Icon size={42} strokeWidth={1.55} />
@@ -504,7 +504,7 @@ function ServiceBigCard({
         </span>
       ) : null}
       <div
-        className="relative w-14 h-14 rounded-[8px] flex items-center justify-center text-white"
+        className="relative w-14 h-14 rounded-2xl flex items-center justify-center text-white"
         style={{ background: categoryGradient(color) }}
       >
         <Icon size={28} strokeWidth={1.8} />
@@ -525,7 +525,7 @@ function ServiceBigCard({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="group relative overflow-hidden rounded-[8px] border border-[#006b55]/10 bg-white p-6 md:p-7 card-lift block"
+        className="surface-apple group relative overflow-hidden p-6 md:p-7 card-lift block"
       >
         {inner}
       </a>
@@ -535,7 +535,7 @@ function ServiceBigCard({
   return (
     <Link
       href={href}
-      className="group relative overflow-hidden rounded-[8px] border border-[#006b55]/10 bg-white p-6 md:p-7 card-lift"
+      className="surface-apple group relative overflow-hidden p-6 md:p-7 card-lift"
     >
       {inner}
     </Link>

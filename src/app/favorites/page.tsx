@@ -61,7 +61,7 @@ export default function FavoritesPage() {
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="h-[340px] rounded-[8px] bg-[#fff7ef] animate-pulse border border-[#006b55]/10"
+                className="h-[340px] rounded-[22px] bg-white/70 animate-pulse border border-[#006b55]/10 apple-shadow"
               />
             ))}
           </div>

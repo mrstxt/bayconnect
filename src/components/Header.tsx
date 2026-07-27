@@ -27,7 +27,7 @@ function NavLink({
   variant: "desktop" | "mobile";
 }) {
   const desktopCls = `px-3.5 py-2 rounded-full text-[13px] font-medium transition inline-flex items-center gap-1 ${
-    active ? "bg-[#eaf4ef] text-[#006b55]" : "text-[#123f34]/75 hover:text-[#006b55] hover:bg-[#123f34]/[0.04]"
+    active ? "bg-white text-[#006b55] shadow-sm ring-1 ring-[#006b55]/10" : "text-[#123f34]/75 hover:text-[#006b55] hover:bg-white/60"
   }`;
   const mobileCls = `px-3 py-3 rounded-2xl text-[15px] font-medium transition flex items-center justify-between ${
     active ? "bg-[#eaf4ef] text-[#006b55]" : "text-[#123f34] hover:bg-[#123f34]/[0.04]"
@@ -143,7 +143,7 @@ export function Header() {
     <header
       className={`sticky top-0 z-50 transition-all duration-300 ${
         scrolled || open
-          ? "glass border-b border-[#123f34]/[0.06] shadow-[0_1px_0_rgba(18,63,52,0.04)]"
+          ? "glass border-b border-[#123f34]/[0.06] shadow-[0_12px_34px_rgba(18,63,52,0.08)]"
           : "bg-transparent"
       }`}
     >
@@ -167,7 +167,7 @@ export function Header() {
           <FavoritesLink variant="desktop" />
           <Link
             href="/register"
-            className="ml-1 px-4 py-2 rounded-full text-[13px] font-semibold text-white bg-[#006b55] hover:bg-[#005541] transition"
+            className="ml-1 px-4 py-2 rounded-full text-[13px] font-semibold text-white bg-[#006b55] hover:bg-[#005541] transition shadow-[0_10px_24px_rgba(0,107,85,0.22)]"
           >
             Hamkor bo'lish
           </Link>

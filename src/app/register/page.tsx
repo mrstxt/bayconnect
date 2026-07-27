@@ -18,7 +18,7 @@ export default function RegisterPage() {
         </p>
       </div>
 
-      <div className="mt-10 rounded-[8px] border border-[#006b55]/10 bg-white p-6 md:p-10 apple-shadow">
+      <div className="surface-apple-strong mt-10 p-6 md:p-10">
         <div className="mb-8 grid sm:grid-cols-3 gap-3">
           {[
             { t: "1 daqiqa", d: "Tez ro'yxatdan o'tish" },
@@ -27,7 +27,7 @@ export default function RegisterPage() {
           ].map((item) => (
             <div
               key={item.t}
-              className="rounded-[8px] bg-[#fff7ef] border border-[#006b55]/10 px-4 py-3 text-center"
+              className="rounded-2xl bg-white/78 border border-[#006b55]/10 px-4 py-3 text-center apple-shadow"
             >
               <div className="text-[15px] font-semibold tracking-tight">{item.t}</div>
               <div className="mt-0.5 text-[12px] text-[#86868b]">{item.d}</div>

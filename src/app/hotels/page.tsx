@@ -35,7 +35,7 @@ export default async function HotelsPage({ searchParams }: { searchParams: Searc
         subtitle="Butik mehmonxonalardan zamonaviy 4* mehmonxonalargacha — sizga qulay joyni tanlang."
       />
 
-      <form className="mt-8 rounded-[8px] border border-[#006b55]/10 bg-[#fff7ef] p-4 md:p-5">
+      <form className="filter-panel mt-8 p-4 md:p-5">
         <div className="grid md:grid-cols-12 gap-3">
           <div className="md:col-span-4">
             <input
@@ -75,7 +75,7 @@ export default async function HotelsPage({ searchParams }: { searchParams: Searc
           <div className="flex gap-2">
             <Link
               href="/hotels"
-              className="px-4 py-2.5 rounded-full text-[13px] font-semibold text-[#123f34] bg-white border border-[#006b55]/10 hover:bg-[#eaf4ef] transition"
+              className="chip-apple px-4 py-2.5 text-[13px] font-semibold text-[#123f34] hover:bg-[#eaf4ef] transition"
             >
               Tozalash
             </Link>

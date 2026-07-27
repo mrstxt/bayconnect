@@ -56,7 +56,7 @@ export function BookingForm({ providerId }: { providerId: number }) {
 
   if (status === "success") {
     return (
-      <div className="mt-5 rounded-[8px] bg-[#e8f8ef] border border-emerald-200/70 p-6 text-center">
+      <div className="surface-apple mt-5 bg-[#e8f8ef] p-6 text-center">
         <div className="mx-auto w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xl">
           ✓
         </div>
@@ -118,7 +118,7 @@ export function BookingForm({ providerId }: { providerId: number }) {
           <button
             type="button"
             onClick={() => setPeople((n) => Math.max(1, n - 1))}
-            className="w-10 h-10 rounded-full bg-[#fff7ef] border border-[#006b55]/10 font-semibold hover:bg-[#eaf4ef]"
+            className="w-10 h-10 rounded-full bg-white border border-[#006b55]/10 font-semibold hover:bg-[#eaf4ef] apple-shadow"
           >
             −
           </button>
@@ -127,7 +127,7 @@ export function BookingForm({ providerId }: { providerId: number }) {
           <button
             type="button"
             onClick={() => setPeople((n) => Math.min(50, n + 1))}
-            className="w-10 h-10 rounded-full bg-[#fff7ef] border border-[#006b55]/10 font-semibold hover:bg-[#eaf4ef]"
+            className="w-10 h-10 rounded-full bg-white border border-[#006b55]/10 font-semibold hover:bg-[#eaf4ef] apple-shadow"
           >
             +
           </button>
@@ -142,7 +142,7 @@ export function BookingForm({ providerId }: { providerId: number }) {
       />
 
       {status === "error" ? (
-        <div className="text-[13px] text-red-600 bg-red-50 border border-red-100 rounded-[8px] px-3 py-2.5">
+        <div className="text-[13px] text-red-600 bg-red-50 border border-red-100 rounded-2xl px-3 py-2.5">
           {error}
         </div>
       ) : null}

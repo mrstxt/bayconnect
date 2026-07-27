@@ -164,7 +164,7 @@ export function RegisterForm() {
               {CATEGORIES.map((c) => (
                 <label
                   key={c.key}
-                  className="cursor-pointer rounded-[8px] border border-[#123f34]/[0.08] bg-[#fff7ef] p-3 has-[:checked]:border-[#006b55] has-[:checked]:bg-[#eaf4ef] transition"
+                  className="cursor-pointer rounded-2xl border border-[#123f34]/[0.08] bg-white/72 p-3 has-[:checked]:border-[#006b55] has-[:checked]:bg-[#eaf4ef] transition"
                 >
                   <input
                     type="radio"
@@ -174,7 +174,7 @@ export function RegisterForm() {
                     className="sr-only"
                     defaultChecked={(draft.category ?? "guide") === c.key}
                   />
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#006b55] ring-1 ring-[#123f34]/5">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#006b55] ring-1 ring-[#123f34]/5 shadow-sm">
                     <CategoryIcon category={c.key} size={20} strokeWidth={1.9} />
                   </div>
                   <div className="mt-2 text-[13px] font-semibold text-[#123f34]">{c.label}</div>
@@ -254,7 +254,7 @@ export function RegisterForm() {
               ].map((c) => (
                 <label
                   key={c.value}
-                  className="cursor-pointer overflow-hidden rounded-[8px] border border-[#123f34]/[0.08] has-[:checked]:ring-2 has-[:checked]:ring-[#006b55] has-[:checked]:ring-offset-2"
+                  className="cursor-pointer overflow-hidden rounded-2xl border border-[#123f34]/[0.08] bg-white has-[:checked]:ring-2 has-[:checked]:ring-[#006b55] has-[:checked]:ring-offset-2"
                 >
                   <input
                     type="radio"
@@ -273,7 +273,7 @@ export function RegisterForm() {
           </Field>
 
           {status === "error" ? (
-            <div className="text-[13px] text-red-600 bg-red-50 border border-red-100 rounded-[8px] px-3 py-2.5">
+            <div className="text-[13px] text-red-600 bg-red-50 border border-red-100 rounded-2xl px-3 py-2.5">
               {error}
             </div>
           ) : null}

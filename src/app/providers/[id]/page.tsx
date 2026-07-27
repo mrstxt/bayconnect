@@ -57,7 +57,7 @@ export default async function ProviderPage({
 
       {/* Cover */}
       <div
-        className={`relative mt-5 h-56 md:h-72 rounded-[8px] overflow-hidden ${coverBg(p.coverColor)} apple-shadow`}
+        className={`relative mt-5 h-56 md:h-72 rounded-[28px] overflow-hidden ${coverBg(p.coverColor)} apple-shadow`}
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(255,255,255,0.35),transparent_50%)]" />
         <div className="absolute inset-0 flex items-center justify-center">
@@ -98,7 +98,7 @@ export default async function ProviderPage({
             </div>
           </div>
 
-          <div className="rounded-[8px] border border-[#006b55]/10 bg-white p-6 md:p-7">
+          <div className="surface-apple p-6 md:p-7">
             <h2 className="text-[13px] font-semibold tracking-[0.12em] uppercase text-[#86868b]">
               Haqida
             </h2>
@@ -106,7 +106,7 @@ export default async function ProviderPage({
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="rounded-[8px] border border-[#006b55]/10 bg-[#fff7ef] p-6">
+            <div className="surface-apple p-6">
               <h3 className="text-[13px] font-semibold tracking-[0.12em] uppercase text-[#86868b]">
                 Tillar
               </h3>
@@ -118,7 +118,7 @@ export default async function ProviderPage({
                 ))}
               </div>
             </div>
-            <div className="rounded-[8px] border border-[#006b55]/10 bg-[#fff7ef] p-6">
+            <div className="surface-apple p-6">
               <h3 className="text-[13px] font-semibold tracking-[0.12em] uppercase text-[#86868b]">
                 Yo'nalishlar
               </h3>
@@ -132,7 +132,7 @@ export default async function ProviderPage({
             </div>
           </div>
 
-          <div className="rounded-[8px] border border-[#006b55]/10 bg-white p-6 md:p-7">
+          <div className="surface-apple p-6 md:p-7">
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-[20px] font-semibold tracking-tight">Mijozlar sharhlari</h2>
               <span className="text-[13px] text-[#86868b]">{reviewList.length} ta</span>
@@ -145,7 +145,7 @@ export default async function ProviderPage({
                 {reviewList.map((r) => (
                   <li
                     key={r.id}
-                    className="rounded-[8px] bg-[#fff7ef] border border-[#006b55]/10 p-4"
+                    className="rounded-2xl bg-white/72 border border-[#006b55]/10 p-4"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <span className="font-semibold text-[15px]">{r.authorName}</span>
@@ -172,7 +172,7 @@ export default async function ProviderPage({
         <aside className="lg:col-span-5 xl:col-span-4">
           <div
             id="booking-form"
-            className="scroll-mt-24 lg:sticky lg:top-24 rounded-[8px] border border-[#006b55]/10 bg-white p-6 apple-shadow-lg"
+            className="surface-apple-strong scroll-mt-24 lg:sticky lg:top-24 p-6"
           >
             <div className="flex items-end justify-between gap-3">
               <div>
@@ -184,7 +184,7 @@ export default async function ProviderPage({
               <Badge tone="green">{p.experienceYears}+ yil</Badge>
             </div>
 
-            <div className="mt-6 space-y-3 rounded-[8px] bg-[#fff7ef] p-4">
+            <div className="mt-6 space-y-3 rounded-2xl bg-white/68 p-4 ring-1 ring-[#006b55]/10">
               <InfoRow label="Telefon" value={p.phone} />
               <InfoRow label="Email" value={p.email} />
               <InfoRow label="Shahar" value={`${p.city}, ${p.country}`} />

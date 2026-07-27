@@ -2,7 +2,7 @@
   "name": "bayconnect",
   "private": true,
   "engines": {
-    "node": ">=20"
+    "node": ">=20 <25"
   },
   "scripts": {
     "dev": "next dev",

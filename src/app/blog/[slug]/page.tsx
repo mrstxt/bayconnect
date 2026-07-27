@@ -42,9 +42,9 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         <span className="text-[#123f34] truncate">{post.title}</span>
       </div>
 
-      <div className={`mt-5 relative h-52 md:h-72 rounded-[8px] overflow-hidden ${coverBg(post.coverColor)} flex items-center justify-center apple-shadow`}>
+      <div className={`mt-5 relative h-52 md:h-72 rounded-[28px] overflow-hidden ${coverBg(post.coverColor)} flex items-center justify-center apple-shadow`}>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.35),transparent_55%)]" />
-        <span className="flex items-center justify-center w-28 h-28 rounded-[8px] bg-white/90 text-[#123f34] shadow-sm">
+        <span className="flex items-center justify-center w-28 h-28 rounded-3xl bg-white/90 text-[#123f34] shadow-sm">
           <PostIcon category={post.category} size={52} />
         </span>
       </div>
@@ -75,9 +75,9 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
               <Link
                 key={m.id}
                 href={`/blog/${m.slug}`}
-                className="group rounded-[8px] bg-white border border-[#006b55]/10 p-4 card-lift"
+                className="surface-apple group p-4 card-lift"
               >
-                <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-[#fff7ef] text-[#006b55] ring-1 ring-[#123f34]/5">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#fff7ef] text-[#006b55] ring-1 ring-[#123f34]/5">
                   <PostIcon category={m.category} size={22} />
                 </span>
                 <h3 className="mt-4 text-[14px] font-semibold tracking-tight text-[#123f34] group-hover:text-[#006b55] transition line-clamp-2">

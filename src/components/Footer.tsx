@@ -7,13 +7,13 @@ const linkCls = "text-[15px] text-[#123f34] hover:text-[#006b55] transition";
 
 export function Footer() {
   return (
-    <footer className="mt-24 border-t border-[#123f34]/[0.06] bg-[#f7f2ed]">
+    <footer className="mt-24 border-t border-[#123f34]/[0.06] bg-[#f8eee5]/80">
       <div className="mx-auto max-w-6xl px-5 py-16">
         <a
           href={PARTNER_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-[8px] bg-gradient-to-br from-[#0717b8] via-[#0d2097] to-[#123f34] text-white p-6 md:p-8 mb-14"
+          className="group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-[28px] bg-gradient-to-br from-[#0717b8] via-[#0d2097] to-[#123f34] text-white p-6 md:p-8 mb-14 apple-shadow-lg"
         >
           <div>
             <div className="text-[11px] font-semibold tracking-[0.14em] uppercase text-white/55">

@@ -37,11 +37,11 @@ export function SectionHeading({
     >
       <div className={align === "center" ? "max-w-2xl" : ""}>
         {eyebrow ? (
-          <div className="text-[12px] font-semibold tracking-[0.14em] uppercase text-[#006b55] mb-3">
+          <div className="text-[12px] font-bold tracking-[0.14em] uppercase text-[#006b55] mb-3">
             {eyebrow}
           </div>
         ) : null}
-        <h2 className="text-[32px] md:text-[40px] font-semibold tracking-tight text-[#123f34] leading-[1.1]">
+        <h2 className="text-[32px] md:text-[42px] font-semibold tracking-tight text-[#123f34] leading-[1.08]">
           {title}
         </h2>
         {subtitle ? (
@@ -88,8 +88,8 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="text-center py-20 px-6 rounded-[8px] bg-[#fff7ef] border border-[#006b55]/10">
-      <div className="mx-auto flex items-center justify-center w-16 h-16 rounded-[8px] bg-white border border-[#123f34]/[0.06] text-[#006b55]">
+    <div className="surface-apple text-center py-20 px-6">
+      <div className="mx-auto flex items-center justify-center w-16 h-16 rounded-2xl bg-white border border-[#123f34]/[0.06] text-[#006b55] apple-shadow">
         {icon}
       </div>
       <h3 className="mt-5 text-[22px] font-semibold tracking-tight text-[#123f34]">{title}</h3>
