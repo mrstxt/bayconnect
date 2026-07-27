@@ -48,16 +48,16 @@ export default async function ProviderPage({
   return (
     <div className="mx-auto max-w-6xl px-5 py-8 md:py-12">
       <div className="flex items-center gap-2 text-[13px] text-[#86868b]">
-        <Link href="/providers" className="hover:text-[#1d1d1f] transition">
+        <Link href="/providers" className="hover:text-[#006b55] transition">
           Mutaxassislar
         </Link>
         <span>/</span>
-        <span className="text-[#1d1d1f]">{p.fullName}</span>
+        <span className="text-[#123f34]">{p.fullName}</span>
       </div>
 
       {/* Cover */}
       <div
-        className={`relative mt-5 h-56 md:h-72 rounded-[36px] overflow-hidden ${coverBg(p.coverColor)} apple-shadow`}
+        className={`relative mt-5 h-56 md:h-72 rounded-[8px] overflow-hidden ${coverBg(p.coverColor)} apple-shadow`}
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(255,255,255,0.35),transparent_50%)]" />
         <div className="absolute inset-0 flex items-center justify-center">
@@ -66,7 +66,7 @@ export default async function ProviderPage({
           </span>
         </div>
         <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-          <span className="glass rounded-full px-3 py-1.5 text-[12px] font-semibold text-[#1d1d1f]">
+          <span className="glass rounded-full px-3 py-1.5 text-[12px] font-semibold text-[#123f34]">
             {categoryLabel(p.category)}
           </span>
           {p.verified ? (
@@ -98,15 +98,15 @@ export default async function ProviderPage({
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-black/[0.06] bg-white p-6 md:p-7">
+          <div className="rounded-[8px] border border-[#006b55]/10 bg-white p-6 md:p-7">
             <h2 className="text-[13px] font-semibold tracking-[0.12em] uppercase text-[#86868b]">
               Haqida
             </h2>
-            <p className="mt-3 text-[17px] leading-relaxed text-[#1d1d1f]/90">{p.bio}</p>
+            <p className="mt-3 text-[17px] leading-relaxed text-[#123f34]/90">{p.bio}</p>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="rounded-[28px] border border-black/[0.06] bg-[#f5f5f7] p-6">
+            <div className="rounded-[8px] border border-[#006b55]/10 bg-[#fff7ef] p-6">
               <h3 className="text-[13px] font-semibold tracking-[0.12em] uppercase text-[#86868b]">
                 Tillar
               </h3>
@@ -118,7 +118,7 @@ export default async function ProviderPage({
                 ))}
               </div>
             </div>
-            <div className="rounded-[28px] border border-black/[0.06] bg-[#f5f5f7] p-6">
+            <div className="rounded-[8px] border border-[#006b55]/10 bg-[#fff7ef] p-6">
               <h3 className="text-[13px] font-semibold tracking-[0.12em] uppercase text-[#86868b]">
                 Yo'nalishlar
               </h3>
@@ -132,7 +132,7 @@ export default async function ProviderPage({
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-black/[0.06] bg-white p-6 md:p-7">
+          <div className="rounded-[8px] border border-[#006b55]/10 bg-white p-6 md:p-7">
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-[20px] font-semibold tracking-tight">Mijozlar sharhlari</h2>
               <span className="text-[13px] text-[#86868b]">{reviewList.length} ta</span>
@@ -145,7 +145,7 @@ export default async function ProviderPage({
                 {reviewList.map((r) => (
                   <li
                     key={r.id}
-                    className="rounded-2xl bg-[#f5f5f7] border border-black/[0.04] p-4"
+                    className="rounded-[8px] bg-[#fff7ef] border border-[#006b55]/10 p-4"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <span className="font-semibold text-[15px]">{r.authorName}</span>
@@ -172,7 +172,7 @@ export default async function ProviderPage({
         <aside className="lg:col-span-5 xl:col-span-4">
           <div
             id="booking-form"
-            className="scroll-mt-24 lg:sticky lg:top-24 rounded-[32px] border border-black/[0.06] bg-white p-6 apple-shadow-lg"
+            className="scroll-mt-24 lg:sticky lg:top-24 rounded-[8px] border border-[#006b55]/10 bg-white p-6 apple-shadow-lg"
           >
             <div className="flex items-end justify-between gap-3">
               <div>
@@ -184,7 +184,7 @@ export default async function ProviderPage({
               <Badge tone="green">{p.experienceYears}+ yil</Badge>
             </div>
 
-            <div className="mt-6 space-y-3 rounded-2xl bg-[#f5f5f7] p-4">
+            <div className="mt-6 space-y-3 rounded-[8px] bg-[#fff7ef] p-4">
               <InfoRow label="Telefon" value={p.phone} />
               <InfoRow label="Email" value={p.email} />
               <InfoRow label="Shahar" value={`${p.city}, ${p.country}`} />
@@ -209,7 +209,7 @@ export default async function ProviderPage({
         <div className="mt-16">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <div className="text-[12px] font-semibold tracking-[0.14em] uppercase text-[#ff8a00]">
+              <div className="text-[12px] font-semibold tracking-[0.14em] uppercase text-[#ff6b4a]">
                 O'xshashlar
               </div>
               <h2 className="mt-2 text-[28px] font-semibold tracking-tight">
@@ -218,7 +218,7 @@ export default async function ProviderPage({
             </div>
             <Link
               href={`/providers?category=${p.category}`}
-              className="text-[14px] font-semibold text-[#0071e3] hover:underline underline-offset-4"
+              className="text-[14px] font-semibold text-[#0717b8] hover:underline underline-offset-4"
             >
               Barchasi →
             </Link>
@@ -238,7 +238,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-4 text-[13px]">
       <span className="text-[#86868b]">{label}</span>
-      <span className="font-semibold text-[#1d1d1f] text-right break-all">{value}</span>
+      <span className="font-semibold text-[#123f34] text-right break-all">{value}</span>
     </div>
   );
 }

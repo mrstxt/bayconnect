@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
 import { NAV_ITEMS } from "@/lib/brand";
+import { FAVORITES_EVENT } from "@/lib/favorites";
 import { HeartIcon, ExternalLinkIcon } from "./Icon";
 
 function isActive(pathname: string, href: string): boolean {
@@ -70,7 +71,9 @@ function FavoritesLink({ variant }: { variant: "desktop" | "mobile" }) {
   useEffect(() => {
     const read = () => {
       try {
-        const raw = window.localStorage.getItem("bayclub:favorites");
+        const raw =
+          window.localStorage.getItem("bayconnect:favorites") ??
+          window.localStorage.getItem("bayclub:favorites");
         const arr = raw ? JSON.parse(raw) : [];
         setCount(Array.isArray(arr) ? arr.length : 0);
       } catch {
@@ -78,9 +81,11 @@ function FavoritesLink({ variant }: { variant: "desktop" | "mobile" }) {
       }
     };
     read();
+    window.addEventListener(FAVORITES_EVENT, read);
     window.addEventListener("bayclub:favorites-changed", read);
     window.addEventListener("storage", read);
     return () => {
+      window.removeEventListener(FAVORITES_EVENT, read);
       window.removeEventListener("bayclub:favorites-changed", read);
       window.removeEventListener("storage", read);
     };
@@ -164,7 +169,7 @@ export function Header() {
             href="/register"
             className="ml-1 px-4 py-2 rounded-full text-[13px] font-semibold text-white bg-[#006b55] hover:bg-[#005541] transition"
           >
-            Mutaxassis bo'lish
+            Hamkor bo'lish
           </Link>
         </div>
 
@@ -218,7 +223,7 @@ export function Header() {
           </div>
           <div className="mt-3">
             <Link href="/register" className="btn-secondary w-full !py-3 text-sm !bg-[#006b55] hover:!bg-[#005541]">
-              Mutaxassis bo'lish
+              Hamkor bo'lish
             </Link>
           </div>
         </div>

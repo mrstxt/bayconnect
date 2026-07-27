@@ -6,11 +6,11 @@ import { Footer } from "@/components/Footer";
 import { ScrollTop } from "@/components/ScrollTop";
 
 export const metadata: Metadata = {
-  title: "bayClub — Sayohatingiz uchun eng zo'r hamroh",
+  title: "bayConnect — Sayohat xizmatlari bilan bog'lovchi platforma",
   description:
-    "bayClub — O'zbekiston bo'ylab gidlar, transferlar, fotograflar va boshqa turizm mutaxassislarini topish uchun premium marketplace.",
+    "bayConnect — O'zbekiston bo'ylab gidlar, transferlar, fotograflar va boshqa turizm mutaxassislarini topish uchun premium marketplace.",
   openGraph: {
-    title: "bayClub",
+    title: "bayConnect",
     description: "Turizm mutaxassislarini topishning eng oddiy yo'li.",
     type: "website",
   },
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="uz">
-      <body className="min-h-screen flex flex-col bg-[#fffaf5] text-[#123f34] antialiased">
+      <body className="min-h-screen flex flex-col bg-[#fff7ef] text-[#123f34] antialiased">
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />

@@ -38,7 +38,7 @@ export function FavoriteButton({
       className={`inline-flex items-center justify-center rounded-full glass w-9 h-9 transition-transform active:scale-90 ${
         pulse ? "scale-110" : ""
       } ${className}`}
-      style={{ color: fav ? "#ff3b30" : "#1d1d1f" }}
+      style={{ color: fav ? "#ff6b4a" : "#123f34" }}
     >
       <HeartIcon size={17} filled={fav} strokeWidth={1.8} />
     </button>

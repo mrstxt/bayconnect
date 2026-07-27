@@ -63,7 +63,7 @@ export default async function TransferPage({ searchParams }: { searchParams: Sea
       </div>
 
       {/* Filters */}
-      <form className="mt-8 rounded-[28px] border border-black/[0.06] bg-[#f5f5f7] p-4 md:p-5">
+      <form className="mt-8 rounded-[8px] border border-[#006b55]/10 bg-[#fff7ef] p-4 md:p-5">
         <input type="hidden" name="type" value={activeType} />
         <div className="grid md:grid-cols-12 gap-3">
           <div className="md:col-span-4">
@@ -104,7 +104,7 @@ export default async function TransferPage({ searchParams }: { searchParams: Sea
           <div className="flex gap-2">
             <Link
               href="/transfer"
-              className="px-4 py-2.5 rounded-full text-[13px] font-semibold text-[#1d1d1f] bg-white border border-black/[0.08] hover:bg-black/[0.03] transition"
+              className="px-4 py-2.5 rounded-full text-[13px] font-semibold text-[#123f34] bg-white border border-[#006b55]/10 hover:bg-[#eaf4ef] transition"
             >
               Tozalash
             </Link>
@@ -155,15 +155,15 @@ function TypeCard({
   return (
     <Link
       href={href}
-      className={`rounded-[24px] border p-5 text-center transition ${
+      className={`rounded-[8px] border p-5 text-center transition ${
         active
-          ? "border-[#1d1d1f] bg-[#1d1d1f] text-white"
-          : "border-black/[0.06] bg-white text-[#1d1d1f] hover:border-black/20 hover:-translate-y-0.5"
+          ? "border-[#006b55] bg-[#006b55] text-white"
+          : "border-[#006b55]/10 bg-white text-[#123f34] hover:border-[#006b55]/30 hover:-translate-y-0.5"
       }`}
     >
       <span
-        className={`mx-auto flex items-center justify-center w-14 h-14 rounded-2xl ${
-          active ? "bg-white/10 text-white" : "bg-[#eef4ff] text-[#0071e3]"
+        className={`mx-auto flex items-center justify-center w-14 h-14 rounded-[8px] ${
+          active ? "bg-white/10 text-white" : "bg-[#eef1ff] text-[#0717b8]"
         }`}
       >
         {icon}

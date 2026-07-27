@@ -80,9 +80,9 @@ export default async function BlogPage({ searchParams }: { searchParams: SearchP
           {featured ? (
             <Link
               href={`/blog/${featured.slug}`}
-              className="group grid gap-6 rounded-[32px] border border-[#123f34]/[0.08] bg-[#fffaf5] p-6 card-lift apple-shadow md:grid-cols-[auto_1fr] md:p-8"
+              className="group grid gap-6 rounded-[8px] border border-[#006b55]/10 bg-[#fff7ef] p-6 card-lift apple-shadow md:grid-cols-[auto_1fr] md:p-8"
             >
-              <span className="flex h-20 w-20 items-center justify-center rounded-[26px] bg-[#006b55] text-white shadow-sm md:h-24 md:w-24">
+              <span className="flex h-20 w-20 items-center justify-center rounded-[8px] bg-[#006b55] text-white shadow-sm md:h-24 md:w-24">
                 <PostIcon category={featured.category} size={44} />
               </span>
               <div className="flex flex-col justify-center">
@@ -105,10 +105,10 @@ export default async function BlogPage({ searchParams }: { searchParams: SearchP
                 <Link
                   key={p.id}
                   href={`/blog/${p.slug}`}
-                  className="group rounded-[28px] border border-[#123f34]/[0.08] bg-white p-5 card-lift"
+                  className="group rounded-[8px] border border-[#006b55]/10 bg-white p-5 card-lift"
                 >
                   <div className="flex items-start gap-4">
-                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#f7f2ed] text-[#006b55] ring-1 ring-[#123f34]/5">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[8px] bg-[#fff7ef] text-[#006b55] ring-1 ring-[#123f34]/5">
                       <PostIcon category={p.category} size={24} />
                     </span>
                     <div className="min-w-0">

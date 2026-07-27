@@ -88,8 +88,8 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="text-center py-20 px-6 rounded-[32px] bg-[#f7f2ed] border border-[#123f34]/[0.06]">
-      <div className="mx-auto flex items-center justify-center w-16 h-16 rounded-2xl bg-white border border-[#123f34]/[0.06] text-[#006b55]">
+    <div className="text-center py-20 px-6 rounded-[8px] bg-[#fff7ef] border border-[#006b55]/10">
+      <div className="mx-auto flex items-center justify-center w-16 h-16 rounded-[8px] bg-white border border-[#123f34]/[0.06] text-[#006b55]">
         {icon}
       </div>
       <h3 className="mt-5 text-[22px] font-semibold tracking-tight text-[#123f34]">{title}</h3>

@@ -1,17 +1,18 @@
-// bayClub brand tokens
+// bayConnect brand tokens
 export const brand = {
-  name: "bayClub",
-  tagline: "Sayohatingiz uchun eng zo'r hamroh",
+  name: "bayConnect",
+  tagline: "Sayohat xizmatlari bilan bog'lovchi platforma",
   colors: {
-    orange: "#FF6B4A",
-    orangeDark: "#E05235",
+    coral: "#FF6B4A",
+    coralDark: "#E05235",
     yellow: "#FFC400",
     blue: "#0717B8",
     green: "#006B55",
-    cream: "#F7EDE4",
+    deepGreen: "#005A48",
+    cream: "#F8EEE5",
     ink: "#123F34",
     muted: "#7B827F",
-    surface: "#F7F2ED",
+    surface: "#FFF7EF",
     white: "#FFFFFF",
   },
 };

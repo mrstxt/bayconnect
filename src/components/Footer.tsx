@@ -13,7 +13,7 @@ export function Footer() {
           href={PARTNER_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-[28px] bg-gradient-to-br from-[#0717b8] via-[#0d2097] to-[#123f34] text-white p-6 md:p-8 mb-14"
+          className="group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-[8px] bg-gradient-to-br from-[#0717b8] via-[#0d2097] to-[#123f34] text-white p-6 md:p-8 mb-14"
         >
           <div>
             <div className="text-[11px] font-semibold tracking-[0.14em] uppercase text-white/55">
@@ -37,7 +37,7 @@ export function Footer() {
           <div className="md:col-span-4">
             <Logo />
             <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-[#5f6864]">
-              bayClub — O'zbekiston va Markaziy Osiyo bo'ylab ishonchli turizm xizmatlarini
+              bayConnect — O'zbekiston va Markaziy Osiyo bo'ylab ishonchli turizm xizmatlarini
               topish uchun marketplace.
             </p>
           </div>
@@ -109,7 +109,7 @@ export function Footer() {
                 <Link href="/register" className={linkCls}>Mutaxassis bo'lish</Link>
               </li>
               <li>
-                <a href="mailto:hello@bayclub.uz" className={linkCls}>Aloqa</a>
+                <a href="mailto:hello@bayconnect.uz" className={linkCls}>Aloqa</a>
               </li>
               <li>
                 <span className="text-[15px] text-[#123f34]">Maxfiylik</span>
@@ -120,7 +120,7 @@ export function Footer() {
 
         <div className="mt-14 pt-6 border-t border-[#123f34]/[0.06] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <p className="text-[13px] text-[#7b827f]">
-            Copyright © {new Date().getFullYear()} bayClub. Barcha huquqlar himoyalangan.
+            Copyright © {new Date().getFullYear()} bayConnect. Barcha huquqlar himoyalangan.
           </p>
           <p className="text-[13px] text-[#7b827f]">O'zbekiston · Markaziy Osiyo</p>
         </div>

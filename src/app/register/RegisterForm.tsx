@@ -73,9 +73,9 @@ export function RegisterForm() {
         ))}
       </div>
       <div className="flex items-center justify-between text-[12px] font-semibold text-[#86868b]">
-        <span className={step === 1 ? "text-[#1d1d1f]" : ""}>Asosiy</span>
-        <span className={step === 2 ? "text-[#1d1d1f]" : ""}>Xizmat</span>
-        <span className={step === 3 ? "text-[#1d1d1f]" : ""}>Profil</span>
+        <span className={step === 1 ? "text-[#123f34]" : ""}>Asosiy</span>
+        <span className={step === 2 ? "text-[#123f34]" : ""}>Xizmat</span>
+        <span className={step === 3 ? "text-[#123f34]" : ""}>Profil</span>
       </div>
 
       {step === 1 ? (
@@ -125,7 +125,7 @@ export function RegisterForm() {
               {CATEGORIES.map((c) => (
                 <label
                   key={c.key}
-                  className="cursor-pointer rounded-2xl border border-[#123f34]/[0.08] bg-[#f7f2ed] p-3 has-[:checked]:border-[#006b55] has-[:checked]:bg-[#eaf4ef] transition"
+                  className="cursor-pointer rounded-[8px] border border-[#123f34]/[0.08] bg-[#fff7ef] p-3 has-[:checked]:border-[#006b55] has-[:checked]:bg-[#eaf4ef] transition"
                 >
                   <input
                     type="radio"
@@ -211,7 +211,7 @@ export function RegisterForm() {
               ].map((c) => (
                 <label
                   key={c.value}
-                  className="cursor-pointer overflow-hidden rounded-2xl border border-[#123f34]/[0.08] has-[:checked]:ring-2 has-[:checked]:ring-[#006b55] has-[:checked]:ring-offset-2"
+                  className="cursor-pointer overflow-hidden rounded-[8px] border border-[#123f34]/[0.08] has-[:checked]:ring-2 has-[:checked]:ring-[#006b55] has-[:checked]:ring-offset-2"
                 >
                   <input
                     type="radio"
@@ -230,7 +230,7 @@ export function RegisterForm() {
           </Field>
 
           {status === "error" ? (
-            <div className="text-[13px] text-red-600 bg-red-50 border border-red-100 rounded-2xl px-3 py-2.5">
+            <div className="text-[13px] text-red-600 bg-red-50 border border-red-100 rounded-[8px] px-3 py-2.5">
               {error}
             </div>
           ) : null}

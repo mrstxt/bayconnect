@@ -16,7 +16,7 @@ export function ProviderCard({ p, priority = false }: { p: Provider; priority?: 
   return (
     <Link
       href={`/providers/${p.id}`}
-      className={`group relative block rounded-[28px] p-5 card-compact card-lift ${
+      className={`group relative block rounded-[8px] p-5 card-compact card-lift ${
         priority ? "apple-shadow" : ""
       }`}
     >
@@ -26,7 +26,7 @@ export function ProviderCard({ p, priority = false }: { p: Provider; priority?: 
 
       <div className="flex items-start gap-4 pr-11">
         <span
-          className="shrink-0 flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-sm transition-transform duration-300 group-hover:scale-105"
+          className="shrink-0 flex h-14 w-14 items-center justify-center rounded-[8px] text-white shadow-sm transition-transform duration-300 group-hover:scale-105"
           style={{ background: categoryGradient(p.coverColor === "yellow" ? "yellow" : p.coverColor === "blue" ? "blue" : p.coverColor === "dark" ? "dark" : "orange") }}
         >
           <CategoryIcon
@@ -68,7 +68,7 @@ export function ProviderCard({ p, priority = false }: { p: Provider; priority?: 
         {(p.tags ?? []).slice(0, 3).map((t) => (
           <span
             key={t}
-            className="rounded-full bg-[#fffaf5] px-2.5 py-1 text-[11px] font-medium text-[#123f34]/75 ring-1 ring-[#123f34]/5"
+            className="rounded-full bg-[#fff7ef] px-2.5 py-1 text-[11px] font-medium text-[#123f34]/75 ring-1 ring-[#123f34]/5"
           >
             {t}
           </span>

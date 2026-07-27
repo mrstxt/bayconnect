@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { db } from "@/db";
 import { providers } from "@/db/schema";
 import { desc, sql } from "drizzle-orm";
@@ -24,7 +25,6 @@ import {
   UsersIcon,
   ExternalLinkIcon,
   HandshakeIcon,
-  MountainIcon,
   BusIcon,
   GlobeGridIcon,
 } from "@/components/Icon";
@@ -64,45 +64,50 @@ export default async function HomePage() {
   return (
     <>
       {/* HERO */}
-      <section className="identity-hero noise relative overflow-hidden min-h-[760px]">
+      <section className="identity-hero noise relative overflow-hidden min-h-[780px]">
         <div className="identity-mountain" />
         <div className="identity-river" />
-        <div className="identity-arc -right-16 top-28 hidden md:block" />
-        <div className="identity-arc-coral -left-24 bottom-20 hidden md:block" />
+        <div className="identity-mountain identity-mountain-back" />
+        <div className="identity-arc -right-12 top-24 hidden md:block" />
+        <div className="identity-arc-coral -left-20 bottom-16 hidden md:block" />
 
-        <FloatingBubble className="left-[9%] top-16 hidden md:flex" tone="blue" Icon={GlobeGridIcon} />
-        <FloatingBubble className="right-[18%] top-20 hidden md:flex" tone="yellow" Icon={MountainIcon} />
-        <FloatingBubble className="left-[25%] bottom-24 hidden lg:flex" tone="blue" Icon={TransferIcon} />
+        <FloatingBubble className="left-[9%] top-20 hidden md:flex" tone="blue" Icon={GlobeGridIcon} shape="tail" />
+        <FloatingBubble className="right-[20%] top-16 hidden md:flex" tone="yellow" Icon={GuideIcon} shape="tail" />
+        <FloatingBubble className="left-[27%] bottom-28 hidden lg:flex" tone="blue" Icon={TransferIcon} />
         <FloatingBubble className="right-[14%] bottom-28 hidden lg:flex" tone="yellow" Icon={BusIcon} />
 
-        <div className="relative mx-auto max-w-6xl px-5 pt-16 pb-16 md:pt-24 md:pb-24">
+        <div className="relative mx-auto max-w-6xl px-5 pt-14 pb-16 md:pt-24 md:pb-24">
           <div className="mx-auto max-w-4xl text-center">
-            <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-[#006b55]/10 bg-white/60 backdrop-blur px-4 py-2 text-[12px] font-semibold text-[#006b55] shadow-sm">
-              <span className="inline-block h-2 w-2 rounded-full bg-[#ffc400]" />
-              O'zbekiston bo'ylab turizm xizmatlari
+            <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-[#006b55]/10 bg-white/72 px-4 py-2 text-[12px] font-bold text-[#006b55] shadow-sm backdrop-blur">
+              <span className="inline-block h-2 w-2 rounded-full bg-[#ff6b4a]" />
+              Gidlar, transfer va sayohat xizmatlari bir joyda
             </div>
 
-            <div className="animate-fade-up delay-1 mt-8 inline-flex items-center gap-5 rounded-[34px] bg-white/52 px-6 py-5 backdrop-blur-xl ring-1 ring-[#006b55]/10 shadow-[0_24px_70px_rgba(18,63,52,0.10)] md:px-8">
-              <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[26px] border-2 border-[#006b55] bg-[#fffaf5] text-[#006b55] md:h-24 md:w-24">
-                <MountainIcon size={48} strokeWidth={1.55} />
-              </span>
-              <span className="text-left text-[42px] font-semibold tracking-[-0.055em] leading-none text-[#006b55] sm:text-[58px] md:text-[76px]">
-                bayClub
+            <div className="animate-fade-up delay-1 mx-auto mt-8 flex max-w-[780px] items-center justify-center">
+              <span className="relative block w-full overflow-hidden rounded-[8px] bg-white/55 px-5 py-5 shadow-[0_24px_70px_rgba(18,63,52,0.12)] ring-1 ring-[#006b55]/10 backdrop-blur-xl md:px-8 md:py-7">
+                <Image
+                  src="/bayconnect.png"
+                  alt="bayConnect"
+                  width={2048}
+                  height={512}
+                  priority
+                  className="mx-auto h-auto w-full max-w-[680px]"
+                />
               </span>
             </div>
 
-            <h1 className="animate-fade-up delay-2 mt-8 text-[36px] font-semibold tracking-[-0.035em] leading-[1.05] text-[#123f34] sm:text-[48px] md:text-[64px]">
-              Turizm xizmatlarini topish endi ancha oson.
+            <h1 className="animate-fade-up delay-2 mx-auto mt-8 max-w-4xl text-[38px] font-black leading-[1.02] text-[#123f34] sm:text-[52px] md:text-[72px]">
+              O'zbekistonda sayohatni bog'laydigan zamonaviy marketplace.
             </h1>
 
-            <p className="animate-fade-up delay-3 mx-auto mt-5 max-w-2xl text-[17px] leading-relaxed text-[#5f6864] md:text-[20px]">
-              Gid, tarjimon, fotograf, transfer va mehmonxona xizmatlarini bitta joyda ko'ring.
-              Keraklisini tanlang, profilni tekshiring va to'g'ridan-to'g'ri zayavka yuboring.
+            <p className="animate-fade-up delay-3 mx-auto mt-5 max-w-2xl text-[17px] leading-relaxed text-[#506861] md:text-[20px]">
+              Gid, tarjimon, fotograf, transfer va mehmonxonalarni rangli, tez va ishonchli
+              platformada tanlang. Profilni ko'ring, narxni solishtiring va zayavkani bir necha soniyada yuboring.
             </p>
 
             <div className="animate-fade-up delay-4 mt-8 flex flex-wrap items-center justify-center gap-3">
               <Link href="/experts" className="btn-primary !px-7 !py-3.5 text-[15px]">
-                Mutaxassisni topish
+                Xizmat topish
               </Link>
               <a
                 href={PARTNER_URL}
@@ -115,7 +120,7 @@ export default async function HomePage() {
               </a>
             </div>
 
-            <div className="animate-fade-up delay-5 mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[13px] text-[#5f6864]">
+            <div className="animate-fade-up delay-5 mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[13px] font-medium text-[#506861]">
               <span className="inline-flex items-center gap-1.5">
                 <CheckIcon size={14} strokeWidth={2} className="text-[#006b55]" />
                 Tekshirilgan profillar
@@ -141,12 +146,12 @@ export default async function HomePage() {
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`animate-fade-up delay-${i + 1} identity-card group relative rounded-[24px] p-4 transition hover:-translate-y-1`}
+                    className={`animate-fade-up delay-${i + 1} identity-card group relative p-4 transition hover:-translate-y-1`}
                   >
                     <span className="absolute right-3 top-3 text-[#0717b8]">
                       <ExternalLinkIcon size={13} strokeWidth={2} />
                     </span>
-                    <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0717b8] text-white">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-[#0717b8] text-white">
                       <item.Icon size={22} />
                     </span>
                     <div className="mt-3 text-[15px] font-semibold tracking-tight text-[#123f34]">{item.title}</div>
@@ -156,9 +161,9 @@ export default async function HomePage() {
                   <Link
                     key={item.title}
                     href={item.href}
-                    className={`animate-fade-up delay-${i + 1} identity-card group rounded-[24px] p-4 transition hover:-translate-y-1`}
+                    className={`animate-fade-up delay-${i + 1} identity-card group p-4 transition hover:-translate-y-1`}
                   >
-                    <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#006b55] text-white">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-[#006b55] text-white">
                       <item.Icon size={22} />
                     </span>
                     <div className="mt-3 text-[15px] font-semibold tracking-tight text-[#123f34]">{item.title}</div>
@@ -173,17 +178,17 @@ export default async function HomePage() {
 
       {/* ABOUT */}
       <Section className="py-16">
-        <div className="rounded-[36px] border border-black/[0.06] bg-[#f5f5f7] p-8 md:p-14">
+        <div className="rounded-[8px] border border-[#006b55]/10 bg-[#fff7ef] p-8 shadow-[0_18px_60px_rgba(18,63,52,0.07)] md:p-14">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div>
               <div className="text-[12px] font-semibold tracking-[0.14em] uppercase text-[#006b55]">
-                bayClub haqida
+                bayConnect haqida
               </div>
               <h2 className="mt-4 text-[32px] md:text-[44px] font-semibold tracking-tight leading-[1.05]">
                 Sayohatni tashkillashtirishning eng oson yo'li.
               </h2>
               <p className="mt-5 text-[17px] leading-relaxed text-[#6e6e73]">
-                bayClub — bu O'zbekiston va Markaziy Osiyoning turizm mutaxassislarini bir
+                bayConnect — bu O'zbekiston va Markaziy Osiyoning turizm mutaxassislarini bir
                 platformada birlashtirgan marketplace. Bu yerda siz gid, tarjimon, fotograf,
                 transfer haydovchisi va mehmonxonalarni bir necha daqiqada topib bron
                 qilishingiz mumkin.
@@ -219,7 +224,7 @@ export default async function HomePage() {
       <Section className="py-16">
         <SectionHeading
           eyebrow="Xizmatlar"
-          title="bayClub'da nimalar bor?"
+          title="bayConnect'da nimalar bor?"
           subtitle="Sayohatingiz uchun kerak bo'lgan har bir xizmat — bir platformada."
         />
 
@@ -259,14 +264,14 @@ export default async function HomePage() {
               <Link
                 key={c.key}
                 href={`/experts?category=${c.key}`}
-                className="group relative overflow-hidden rounded-[28px] border border-black/[0.06] bg-white p-5 md:p-6 card-lift"
+                className="group relative overflow-hidden rounded-[8px] border border-[#006b55]/10 bg-white p-5 md:p-6 card-lift"
               >
                 <div
                   className="absolute -right-8 -top-8 w-28 h-28 rounded-full opacity-20 blur-2xl transition group-hover:opacity-40"
                   style={{ background: c.color === "dark" ? "#123f34" : c.color === "blue" ? "#0717b8" : "#ff6b4a" }}
                 />
                 <div
-                  className="relative w-12 h-12 rounded-2xl flex items-center justify-center text-white"
+                  className="relative w-12 h-12 rounded-[8px] flex items-center justify-center text-white"
                   style={{ background: categoryGradient(c.color) }}
                 >
                   <Icon size={24} strokeWidth={1.8} />
@@ -300,9 +305,9 @@ export default async function HomePage() {
             <Link
               key={t.key}
               href={`/transfer?type=${t.key}`}
-              className="group rounded-[24px] border border-black/[0.06] bg-white p-5 card-lift text-center"
+              className="group rounded-[8px] border border-[#006b55]/10 bg-white p-5 card-lift text-center"
             >
-              <span className="mx-auto flex items-center justify-center w-14 h-14 rounded-2xl bg-[#eef1ff] text-[#0717b8]">
+              <span className="mx-auto flex items-center justify-center w-14 h-14 rounded-[8px] bg-[#eef1ff] text-[#0717b8]">
                 <TransferTypeIcon type={t.key} size={28} />
               </span>
               <div className="mt-4 text-[15px] font-semibold tracking-tight">{t.label}</div>
@@ -323,12 +328,12 @@ export default async function HomePage() {
           href={PARTNER_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="group relative overflow-hidden rounded-[36px] bg-gradient-to-br from-[#0717b8] via-[#0d2097] to-[#123f34] text-white p-8 md:p-14 block"
+          className="group relative overflow-hidden rounded-[8px] bg-gradient-to-br from-[#0717b8] via-[#0d2097] to-[#123f34] text-white p-8 md:p-14 block"
         >
           <div className="absolute -top-20 -right-16 w-72 h-72 rounded-full bg-[#ffc400]/20 blur-3xl" />
           <div className="absolute -bottom-24 -left-10 w-72 h-72 rounded-full bg-[#ff6b4a]/18 blur-3xl" />
           <div className="relative grid md:grid-cols-[auto_1.4fr_auto] gap-8 items-center">
-            <span className="hidden md:flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 text-white">
+            <span className="hidden md:flex items-center justify-center w-16 h-16 rounded-[8px] bg-white/10 text-white">
               <HandshakeIcon size={32} strokeWidth={1.6} />
             </span>
             <div>
@@ -340,7 +345,7 @@ export default async function HomePage() {
               </h2>
               <p className="mt-3 text-[16px] text-white/80 max-w-xl">
                 Ipak Yo'li, tog' sarguzashtlari va boshqa marshrutlar bo'yicha tayyor
-                paketlarni bayClub emas, hamkorimiz {PARTNER_NAME} platformasi taqdim etadi.
+                paketlarni bayConnect emas, hamkorimiz {PARTNER_NAME} platformasi taqdim etadi.
               </p>
             </div>
             <span className="shrink-0 inline-flex items-center gap-2 rounded-full bg-white text-[#123f34] px-6 py-3.5 text-[14px] font-semibold group-hover:bg-[#ffc400] group-hover:text-[#123f34] transition">
@@ -371,7 +376,7 @@ export default async function HomePage() {
       </Section>
 
       {/* HOW IT WORKS */}
-      <section className="mt-16 py-20 bg-[#f5f5f7]">
+      <section className="mt-16 border-y border-[#006b55]/10 bg-[#f8eee5] py-20">
         <div className="mx-auto max-w-6xl px-5">
           <SectionHeading
             align="center"
@@ -386,7 +391,7 @@ export default async function HomePage() {
               { step: "02", title: "Tekshiring", desc: "Reyting, sharhlar, tillar va tajribani bir qarashda ko'ring." },
               { step: "03", title: "Bron qiling", desc: "Zayavka yuboring — mutaxassis tez orada siz bilan bog'lanadi." },
             ].map((item) => (
-              <div key={item.step} className="rounded-[28px] bg-white border border-black/[0.05] p-7 apple-shadow">
+              <div key={item.step} className="rounded-[8px] bg-white border border-[#006b55]/10 p-7 apple-shadow">
                 <div className="text-[13px] font-semibold tracking-[0.14em] text-[#006b55]">
                   {item.step}
                 </div>
@@ -400,7 +405,7 @@ export default async function HomePage() {
 
       {/* CTA */}
       <Section className="py-16">
-        <div className="relative overflow-hidden rounded-[36px] bg-gradient-to-br from-[#006b55] via-[#0b5e4d] to-[#123f34] text-white p-8 md:p-14">
+        <div className="relative overflow-hidden rounded-[8px] bg-gradient-to-br from-[#006b55] via-[#0b5e4d] to-[#123f34] text-white p-8 md:p-14">
           <div className="absolute -top-20 -right-16 w-72 h-72 rounded-full bg-white/15 blur-3xl" />
           <div className="absolute -bottom-24 -left-10 w-72 h-72 rounded-full bg-black/10 blur-3xl" />
           <div className="relative grid md:grid-cols-[1.4fr_auto] gap-8 items-center">
@@ -412,7 +417,7 @@ export default async function HomePage() {
                 Turizm sohasida ishlaysizmi?
               </h2>
               <p className="mt-3 text-[17px] text-white/85 max-w-xl">
-                bayClub'ga qo'shiling va yangi mijozlar oqimini oching. Ro'yxatga olish bepul.
+                bayConnect'ga qo'shiling va yangi mijozlar oqimini oching. Ro'yxatga olish bepul.
               </p>
             </div>
             <Link
@@ -438,8 +443,8 @@ function StatCard({
   label: string;
 }) {
   return (
-    <div className="rounded-[24px] bg-white border border-black/[0.05] p-5 apple-shadow">
-      <span className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#eaf4ef] text-[#006b55]">
+    <div className="rounded-[8px] bg-white border border-[#006b55]/10 p-5 apple-shadow">
+      <span className="flex items-center justify-center w-11 h-11 rounded-[8px] bg-[#eaf4ef] text-[#006b55]">
         <Icon size={22} />
       </span>
       <div className="mt-3 text-[32px] font-semibold tracking-tight">{value}</div>
@@ -452,14 +457,16 @@ function FloatingBubble({
   className,
   tone,
   Icon,
+  shape = "soft",
 }: {
   className: string;
   tone: "blue" | "yellow";
   Icon: (p: { size?: number; strokeWidth?: number }) => React.JSX.Element;
+  shape?: "soft" | "tail";
 }) {
   return (
     <div
-      className={`identity-bubble animate-float absolute z-10 h-24 w-24 items-center justify-center rounded-[34px] ${className}`}
+      className={`identity-bubble ${shape === "tail" ? "identity-bubble-tail" : ""} animate-float absolute z-10 h-24 w-24 items-center justify-center rounded-[8px] ${className}`}
       style={{ color: tone === "blue" ? "#0717b8" : "#006b55", background: tone === "yellow" ? "rgba(255,196,0,0.22)" : "rgba(255,255,255,0.62)" }}
     >
       <Icon size={42} strokeWidth={1.55} />
@@ -497,7 +504,7 @@ function ServiceBigCard({
         </span>
       ) : null}
       <div
-        className="relative w-14 h-14 rounded-2xl flex items-center justify-center text-white"
+        className="relative w-14 h-14 rounded-[8px] flex items-center justify-center text-white"
         style={{ background: categoryGradient(color) }}
       >
         <Icon size={28} strokeWidth={1.8} />
@@ -518,7 +525,7 @@ function ServiceBigCard({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="group relative overflow-hidden rounded-[28px] border border-black/[0.06] bg-white p-6 md:p-7 card-lift block"
+        className="group relative overflow-hidden rounded-[8px] border border-[#006b55]/10 bg-white p-6 md:p-7 card-lift block"
       >
         {inner}
       </a>
@@ -528,7 +535,7 @@ function ServiceBigCard({
   return (
     <Link
       href={href}
-      className="group relative overflow-hidden rounded-[28px] border border-black/[0.06] bg-white p-6 md:p-7 card-lift"
+      className="group relative overflow-hidden rounded-[8px] border border-[#006b55]/10 bg-white p-6 md:p-7 card-lift"
     >
       {inner}
     </Link>

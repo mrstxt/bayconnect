@@ -3,15 +3,16 @@
 @theme {
   --font-sans: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont,
     "Segoe UI", "Inter", system-ui, sans-serif;
-  --color-bay-orange: #ff6b4a;
-  --color-bay-orange-dark: #e05235;
+  --color-bay-coral: #ff6b4a;
+  --color-bay-coral-dark: #e05235;
   --color-bay-yellow: #ffc400;
   --color-bay-blue: #0717b8;
   --color-bay-green: #006b55;
-  --color-bay-cream: #f7ede4;
+  --color-bay-green-dark: #005a48;
+  --color-bay-cream: #f8eee5;
   --color-bay-ink: #123f34;
   --color-bay-muted: #7b827f;
-  --color-bay-surface: #f7f2ed;
+  --color-bay-surface: #fff7ef;
   --color-bay-line: rgba(0, 0, 0, 0.08);
 }
 
@@ -25,7 +26,7 @@ html {
 body {
   font-family: var(--font-sans);
   color: var(--color-bay-ink);
-  background: #fffaf5;
+  background: #fff7ef;
 }
 
 ::selection {
@@ -147,12 +148,12 @@ body {
 /* Form controls */
 .input-apple {
   width: 100%;
-  border-radius: 14px;
+  border-radius: 8px;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  background: #f5f5f7;
+  background: #fff7ef;
   padding: 0.8rem 1rem;
   font-size: 0.95rem;
-  color: #1d1d1f;
+  color: #123f34;
   transition:
     border-color 0.2s ease,
     background 0.2s ease,
@@ -184,11 +185,11 @@ body {
     transform 0.2s ease,
     background 0.2s ease,
     box-shadow 0.2s ease;
-  box-shadow: 0 12px 28px rgba(0, 107, 85, 0.22);
+  box-shadow: 0 14px 30px rgba(0, 107, 85, 0.24);
 }
 
 .btn-primary:hover {
-  background: #005541;
+  background: #005a48;
   transform: scale(1.02);
 }
 
@@ -208,7 +209,7 @@ body {
   justify-content: center;
   gap: 0.5rem;
   border-radius: 980px;
-  background: #1d1d1f;
+  background: #0717b8;
   color: white;
   font-weight: 600;
   padding: 0.85rem 1.5rem;
@@ -218,7 +219,7 @@ body {
 }
 
 .btn-secondary:hover {
-  background: #000;
+  background: #06139d;
   transform: scale(1.02);
 }
 
@@ -228,8 +229,8 @@ body {
   justify-content: center;
   gap: 0.5rem;
   border-radius: 980px;
-  background: rgba(0, 0, 0, 0.05);
-  color: #1d1d1f;
+  background: rgba(0, 107, 85, 0.08);
+  color: #123f34;
   font-weight: 600;
   padding: 0.85rem 1.5rem;
   transition:
@@ -258,7 +259,7 @@ body {
 
 /* Gradient text */
 .text-gradient {
-  background: linear-gradient(135deg, #1d1d1f 0%, #434344 50%, #ff8a00 100%);
+  background: linear-gradient(135deg, #006b55 0%, #123f34 46%, #0717b8 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -274,33 +275,42 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* bayConnect/bayClub identity inspired hero */
+/* bayConnect identity inspired hero */
 .identity-hero {
   background:
-    radial-gradient(circle at 18% 18%, rgba(255, 196, 0, 0.18), transparent 18rem),
+    radial-gradient(circle at 18% 18%, rgba(255, 196, 0, 0.16), transparent 17rem),
     radial-gradient(circle at 84% 20%, rgba(7, 23, 184, 0.08), transparent 22rem),
-    linear-gradient(180deg, #f8eee5 0%, #fffaf5 78%);
+    radial-gradient(circle at 45% 45%, rgba(255, 107, 74, 0.08), transparent 18rem),
+    linear-gradient(180deg, #f8eee5 0%, #fff7ef 82%);
 }
 
 .identity-mountain {
   position: absolute;
-  inset: auto -6% -18% 20%;
+  inset: auto -8% -15% 25%;
   width: 88%;
   height: 78%;
-  opacity: 0.34;
-  background: #e8dcda;
-  clip-path: polygon(0 100%, 20% 56%, 32% 80%, 55% 28%, 67% 62%, 78% 18%, 100% 100%);
+  opacity: 0.46;
+  background: #e4d8d7;
+  clip-path: polygon(0 100%, 19% 58%, 31% 79%, 54% 25%, 67% 63%, 79% 20%, 100% 100%);
   filter: blur(0.2px);
+}
+
+.identity-mountain-back {
+  inset: 13% 7% auto auto;
+  width: 50%;
+  height: 48%;
+  opacity: 0.22;
+  transform: scaleX(-1);
 }
 
 .identity-river {
   position: absolute;
-  left: 7%;
-  bottom: -18%;
+  left: 6%;
+  bottom: -19%;
   width: 36%;
   height: 62%;
-  opacity: 0.35;
-  background: #ded2d2;
+  opacity: 0.34;
+  background: #ddd0cf;
   border-radius: 999px 999px 0 0;
   transform: rotate(34deg);
 }
@@ -337,14 +347,27 @@ body {
   box-shadow: 0 18px 50px rgba(18, 63, 52, 0.08);
 }
 
+.identity-bubble-tail::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  bottom: -10px;
+  width: 22px;
+  height: 22px;
+  background: inherit;
+  clip-path: polygon(0 0, 100% 0, 18% 100%);
+}
+
 .identity-card {
   background: rgba(255, 255, 255, 0.82);
+  border-radius: 8px;
   border: 1px solid rgba(0, 107, 85, 0.08);
   box-shadow: 0 14px 42px rgba(18, 63, 52, 0.08);
 }
 
 .card-compact {
   background: rgba(255, 255, 255, 0.94);
+  border-radius: 8px;
   border: 1px solid rgba(18, 63, 52, 0.08);
   box-shadow: 0 10px 28px rgba(18, 63, 52, 0.06);
 }
