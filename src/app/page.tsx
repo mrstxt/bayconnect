@@ -100,9 +100,9 @@ export default async function HomePage() {
               Gidlar, transfer va sayohat xizmatlari bir joyda
             </div>
 
-            <h1 className="hero-title-shield animate-fade-up delay-2 mx-auto mt-8 max-w-4xl text-[40px] font-black leading-[1.03] tracking-[-0.02em] text-[#123f34] sm:text-[54px] md:text-[74px]">
+            <h1 className="hero-title-clean animate-fade-up delay-2 mx-auto mt-8 max-w-4xl text-[40px] font-black leading-[1.03] text-[#123f34] sm:text-[54px] md:text-[74px]">
               O'zbekistonda sayohatni{" "}
-              <span className="text-gradient">oson qiladigan</span>{" "}
+              <span className="hero-title-accent">oson qiladigan</span>{" "}
               zamonaviy marketplace.
             </h1>
 
@@ -176,11 +176,11 @@ export default async function HomePage() {
                     style={{ animationDelay: `${0.4 + (i + 1) * 0.08}s` }}
                     className="quick-access-card quick-access-card-partner animate-fade-up group p-4"
                   >
-                    <span className="absolute right-3 top-3 rounded-full bg-[#1264f1]/10 p-1 text-[#1264f1] ring-1 ring-[#1264f1]/10">
+                    <span className="absolute right-3 top-3 rounded-full bg-[#eef3ff] p-1 text-[#1264f1]">
                       <ExternalLinkIcon size={13} strokeWidth={2} />
                     </span>
                     <span
-                      className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1264f1]/10 text-[#1264f1] ring-1 ring-[#1264f1]/10"
+                      className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef3ff] text-[#1264f1]"
                     >
                       <item.Icon size={22} />
                     </span>
@@ -195,8 +195,7 @@ export default async function HomePage() {
                     className="quick-access-card animate-fade-up group p-4"
                   >
                     <span
-                      className="flex h-11 w-11 items-center justify-center rounded-2xl text-white"
-                      style={{ background: "linear-gradient(135deg,#0b8267,#006b55)" }}
+                      className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef8f5] text-[#006b55]"
                     >
                       <item.Icon size={22} />
                     </span>

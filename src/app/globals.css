@@ -642,13 +642,10 @@ body {
   position: relative;
   min-height: 146px;
   overflow: hidden;
-  border: 1px solid rgba(0, 107, 85, 0.1);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.94) inset,
-    0 14px 34px rgba(12, 43, 35, 0.07);
-  backdrop-filter: blur(12px);
+  border: 1px solid rgba(18, 63, 52, 0.09);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: none;
   transition:
     transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
     border-color 0.24s ease,
@@ -660,23 +657,16 @@ body {
   transform: translateY(-4px);
   border-color: rgba(0, 107, 85, 0.22);
   background: #ffffff;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.96) inset,
-    0 20px 48px rgba(12, 43, 35, 0.12);
+  box-shadow: 0 16px 34px rgba(12, 43, 35, 0.08);
 }
 
 .quick-access-card-partner {
   border-color: rgba(18, 100, 241, 0.16);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.94) inset,
-    0 14px 34px rgba(18, 100, 241, 0.08);
 }
 
 .quick-access-card-partner:hover {
   border-color: rgba(18, 100, 241, 0.28);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.96) inset,
-    0 20px 48px rgba(18, 100, 241, 0.14);
+  box-shadow: 0 16px 34px rgba(18, 100, 241, 0.1);
 }
 
 .service-card {
@@ -775,12 +765,13 @@ body {
     0 16px 34px rgba(0, 107, 85, 0.28);
 }
 
-.hero-title-shield {
-  position: relative;
-  border-radius: 30px;
-  padding: 0.06em 0.16em 0.12em;
-  background: radial-gradient(ellipse at center, rgba(253, 250, 246, 0.78), rgba(253, 250, 246, 0.28) 62%, transparent 76%);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.72);
+.hero-title-clean {
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.hero-title-accent {
+  color: #006b55;
 }
 
 /* Gradient matn */
@@ -1026,24 +1017,27 @@ body {
   justify-content: center;
   gap: 0.5rem;
   border-radius: 999px;
-  background: linear-gradient(180deg, #ffd83d 0%, #ffbd19 100%);
-  color: #17392e;
+  border: 1px solid rgba(18, 100, 241, 0.16);
+  background: #ffffff;
+  color: #1264f1;
   font-weight: 900;
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.55) inset,
-    0 18px 38px rgba(255, 189, 25, 0.28);
+    0 1px 0 rgba(255, 255, 255, 0.78) inset,
+    0 14px 32px rgba(18, 100, 241, 0.12);
   transition:
     transform 0.24s ease,
+    border-color 0.24s ease,
     box-shadow 0.24s ease,
-    filter 0.24s ease;
+    background 0.24s ease,
+    color 0.24s ease;
 }
 
 .baytrip-button:hover {
-  filter: brightness(1.03);
+  border-color: rgba(18, 100, 241, 0.28);
+  background: #1264f1;
+  color: #ffffff;
   transform: translateY(-2px);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.55) inset,
-    0 24px 48px rgba(255, 189, 25, 0.34);
+  box-shadow: 0 18px 42px rgba(18, 100, 241, 0.2);
 }
 
 .baytrip-mini-card,
