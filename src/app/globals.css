@@ -814,9 +814,7 @@ body {
    -------------------------------------------------------------------------- */
 .identity-hero {
   min-height: calc(100svh - 60px);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(253, 250, 246, 0.92) 72%, #fdfaf6),
-    linear-gradient(115deg, #f6f0e9 0%, #fff7ef 42%, #eef7f2 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdfc 58%, #ffffff 100%);
 }
 
 .silk-road-scene {

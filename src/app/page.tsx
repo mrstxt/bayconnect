@@ -72,27 +72,8 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* HERO — Silk Road visual */}
-      <section className="identity-hero noise relative overflow-hidden">
-        <div className="silk-road-scene" aria-hidden="true">
-          <div className="silk-road-sun" />
-          <div className="silk-road-mountain silk-road-mountain-back" />
-          <div className="silk-road-mountain silk-road-mountain-front" />
-          <div className="silk-road-path" />
-          <div className="silk-road-arch silk-road-arch-left" />
-          <div className="silk-road-arch silk-road-arch-right" />
-        </div>
-
-        <div className="dot-grid absolute inset-x-0 top-0 h-[560px]" />
-
-        <div className="identity-arc -right-20 top-28 hidden lg:block" />
-        <div className="identity-arc-coral -left-24 bottom-12 hidden lg:block" />
-
-        <FloatingBubble className="left-[5%] top-44 hidden md:flex" tone="blue" Icon={GlobeGridIcon} shape="tail" />
-        <FloatingBubble className="right-[8%] top-64 hidden lg:flex" tone="yellow" Icon={GuideIcon} />
-        <FloatingBubble className="left-[12%] bottom-28 hidden lg:flex" tone="yellow" Icon={TransferIcon} shape="tail" />
-        <FloatingBubble className="right-[6%] bottom-20 hidden xl:flex" tone="blue" Icon={BusIcon} />
-
+      {/* HERO */}
+      <section className="identity-hero relative overflow-hidden">
         <div className="relative z-20 mx-auto max-w-6xl px-5 pt-16 pb-20 md:pt-24 md:pb-28">
           <div className="mx-auto max-w-4xl text-center">
             <div className="animate-fade-up inline-flex items-center gap-2.5 rounded-full border border-[#006b55]/15 bg-white/75 px-4 py-2 text-[12px] font-bold text-[#006b55] shadow-[0_10px_30px_rgba(12,43,35,0.08)] backdrop-blur">
@@ -516,27 +497,6 @@ function StatCard({
       </span>
       <div className="mt-3 text-[32px] font-black tracking-tight">{value}</div>
       <div className="text-[13px] font-semibold text-[#7b827f]">{label}</div>
-    </div>
-  );
-}
-
-function FloatingBubble({
-  className,
-  tone,
-  Icon,
-  shape = "soft",
-}: {
-  className: string;
-  tone: "blue" | "yellow";
-  Icon: (p: { size?: number; strokeWidth?: number }) => React.JSX.Element;
-  shape?: "soft" | "tail";
-}) {
-  return (
-    <div
-      className={`identity-bubble ${shape === "tail" ? "identity-bubble-tail" : ""} animate-float pointer-events-none absolute z-[1] h-24 w-24 items-center justify-center rounded-[30px] ${className}`}
-      style={{ color: tone === "blue" ? "#0717b8" : "#006b55" }}
-    >
-      <Icon size={42} strokeWidth={1.55} />
     </div>
   );
 }
