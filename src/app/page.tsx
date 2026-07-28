@@ -25,6 +25,8 @@ import {
   BusIcon,
   GlobeGridIcon,
   PinIcon,
+  SearchIcon,
+  CompassIcon,
 } from "@/components/Icon";
 
 /**
@@ -52,7 +54,7 @@ export default async function HomePage() {
     { href: "/experts?category=guide", Icon: GuideIcon, title: "Gidlar", sub: "Tarix va madaniyat" },
     { href: "/transfer", Icon: CarIcon, title: "Transfer", sub: "Yengil avto → avtobus" },
     { href: "/hotels", Icon: HotelIcon, title: "Mehmonxonalar", sub: "Qulay joylashuv" },
-    { href: PARTNER_URL, Icon: TourAgentIcon, title: "Turlar", sub: PARTNER_NAME, external: true },
+    { href: PARTNER_URL, Icon: TourAgentIcon, title: "Turlar", sub: "Tur paketlar", external: true },
   ];
 
   const marqueeCities = [
@@ -83,13 +85,13 @@ export default async function HomePage() {
 
         <div className="dot-grid absolute inset-x-0 top-0 h-[560px]" />
 
-        <div className="identity-arc -right-20 top-16 hidden lg:block" />
-        <div className="identity-arc-coral -left-24 bottom-20 hidden lg:block" />
+        <div className="identity-arc -right-20 top-28 hidden lg:block" />
+        <div className="identity-arc-coral -left-24 bottom-12 hidden lg:block" />
 
-        <FloatingBubble className="left-[7%] top-24 hidden md:flex" tone="blue" Icon={GlobeGridIcon} shape="tail" />
-        <FloatingBubble className="right-[13%] top-40 hidden lg:flex" tone="yellow" Icon={GuideIcon} />
-        <FloatingBubble className="left-[16%] bottom-24 hidden lg:flex" tone="yellow" Icon={TransferIcon} shape="tail" />
-        <FloatingBubble className="right-[7%] bottom-32 hidden xl:flex" tone="blue" Icon={BusIcon} />
+        <FloatingBubble className="left-[5%] top-44 hidden md:flex" tone="blue" Icon={GlobeGridIcon} shape="tail" />
+        <FloatingBubble className="right-[8%] top-64 hidden lg:flex" tone="yellow" Icon={GuideIcon} />
+        <FloatingBubble className="left-[12%] bottom-28 hidden lg:flex" tone="yellow" Icon={TransferIcon} shape="tail" />
+        <FloatingBubble className="right-[6%] bottom-20 hidden xl:flex" tone="blue" Icon={BusIcon} />
 
         <div className="relative z-20 mx-auto max-w-6xl px-5 pt-16 pb-20 md:pt-24 md:pb-28">
           <div className="mx-auto max-w-4xl text-center">
@@ -98,9 +100,9 @@ export default async function HomePage() {
               Gidlar, transfer va sayohat xizmatlari bir joyda
             </div>
 
-            <h1 className="animate-fade-up delay-2 mx-auto mt-8 max-w-4xl text-[40px] font-black leading-[1.03] tracking-[-0.02em] text-[#123f34] sm:text-[54px] md:text-[74px]">
+            <h1 className="hero-title-shield animate-fade-up delay-2 mx-auto mt-8 max-w-4xl text-[40px] font-black leading-[1.03] tracking-[-0.02em] text-[#123f34] sm:text-[54px] md:text-[74px]">
               O'zbekistonda sayohatni{" "}
-              <span className="text-gradient">bog'laydigan</span>{" "}
+              <span className="text-gradient">oson qiladigan</span>{" "}
               zamonaviy marketplace.
             </h1>
 
@@ -122,6 +124,31 @@ export default async function HomePage() {
                 Tur paketlar — {PARTNER_NAME}
                 <ExternalLinkIcon size={15} strokeWidth={2} />
               </a>
+            </div>
+
+            <div className="hero-command-panel animate-fade-up delay-5 mx-auto mt-8 max-w-3xl">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center">
+                <div className="hero-command-input flex min-w-0 flex-1 items-center gap-3">
+                  <SearchIcon size={18} strokeWidth={2} className="shrink-0 text-[#006b55]" />
+                  <span className="truncate text-[14px] font-semibold text-[#123f34]/70">
+                    Qidiruv
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Link href="/experts?city=Samarqand" className="hero-command-chip">
+                    <CompassIcon size={14} strokeWidth={2} />
+                    Samarqand
+                  </Link>
+                  <Link href="/transfer" className="hero-command-chip">
+                    <TransferIcon size={14} strokeWidth={2} />
+                    Transfer
+                  </Link>
+                  <Link href="/hotels" className="hero-command-chip">
+                    <HotelIcon size={14} strokeWidth={2} />
+                    Mehmonxonalar
+                  </Link>
+                </div>
+              </div>
             </div>
 
             <div className="animate-fade-up delay-5 mt-9 flex flex-wrap items-center justify-center gap-x-6 gap-y-2.5 text-[13px] font-semibold text-[#123f34]/70">
@@ -147,25 +174,25 @@ export default async function HomePage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ animationDelay: `${0.4 + (i + 1) * 0.08}s` }}
-                    className="baytrip-mini-card animate-fade-up group relative p-4"
+                    className="quick-access-card quick-access-card-partner animate-fade-up group p-4"
                   >
-                    <span className="absolute right-3 top-3 rounded-full bg-white/14 p-1 text-[#f3c85a] ring-1 ring-white/15">
+                    <span className="absolute right-3 top-3 rounded-full bg-[#1264f1]/10 p-1 text-[#1264f1] ring-1 ring-[#1264f1]/10">
                       <ExternalLinkIcon size={13} strokeWidth={2} />
                     </span>
                     <span
-                      className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/12 text-[#f3c85a] ring-1 ring-white/18"
+                      className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1264f1]/10 text-[#1264f1] ring-1 ring-[#1264f1]/10"
                     >
                       <item.Icon size={22} />
                     </span>
-                    <div className="mt-3 text-[15px] font-black tracking-tight text-white">{item.title}</div>
-                    <div className="mt-0.5 text-[12px] font-semibold text-[#f3c85a]">bayTrip · {item.sub}</div>
+                    <div className="mt-3 text-[15px] font-black tracking-tight text-[#123f34]">{item.title}</div>
+                    <div className="mt-0.5 text-[12px] font-semibold text-[#1264f1]">{PARTNER_NAME} · {item.sub}</div>
                   </a>
                 ) : (
                   <Link
                     key={item.title}
                     href={item.href}
                     style={{ animationDelay: `${0.4 + (i + 1) * 0.08}s` }}
-                    className="animate-fade-up identity-card group p-4"
+                    className="quick-access-card animate-fade-up group p-4"
                   >
                     <span
                       className="flex h-11 w-11 items-center justify-center rounded-2xl text-white"

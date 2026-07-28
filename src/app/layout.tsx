@@ -4,7 +4,6 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ScrollTop } from "@/components/ScrollTop";
-import { AutoTranslator } from "@/components/LanguageTools";
 import { siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -12,7 +11,7 @@ export const metadata: Metadata = {
   // va ijtimoiy tarmoqlarda preview ishlamaydi.
   metadataBase: new URL(siteUrl()),
   title: {
-    default: "bayConnect — Sayohat xizmatlari bilan bog'lovchi platforma",
+    default: "bayConnect — Sayohat xizmatlarini birlashtiruvchi platforma",
     // Ichki sahifalar o'z sarlavhasini beradi, brend avtomatik qo'shiladi.
     template: "%s | bayConnect",
   },
@@ -80,7 +79,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </main>
         <Footer />
         <ScrollTop />
-        <AutoTranslator />
       </body>
     </html>
   );

@@ -4,10 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Logo } from "./Logo";
-import { NAV_ITEMS } from "@/lib/brand";
+import { NAV_ITEMS, PARTNER_URL } from "@/lib/brand";
 import { useFavoritesCount } from "@/lib/useFavorites";
 import { HeartIcon, ExternalLinkIcon } from "./Icon";
-import { LanguageSwitcher } from "./LanguageTools";
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
@@ -216,7 +215,6 @@ export function Header() {
         </nav>
 
         <div className="hidden lg:flex items-center gap-1">
-          <LanguageSwitcher />
           <FavoritesLink variant="desktop" />
           <Link
             href="/register"
@@ -224,10 +222,18 @@ export function Header() {
           >
             Hamkor bo'lish
           </Link>
+          <a
+            href={PARTNER_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="baytrip-nav-link ml-1 px-3.5 py-2 rounded-full text-[13px] font-bold transition inline-flex items-center gap-1"
+          >
+            Tur paketlar
+            <ExternalLinkIcon size={12} strokeWidth={2} />
+          </a>
         </div>
 
         <div className="flex items-center gap-1 lg:hidden">
-          <LanguageSwitcher />
           <FavoritesLink variant="desktop" />
           <button
             type="button"
@@ -288,6 +294,16 @@ export function Header() {
             >
               Hamkor bo'lish
             </Link>
+            <a
+              href={PARTNER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={closeMenu}
+              className="baytrip-nav-link mt-2 flex w-full items-center justify-center gap-1 rounded-full px-4 py-3 text-sm font-bold"
+            >
+              Tur paketlar
+              <ExternalLinkIcon size={13} strokeWidth={2} />
+            </a>
           </div>
         </div>
       </div>

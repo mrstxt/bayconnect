@@ -136,7 +136,6 @@ export const NAV_ITEMS = [
   { href: "/", label: "Bosh sahifa", external: false },
   { href: "/experts", label: "Mutaxassislar", external: false },
   { href: "/transfer", label: "Transfer", external: false },
-  { href: PARTNER_URL, label: "Hamkor", external: true },
   { href: "/hotels", label: "Mehmonxonalar", external: false },
   { href: "/blog", label: "Blog", external: false },
 ] as const;
