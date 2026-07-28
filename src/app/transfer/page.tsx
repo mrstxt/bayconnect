@@ -64,7 +64,7 @@ export default async function TransferPage({
         subtitle="Yengil avtodan avtobusgacha — sizga qulay transport turini tanlang."
       />
 
-      <div className="surface-apple mt-8 grid gap-3 p-4 sm:grid-cols-3">
+      <div className="metric-panel mt-8 grid gap-3 p-4 sm:grid-cols-3">
         <PanelStat value={String(total)} label="Transport" />
         <PanelStat value={activeType ? transferLabel(activeType) : "Barchasi"} label="Tur" />
         <PanelStat value={city || "Hamma"} label="Shahar" />
@@ -199,7 +199,7 @@ export default async function TransferPage({
 
 function PanelStat({ value, label }: { value: string; label: string }) {
   return (
-    <div className="rounded-2xl bg-white/72 px-4 py-3 ring-1 ring-[#006b55]/10">
+    <div className="metric-card px-4 py-3">
       <div className="text-[20px] font-semibold tracking-tight text-[#123f34]">{value}</div>
       <div className="mt-0.5 text-[12px] font-medium text-[#7b827f]">{label}</div>
     </div>
@@ -222,10 +222,10 @@ function TypeCard({
   return (
     <Link
       href={href}
-      className={`rounded-[22px] border p-5 text-center transition apple-shadow ${
+      className={`transport-type-card p-5 text-center ${
         active
-          ? "border-[#006b55] bg-[#006b55] text-white"
-          : "border-[#006b55]/10 bg-white/85 text-[#123f34] hover:border-[#006b55]/30 hover:-translate-y-0.5"
+          ? "transport-type-card-active text-white"
+          : "text-[#123f34]"
       }`}
     >
       <span

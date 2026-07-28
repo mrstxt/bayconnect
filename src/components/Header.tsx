@@ -34,9 +34,13 @@ function NavLink({
       ? "bg-white text-[#006b55] shadow-sm ring-1 ring-[#006b55]/10"
       : "text-[#123f34]/75 hover:text-[#006b55] hover:bg-white/60"
   }`;
+  const partnerDesktopCls =
+    "baytrip-nav-link px-3.5 py-2 rounded-full text-[13px] font-bold transition inline-flex items-center gap-1";
   const mobileCls = `px-3 py-3 rounded-2xl text-[15px] font-medium transition flex items-center justify-between ${
     active ? "bg-[#eaf4ef] text-[#006b55]" : "text-[#123f34] hover:bg-[#123f34]/[0.04]"
   }`;
+  const partnerMobileCls =
+    "baytrip-nav-link px-3 py-3 rounded-2xl text-[15px] font-bold transition flex items-center justify-between";
 
   const content = (
     <span
@@ -56,12 +60,12 @@ function NavLink({
         target="_blank"
         rel="noopener noreferrer"
         onClick={onNavigate}
-        className={variant === "desktop" ? desktopCls : mobileCls}
+        className={variant === "desktop" ? partnerDesktopCls : partnerMobileCls}
       >
         {content}
         {variant === "mobile" ? (
-          <span className="text-[10px] font-semibold text-[#0717b8] bg-[#eef1ff] px-2 py-0.5 rounded-full">
-            Hamkor
+          <span className="rounded-full bg-[#f3c85a] px-2 py-0.5 text-[10px] font-black text-[#17392e]">
+            bayTrip
           </span>
         ) : null}
       </a>

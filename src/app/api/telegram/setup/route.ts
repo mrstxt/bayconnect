@@ -6,6 +6,16 @@ export const dynamic = "force-dynamic";
 
 const API = "https://api.telegram.org";
 
+async function telegramApi<T>(token: string, method: string, body?: Record<string, unknown>) {
+  const response = await fetch(`${API}/bot${token}/${method}`, {
+    method: body ? "POST" : "GET",
+    headers: body ? { "content-type": "application/json" } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const result = (await response.json().catch(() => null)) as T;
+  return { ok: response.ok, result };
+}
+
 export async function GET(req: Request) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const secret = process.env.TELEGRAM_WEBHOOK_SECRET;
@@ -23,23 +33,33 @@ export async function GET(req: Request) {
   }
 
   const webhookUrl = `${siteUrl().replace(/\/$/, "")}/api/telegram/webhook`;
-  const response = await fetch(`${API}/bot${token}/setWebhook`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
+  const [me, commands, webhook] = await Promise.all([
+    telegramApi(token, "getMe"),
+    telegramApi(token, "setMyCommands", {
+      commands: [
+        { command: "start", description: "Ro'yxatdan o'tishni boshlash" },
+        { command: "register", description: "Mutaxassis sifatida ro'yxatdan o'tish" },
+      ],
+    }),
+    telegramApi(token, "setWebhook", {
       url: webhookUrl,
       secret_token: secret,
       allowed_updates: ["message", "callback_query"],
+      drop_pending_updates: false,
     }),
-  });
+  ]);
 
-  const result = (await response.json().catch(() => null)) as unknown;
+  const info = await telegramApi(token, "getWebhookInfo");
+
   return NextResponse.json(
     {
-      ok: response.ok,
+      ok: webhook.ok,
       webhookUrl,
-      telegram: result,
+      bot: me.result,
+      commands: commands.result,
+      webhook: webhook.result,
+      webhookInfo: info.result,
     },
-    { status: response.ok ? 200 : 502 },
+    { status: webhook.ok ? 200 : 502 },
   );
 }

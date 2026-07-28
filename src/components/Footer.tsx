@@ -20,15 +20,15 @@ export function Footer() {
           href={PARTNER_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="group mb-14 flex flex-col items-start justify-between gap-4 rounded-[28px] bg-white/[0.06] p-6 ring-1 ring-white/10 backdrop-blur transition hover:bg-white/[0.09] sm:flex-row sm:items-center md:p-8"
+          className="baytrip-footer-card group mb-14 flex flex-col items-start justify-between gap-4 p-6 sm:flex-row sm:items-center md:p-8"
         >
           <div className="flex items-start gap-4">
-            <span className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white ring-1 ring-white/15 sm:flex">
+            <span className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/12 text-[#f3c85a] ring-1 ring-white/18 sm:flex">
               <HandshakeIcon size={24} strokeWidth={1.6} />
             </span>
             <div>
-              <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/50">
-                Hamkorimiz
+              <div className="inline-flex rounded-full bg-[#f3c85a] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#17392e]">
+                bayTrip
               </div>
               <h3 className="mt-1.5 text-[21px] font-semibold tracking-tight md:text-[25px]">
                 Tayyor tur paketlarini {PARTNER_NAME} saytida ko'ring
@@ -39,7 +39,7 @@ export function Footer() {
               </p>
             </div>
           </div>
-          <span className="inline-flex shrink-0 items-center gap-2 rounded-full bg-white px-5 py-3 text-[14px] font-semibold text-[#123f34] transition group-hover:bg-[#ffc400]">
+          <span className="baytrip-button shrink-0 !px-5 !py-3 text-[14px]">
             {PARTNER_NAME}.vercel.app
             <ExternalLinkIcon size={15} strokeWidth={2} />
           </span>
@@ -104,7 +104,7 @@ export function Footer() {
                   href={PARTNER_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`inline-flex items-center gap-1 ${linkCls}`}
+                  className="baytrip-footer-link inline-flex items-center gap-1"
                 >
                   Turlar ({PARTNER_NAME})
                   <ExternalLinkIcon size={12} strokeWidth={2} />

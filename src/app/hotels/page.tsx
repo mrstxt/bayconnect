@@ -68,7 +68,7 @@ export default async function HotelsPage({
         subtitle="Butik mehmonxonalardan zamonaviy 4* mehmonxonalargacha — sizga qulay joyni tanlang."
       />
 
-      <div className="surface-apple mt-8 grid gap-3 p-4 sm:grid-cols-3">
+      <div className="metric-panel mt-8 grid gap-3 p-4 sm:grid-cols-3">
         <PanelStat value={String(total)} label="Mehmonxona" />
         <PanelStat value={city || "Hamma"} label="Shahar" />
         <PanelStat value={SORT_LABELS[sort] ?? "Reyting"} label="Saralash" />
@@ -180,7 +180,7 @@ export default async function HotelsPage({
 
 function PanelStat({ value, label }: { value: string; label: string }) {
   return (
-    <div className="rounded-2xl bg-white/72 px-4 py-3 ring-1 ring-[#006b55]/10">
+    <div className="metric-card px-4 py-3">
       <div className="text-[20px] font-semibold tracking-tight text-[#123f34]">{value}</div>
       <div className="mt-0.5 text-[12px] font-medium text-[#7b827f]">{label}</div>
     </div>

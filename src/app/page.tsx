@@ -117,7 +117,7 @@ export default async function HomePage() {
                 href={PARTNER_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-ghost !px-7 !py-4 text-[15px]"
+                className="baytrip-button !px-7 !py-4 text-[15px]"
               >
                 Tur paketlar — {PARTNER_NAME}
                 <ExternalLinkIcon size={15} strokeWidth={2} />
@@ -147,26 +147,25 @@ export default async function HomePage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ animationDelay: `${0.4 + (i + 1) * 0.08}s` }}
-                    className="animate-fade-up identity-card group relative p-4 transition duration-300 hover:-translate-y-1.5 hover:shadow-[0_24px_56px_rgba(12,43,35,0.13)]"
+                    className="baytrip-mini-card animate-fade-up group relative p-4"
                   >
-                    <span className="absolute right-3 top-3 text-[#0717b8]">
+                    <span className="absolute right-3 top-3 rounded-full bg-white/14 p-1 text-[#f3c85a] ring-1 ring-white/15">
                       <ExternalLinkIcon size={13} strokeWidth={2} />
                     </span>
                     <span
-                      className="flex h-11 w-11 items-center justify-center rounded-2xl text-white"
-                      style={{ background: "linear-gradient(135deg,#3d5bff,#0717b8)" }}
+                      className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/12 text-[#f3c85a] ring-1 ring-white/18"
                     >
                       <item.Icon size={22} />
                     </span>
-                    <div className="mt-3 text-[15px] font-semibold tracking-tight text-[#123f34]">{item.title}</div>
-                    <div className="mt-0.5 text-[12px] text-[#7b827f]">Hamkor · {item.sub}</div>
+                    <div className="mt-3 text-[15px] font-black tracking-tight text-white">{item.title}</div>
+                    <div className="mt-0.5 text-[12px] font-semibold text-[#f3c85a]">bayTrip · {item.sub}</div>
                   </a>
                 ) : (
                   <Link
                     key={item.title}
                     href={item.href}
                     style={{ animationDelay: `${0.4 + (i + 1) * 0.08}s` }}
-                    className="animate-fade-up identity-card group p-4 transition duration-300 hover:-translate-y-1.5 hover:shadow-[0_24px_56px_rgba(12,43,35,0.13)]"
+                    className="animate-fade-up identity-card group p-4"
                   >
                     <span
                       className="flex h-11 w-11 items-center justify-center rounded-2xl text-white"
@@ -290,7 +289,7 @@ export default async function HomePage() {
               <Link
                 key={c.key}
                 href={`/experts?category=${c.key}`}
-                className="surface-apple group relative overflow-hidden p-5 md:p-6 card-lift"
+                className="category-card group relative overflow-hidden p-5 md:p-6"
               >
                 <div
                   className="absolute -right-8 -top-8 w-28 h-28 rounded-full opacity-20 blur-2xl transition group-hover:opacity-40"
@@ -331,7 +330,7 @@ export default async function HomePage() {
             <Link
               key={t.key}
               href={`/transfer?type=${t.key}`}
-              className="surface-apple group p-5 card-lift text-center"
+              className="transport-card group p-5 text-center"
             >
               <span className="mx-auto flex items-center justify-center w-14 h-14 rounded-2xl bg-[#eef1ff] text-[#0717b8] transition duration-300 group-hover:scale-110">
                 <TransferTypeIcon type={t.key} size={28} />
@@ -354,16 +353,14 @@ export default async function HomePage() {
           href={PARTNER_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="dark-panel group relative block overflow-hidden rounded-[32px] p-8 text-white apple-shadow-lg md:p-14"
+          className="baytrip-feature group relative block overflow-hidden p-8 text-white apple-shadow-lg md:p-14"
         >
-          <div className="dot-grid-light" />
-          <div className="relative grid items-center gap-8 md:grid-cols-[auto_1.4fr_auto]">
-            <span className="hidden h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-white ring-1 ring-white/15 md:flex">
-              <HandshakeIcon size={32} strokeWidth={1.6} />
-            </span>
+          <div className="baytrip-grid" />
+          <div className="baytrip-route-line" />
+          <div className="relative grid items-center gap-8 lg:grid-cols-[1.05fr_0.95fr]">
             <div>
-              <div className="inline-flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.14em] text-white/60">
-                Rasmiy hamkorimiz
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-[#f3c85a] px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#17392e]">
+                Rasmiy hamkor · bayTrip
               </div>
               <h2 className="mt-3 text-[30px] font-semibold leading-[1.05] tracking-tight md:text-[40px]">
                 Tayyor tur paketlari uchun {PARTNER_NAME}'ga tashrif buyuring
@@ -372,11 +369,34 @@ export default async function HomePage() {
                 Ipak Yo'li, tog' sarguzashtlari va boshqa marshrutlar bo'yicha tayyor
                 paketlarni bayConnect emas, hamkorimiz {PARTNER_NAME} platformasi taqdim etadi.
               </p>
+              <span className="baytrip-button mt-7 !px-6 !py-3.5 text-[14px]">
+                Turlarni ko'rish
+                <ExternalLinkIcon size={15} strokeWidth={2} />
+              </span>
             </div>
-            <span className="inline-flex shrink-0 items-center gap-2 rounded-full bg-white px-6 py-3.5 text-[14px] font-semibold text-[#123f34] shadow-lg transition group-hover:bg-[#ffc400]">
-              {PARTNER_NAME}.vercel.app
-              <ExternalLinkIcon size={15} strokeWidth={2} />
-            </span>
+            <div className="baytrip-orbit hidden min-h-[260px] lg:block" aria-hidden="true">
+              <span className="baytrip-orbit-dot baytrip-orbit-dot-main">
+                <TransferIcon size={44} strokeWidth={1.75} />
+              </span>
+              <span className="baytrip-orbit-dot baytrip-orbit-dot-yellow">
+                <HotelIcon size={30} strokeWidth={1.8} />
+              </span>
+              <span className="baytrip-orbit-dot baytrip-orbit-dot-orange">
+                <PhotographerIcon size={24} strokeWidth={2} />
+              </span>
+              <span className="baytrip-chip baytrip-chip-one">
+                <TransferIcon size={19} strokeWidth={2} />
+                <span><b>Aviachiptalar</b><small>qulay reyslar</small></span>
+              </span>
+              <span className="baytrip-chip baytrip-chip-two">
+                <HotelIcon size={19} strokeWidth={2} />
+                <span><b>Mehmonxona</b><small>tekshirilgan joylar</small></span>
+              </span>
+              <span className="baytrip-chip baytrip-chip-three">
+                <CarIcon size={19} strokeWidth={2} />
+                <span><b>Transfer</b><small>kutib olish</small></span>
+              </span>
+            </div>
           </div>
         </a>
       </Section>
@@ -416,7 +436,7 @@ export default async function HomePage() {
               { step: "02", title: "Tekshiring", desc: "Reyting, sharhlar, tillar va tajribani bir qarashda ko'ring." },
               { step: "03", title: "Bron qiling", desc: "Zayavka yuboring — mutaxassis tez orada siz bilan bog'lanadi." },
             ].map((item) => (
-              <div key={item.step} className="surface-apple group p-7 card-lift">
+              <div key={item.step} className="process-card group p-7">
                 <div className="inline-flex rounded-full bg-[#eaf4ef] px-3 py-1.5 text-[13px] font-bold tracking-[0.14em] text-[#006b55]">
                   {item.step}
                 </div>
@@ -464,12 +484,12 @@ function StatCard({
   label: string;
 }) {
   return (
-    <div className="surface-apple p-5">
-      <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eaf4ef] text-[#006b55]">
+    <div className="stat-card p-5">
+      <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eaf4ef] text-[#006b55] shadow-sm ring-1 ring-[#006b55]/10">
         <Icon size={22} />
       </span>
-      <div className="mt-3 text-[32px] font-semibold tracking-tight">{value}</div>
-      <div className="text-[13px] text-[#7b827f]">{label}</div>
+      <div className="mt-3 text-[32px] font-black tracking-tight">{value}</div>
+      <div className="text-[13px] font-semibold text-[#7b827f]">{label}</div>
     </div>
   );
 }
@@ -520,21 +540,29 @@ function ServiceBigCard({
         }}
       />
       {external ? (
-        <span className="absolute right-5 top-5 inline-flex items-center gap-1 rounded-full bg-[#eef1ff] px-2 py-1 text-[10px] font-bold text-[#0717b8]">
-          Hamkor <ExternalLinkIcon size={10} strokeWidth={2.2} />
+        <span className="absolute right-5 top-5 inline-flex items-center gap-1 rounded-full bg-[#f3c85a] px-2.5 py-1 text-[10px] font-black text-[#17392e]">
+          bayTrip <ExternalLinkIcon size={10} strokeWidth={2.2} />
         </span>
       ) : null}
       <div
-        className="relative flex h-14 w-14 items-center justify-center rounded-2xl text-white"
-        style={{ background: categoryGradient(color) }}
+        className={`relative flex h-14 w-14 items-center justify-center rounded-2xl text-white ${
+          external ? "bg-white/12 text-[#f3c85a] ring-1 ring-white/18" : ""
+        }`}
+        style={external ? undefined : { background: categoryGradient(color) }}
       >
         <Icon size={28} strokeWidth={1.8} />
       </div>
       <div className="relative mt-5">
-        <h3 className="text-[20px] font-semibold tracking-tight">{title}</h3>
-        <p className="mt-2 text-[14px] leading-relaxed text-[#5f6864]">{desc}</p>
+        <h3 className={`text-[20px] font-semibold tracking-tight ${external ? "text-white" : ""}`}>
+          {title}
+        </h3>
+        <p className={`mt-2 text-[14px] leading-relaxed ${external ? "text-white/72" : "text-[#5f6864]"}`}>
+          {desc}
+        </p>
       </div>
-      <div className="relative mt-5 translate-y-1 text-[13px] font-semibold text-[#0717b8] opacity-0 transition group-hover:translate-y-0 group-hover:opacity-100">
+      <div className={`relative mt-5 translate-y-1 text-[13px] font-semibold opacity-0 transition group-hover:translate-y-0 group-hover:opacity-100 ${
+        external ? "text-[#f3c85a]" : "text-[#0717b8]"
+      }`}>
         {external ? "Saytga o'tish →" : "Ko'rish →"}
       </div>
     </>
@@ -546,7 +574,7 @@ function ServiceBigCard({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="surface-apple card-lift group relative block overflow-hidden p-6 md:p-7"
+        className="baytrip-service-card card-lift group relative block overflow-hidden p-6 md:p-7"
       >
         {inner}
       </a>
@@ -556,7 +584,7 @@ function ServiceBigCard({
   return (
     <Link
       href={href}
-      className="surface-apple card-lift group relative overflow-hidden p-6 md:p-7"
+      className="service-card group relative overflow-hidden p-6 md:p-7"
     >
       {inner}
     </Link>

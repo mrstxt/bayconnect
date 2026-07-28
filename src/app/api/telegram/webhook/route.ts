@@ -23,6 +23,12 @@ const categoryKeyboard = { inline_keyboard: [[
   { text: "✈️ Transfer", callback_data: "register:category:transfer" },
 ]] };
 
+function commandOf(text: string): string {
+  const first = text.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
+  // Public/group botlarda Telegram commandni /start@BotUsername shaklida yuboradi.
+  return first.replace(/@\w+$/, "");
+}
+
 async function save(reg: Registration) {
   await db.insert(telegramRegistrations).values({ ...reg, updatedAt: new Date() })
     .onConflictDoUpdate({ target: telegramRegistrations.chatId, set: { telegramUserId: reg.telegramUserId, fullName: reg.fullName, username: reg.username, phone: reg.phone, step: reg.step, data: reg.data, updatedAt: new Date() } });
@@ -30,6 +36,15 @@ async function save(reg: Registration) {
 async function answerCallback(id: string) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (token) await fetch(`https://api.telegram.org/bot${token}/answerCallbackQuery`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ callback_query_id: id }) }).catch(() => undefined);
+}
+
+export async function GET() {
+  return NextResponse.json({
+    ok: true,
+    endpoint: "telegram-webhook",
+    botTokenConfigured: Boolean(process.env.TELEGRAM_BOT_TOKEN),
+    webhookSecretConfigured: Boolean(process.env.TELEGRAM_WEBHOOK_SECRET),
+  });
 }
 
 export async function POST(req: Request) {
@@ -44,6 +59,7 @@ export async function POST(req: Request) {
   const from = callback?.from ?? message?.from;
   if (!chatId || !from) return NextResponse.json({ ok: true });
 
+  try {
   const [stored] = await db.select().from(telegramRegistrations).where(eq(telegramRegistrations.chatId, chatId)).limit(1);
   let reg: Registration = stored ?? { chatId, telegramUserId: String(from.id), fullName: [from.first_name, from.last_name].filter(Boolean).join(" "), username: from.username ?? "", phone: "", step: "start", data: {} };
   reg = { ...reg, telegramUserId: String(from.id), fullName: reg.fullName || [from.first_name, from.last_name].filter(Boolean).join(" "), username: from.username ?? reg.username };
@@ -58,7 +74,8 @@ export async function POST(req: Request) {
   }
 
   const text = clean(message?.text, 2000);
-  if (text === "/start" || text === "/register" || text === "Ro'yxatdan o'tish") {
+  const command = commandOf(text);
+  if (command === "/start" || command === "/register" || text === "Ro'yxatdan o'tish") {
     if (reg.step === "done") {
       await telegramSendMessage(chatId, "Siz allaqachon ro'yxatdan o'tgansiz. Yangi buyurtmalar shu botga keladi.");
       return NextResponse.json({ ok: true });
@@ -110,4 +127,12 @@ export async function POST(req: Request) {
     await telegramSendMessage(chatId, "Ro'yxatdan o'tish uchun /start buyrug'ini bosing.");
   }
   return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("[telegram/webhook] xato:", error);
+    await telegramSendMessage(
+      chatId,
+      "Bot vaqtincha sozlanmoqda. Iltimos, birozdan keyin /start buyrug'ini qayta yuboring.",
+    );
+    return NextResponse.json({ ok: true });
+  }
 }
