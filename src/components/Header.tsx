@@ -214,7 +214,7 @@ export function Header() {
           <FavoritesLink variant="desktop" />
           <Link
             href="/register"
-            className="ml-1 px-4 py-2 rounded-full text-[13px] font-semibold text-white bg-[#06139d] hover:bg-[#ff2d5d] transition shadow-[0_10px_24px_rgba(0,107,85,0.22)]"
+            className="ml-1 inline-flex items-center justify-center rounded-full bg-gradient-to-b from-[#0b8267] to-[#006b55] px-4 py-2 text-[13px] font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.2)_inset,0_10px_24px_rgba(0,107,85,0.3)] transition duration-300 hover:-translate-y-px hover:brightness-110"
           >
             Hamkor bo'lish
           </Link>
@@ -277,7 +277,7 @@ export function Header() {
             <Link
               href="/register"
               onClick={closeMenu}
-              className="btn-secondary w-full !py-3 text-sm !bg-[#006b55] hover:!bg-[#005541]"
+              className="btn-primary w-full !py-3 text-sm"
             >
               Hamkor bo'lish
             </Link>

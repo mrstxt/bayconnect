@@ -24,6 +24,7 @@ import {
   HandshakeIcon,
   BusIcon,
   GlobeGridIcon,
+  PinIcon,
 } from "@/components/Icon";
 
 /**
@@ -54,70 +55,88 @@ export default async function HomePage() {
     { href: PARTNER_URL, Icon: TourAgentIcon, title: "Turlar", sub: PARTNER_NAME, external: true },
   ];
 
+  const marqueeCities = [
+    "Samarqand",
+    "Buxoro",
+    "Xiva",
+    "Toshkent",
+    "Shahrisabz",
+    "Chimyon",
+    "Farg'ona",
+    "Nukus",
+    "Termiz",
+    "Qarshi",
+  ];
+
   return (
     <>
-      {/* HERO */}
-      <section className="identity-hero noise relative overflow-hidden min-h-[780px]">
-        <div className="identity-mountain" />
-        <div className="identity-river" />
-        <div className="identity-mountain identity-mountain-back" />
-        <div className="identity-arc -right-12 top-24 hidden md:block" />
-        <div className="identity-arc-coral -left-20 bottom-16 hidden md:block" />
+      {/* HERO — aurora identiteti */}
+      <section className="identity-hero noise relative overflow-hidden">
+        {/* Yumshoq nur bloblari */}
+        <div className="aurora-blob animate-float-slow -left-36 -top-10 h-96 w-96 bg-[#ffc400]/25" />
+        <div className="aurora-blob right-[-9rem] top-20 h-[26rem] w-[26rem] bg-[#3d5bff]/14" />
+        <div className="aurora-blob bottom-[-11rem] left-1/3 h-80 w-80 bg-[#006b55]/14" />
 
-        <FloatingBubble className="left-[9%] top-20 hidden md:flex" tone="blue" Icon={GlobeGridIcon} shape="tail" />
-        <FloatingBubble className="right-[20%] top-16 hidden md:flex" tone="yellow" Icon={GuideIcon} shape="tail" />
-        <FloatingBubble className="left-[27%] bottom-28 hidden lg:flex" tone="blue" Icon={TransferIcon} />
-        <FloatingBubble className="right-[14%] bottom-28 hidden lg:flex" tone="yellow" Icon={BusIcon} />
+        {/* Nokta panjarasi */}
+        <div className="dot-grid absolute inset-x-0 top-0 h-[560px]" />
 
-        <div className="relative mx-auto max-w-6xl px-5 pt-14 pb-16 md:pt-24 md:pb-24">
+        {/* Brend halqa ornamentlari */}
+        <div className="identity-arc -right-20 top-16 hidden lg:block" />
+        <div className="identity-arc-coral -left-24 bottom-20 hidden lg:block" />
+
+        {/* Suzuki shisha kartochkalar */}
+        <FloatingBubble className="left-[7%] top-24 hidden md:flex" tone="blue" Icon={GlobeGridIcon} shape="tail" />
+        <FloatingBubble className="right-[13%] top-40 hidden lg:flex" tone="yellow" Icon={GuideIcon} />
+        <FloatingBubble className="left-[16%] bottom-24 hidden lg:flex" tone="yellow" Icon={TransferIcon} shape="tail" />
+        <FloatingBubble className="right-[7%] bottom-32 hidden xl:flex" tone="blue" Icon={BusIcon} />
+
+        <div className="relative mx-auto max-w-6xl px-5 pt-16 pb-20 md:pt-24 md:pb-28">
           <div className="mx-auto max-w-4xl text-center">
-            <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-[#006b55]/10 bg-white/72 px-4 py-2 text-[12px] font-bold text-[#006b55] shadow-sm backdrop-blur">
-              <span className="inline-block h-2 w-2 rounded-full bg-[#ff6b4a]" />
+            <div className="animate-fade-up inline-flex items-center gap-2.5 rounded-full border border-[#006b55]/15 bg-white/75 px-4 py-2 text-[12px] font-bold text-[#006b55] shadow-[0_10px_30px_rgba(12,43,35,0.08)] backdrop-blur">
+              <span className="animate-pulse-dot inline-block h-2 w-2 rounded-full bg-[#ff6b4a]" />
               Gidlar, transfer va sayohat xizmatlari bir joyda
             </div>
 
-            <h1 className="animate-fade-up delay-2 mx-auto mt-8 max-w-4xl text-[38px] font-black leading-[1.02] text-[#123f34] sm:text-[52px] md:text-[72px]">
-              O'zbekistonda sayohatni bog'laydigan zamonaviy marketplace.
+            <h1 className="animate-fade-up delay-2 mx-auto mt-8 max-w-4xl text-[40px] font-black leading-[1.03] tracking-[-0.02em] text-[#123f34] sm:text-[54px] md:text-[74px]">
+              O'zbekistonda sayohatni{" "}
+              <span className="text-gradient">bog'laydigan</span>{" "}
+              zamonaviy marketplace.
             </h1>
 
-            <p className="animate-fade-up delay-3 mx-auto mt-5 max-w-2xl text-[17px] leading-relaxed text-[#506861] md:text-[20px]">
+            <p className="animate-fade-up delay-3 mx-auto mt-6 max-w-2xl text-[17px] leading-relaxed text-[#506861] md:text-[19px]">
               Gid, tarjimon, fotograf, transfer va mehmonxonalarni rangli, tez va ishonchli
               platformada tanlang. Profilni ko'ring, narxni solishtiring va zayavkani bir necha soniyada yuboring.
             </p>
 
-            <div className="animate-fade-up delay-4 mt-8 flex flex-wrap items-center justify-center gap-3">
-              <Link href="/experts" className="btn-primary !px-7 !py-4 text-[15px]">
+            <div className="animate-fade-up delay-4 mt-9 flex flex-wrap items-center justify-center gap-3">
+              <Link href="/experts" className="btn-primary !px-8 !py-4 text-[15px]">
                 Mutaxassislarni ko'rish
               </Link>
               <a
                 href={PARTNER_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#06139d] px-7 py-4 text-[15px] font-semibold text-white shadow-[0_12px_28px_rgba(7,23,184,0.20)] transition hover:scale-[1.02] hover:bg-[#ff2d5d]"
+                className="btn-ghost !px-7 !py-4 text-[15px]"
               >
                 Tur paketlar — {PARTNER_NAME}
                 <ExternalLinkIcon size={15} strokeWidth={2} />
               </a>
             </div>
 
-            <div className="animate-fade-up delay-5 mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[13px] font-medium text-[#06139d]">
-              <span className="inline-flex items-center gap-1.5">
-                <CheckIcon size={20} strokeWidth={2} className="text-[#06139d]" />
-                Tekshirilgan profillar
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <CheckIcon size={20} strokeWidth={2} className="text-[#06139d]" />
-                Shaffof narxlar
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <CheckIcon size={20} strokeWidth={2} className="text-[#06139d]" />
-                Tez zayavka
-              </span>
+            <div className="animate-fade-up delay-5 mt-9 flex flex-wrap items-center justify-center gap-x-6 gap-y-2.5 text-[13px] font-semibold text-[#123f34]/70">
+              {["Tekshirilgan profillar", "Shaffof narxlar", "Tez zayavka"].map((t) => (
+                <span key={t} className="inline-flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#006b55] text-white shadow-[0_4px_10px_rgba(0,107,85,0.3)]">
+                    <CheckIcon size={11} strokeWidth={2.6} />
+                  </span>
+                  {t}
+                </span>
+              ))}
             </div>
           </div>
 
           {/* Quick access cards */}
-          <div className="relative mt-14 md:mt-18">
+          <div className="relative mt-14 md:mt-16">
             <div className="mx-auto grid max-w-4xl grid-cols-2 gap-3 md:grid-cols-4">
               {quickAccess.map((item, i) =>
                 item.external ? (
@@ -126,13 +145,16 @@ export default async function HomePage() {
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ animationDelay: `${(i + 1) * 0.08}s` }}
-                    className="animate-fade-up identity-card group relative p-4 transition hover:-translate-y-1"
+                    style={{ animationDelay: `${0.4 + (i + 1) * 0.08}s` }}
+                    className="animate-fade-up identity-card group relative p-4 transition duration-300 hover:-translate-y-1.5 hover:shadow-[0_24px_56px_rgba(12,43,35,0.13)]"
                   >
                     <span className="absolute right-3 top-3 text-[#0717b8]">
                       <ExternalLinkIcon size={13} strokeWidth={2} />
                     </span>
-                    <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0717b8] text-white">
+                    <span
+                      className="flex h-11 w-11 items-center justify-center rounded-2xl text-white"
+                      style={{ background: "linear-gradient(135deg,#3d5bff,#0717b8)" }}
+                    >
                       <item.Icon size={22} />
                     </span>
                     <div className="mt-3 text-[15px] font-semibold tracking-tight text-[#123f34]">{item.title}</div>
@@ -142,10 +164,13 @@ export default async function HomePage() {
                   <Link
                     key={item.title}
                     href={item.href}
-                    style={{ animationDelay: `${(i + 1) * 0.08}s` }}
-                    className="animate-fade-up identity-card group p-4 transition hover:-translate-y-1"
+                    style={{ animationDelay: `${0.4 + (i + 1) * 0.08}s` }}
+                    className="animate-fade-up identity-card group p-4 transition duration-300 hover:-translate-y-1.5 hover:shadow-[0_24px_56px_rgba(12,43,35,0.13)]"
                   >
-                    <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#006b55] text-white">
+                    <span
+                      className="flex h-11 w-11 items-center justify-center rounded-2xl text-white"
+                      style={{ background: "linear-gradient(135deg,#0b8267,#006b55)" }}
+                    >
                       <item.Icon size={22} />
                     </span>
                     <div className="mt-3 text-[15px] font-semibold tracking-tight text-[#123f34]">{item.title}</div>
@@ -156,6 +181,24 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
+
+        {/* Shaharlar marquee */}
+        <div className="relative border-y border-[#123f34]/[0.07] bg-white/55 py-3.5 backdrop-blur-sm">
+          <div className="overflow-hidden">
+            <div className="animate-marquee flex w-max items-center gap-3 pr-3">
+              {[...marqueeCities, ...marqueeCities].map((city, i) => (
+                <span
+                  key={`${city}-${i}`}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#123f34]/[0.07] bg-white/85 px-4 py-1.5 text-[12.5px] font-semibold text-[#123f34]/70"
+                  aria-hidden={i >= marqueeCities.length}
+                >
+                  <PinIcon size={11} strokeWidth={2} className="text-[#006b55]" />
+                  {city}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* ABOUT */}
@@ -163,19 +206,19 @@ export default async function HomePage() {
         <div className="surface-apple-strong p-8 md:p-14">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div>
-              <div className="text-[12px] font-semibold tracking-[0.14em] uppercase text-[#006b55]">
+              <div className="text-[12px] font-bold tracking-[0.14em] uppercase text-[#006b55]">
                 bayConnect haqida
               </div>
               <h2 className="mt-4 text-[32px] md:text-[44px] font-semibold tracking-tight leading-[1.05]">
-                Sayohatni tashkillashtirishning eng oson yo'li.
+                Sayohatni tashkil etishning eng oson yo'li.
               </h2>
-              <p className="mt-5 text-[17px] leading-relaxed text-[#6e6e73]">
+              <p className="mt-5 text-[17px] leading-relaxed text-[#5f6864]">
                 bayConnect — bu O'zbekiston va Markaziy Osiyoning turizm mutaxassislarini bir
                 platformada birlashtirgan marketplace. Bu yerda siz gid, tarjimon, fotograf,
                 transfer haydovchisi va mehmonxonalarni bir necha daqiqada topib bron
                 qilishingiz mumkin.
               </p>
-              <div className="mt-6 grid sm:grid-cols-2 gap-3">
+              <div className="mt-7 grid sm:grid-cols-2 gap-3.5">
                 {[
                   "Ishonchli va tekshirilgan xizmatlar",
                   "Shaffof narxlar — yashirin to'lov yo'q",
@@ -183,7 +226,7 @@ export default async function HomePage() {
                   "To'g'ridan-to'g'ri aloqa — vositachisiz",
                 ].map((t) => (
                   <div key={t} className="flex items-start gap-3">
-                    <div className="mt-0.5 w-6 h-6 shrink-0 rounded-full bg-[#006b55] text-white flex items-center justify-center">
+                    <div className="mt-0.5 w-6 h-6 shrink-0 rounded-full bg-gradient-to-b from-[#0b8267] to-[#006b55] text-white flex items-center justify-center shadow-[0_5px_12px_rgba(0,107,85,0.3)]">
                       <CheckIcon size={13} strokeWidth={2.4} />
                     </div>
                     <p className="text-[14px] text-[#123f34] leading-relaxed">{t}</p>
@@ -250,7 +293,7 @@ export default async function HomePage() {
               >
                 <div
                   className="absolute -right-8 -top-8 w-28 h-28 rounded-full opacity-20 blur-2xl transition group-hover:opacity-40"
-                  style={{ background: c.color === "dark" ? "#123f34" : c.color === "blue" ? "#0717b8" : "#ff6b4a" }}
+                  style={{ background: c.color === "dark" ? "#123f34" : c.color === "blue" ? "#3d5bff" : "#ff6b4a" }}
                 />
                 <div
                   className="relative w-12 h-12 rounded-2xl flex items-center justify-center text-white"
@@ -260,7 +303,7 @@ export default async function HomePage() {
                 </div>
                 <div className="relative mt-5">
                   <div className="text-[17px] font-semibold tracking-tight">{c.label}</div>
-                  <div className="mt-1 text-[13px] text-[#86868b] leading-relaxed line-clamp-2">
+                  <div className="mt-1 text-[13px] text-[#7b827f] leading-relaxed line-clamp-2">
                     {c.description}
                   </div>
                 </div>
@@ -289,14 +332,14 @@ export default async function HomePage() {
               href={`/transfer?type=${t.key}`}
               className="surface-apple group p-5 card-lift text-center"
             >
-              <span className="mx-auto flex items-center justify-center w-14 h-14 rounded-2xl bg-[#eef1ff] text-[#0717b8]">
+              <span className="mx-auto flex items-center justify-center w-14 h-14 rounded-2xl bg-[#eef1ff] text-[#0717b8] transition duration-300 group-hover:scale-110">
                 <TransferTypeIcon type={t.key} size={28} />
               </span>
               <div className="mt-4 text-[15px] font-semibold tracking-tight">{t.label}</div>
-              <div className="mt-1 inline-flex items-center gap-1 text-[12px] text-[#86868b]">
+              <div className="mt-1 inline-flex items-center gap-1 text-[12px] text-[#7b827f]">
                 <UsersIcon size={12} /> {t.capacity} kishi
               </div>
-              <div className="mt-2 text-[11px] text-[#86868b] leading-relaxed line-clamp-2">
+              <div className="mt-2 text-[11px] text-[#7b827f] leading-relaxed line-clamp-2">
                 {t.description}
               </div>
             </Link>
@@ -310,27 +353,26 @@ export default async function HomePage() {
           href={PARTNER_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="group relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#0717b8] via-[#0d2097] to-[#123f34] text-white p-8 md:p-14 block apple-shadow-lg"
+          className="dark-panel group relative block overflow-hidden rounded-[32px] p-8 text-white apple-shadow-lg md:p-14"
         >
-          <div className="absolute -top-20 -right-16 w-72 h-72 rounded-full bg-[#ffc400]/20 blur-3xl" />
-          <div className="absolute -bottom-24 -left-10 w-72 h-72 rounded-full bg-[#ff6b4a]/18 blur-3xl" />
-          <div className="relative grid md:grid-cols-[auto_1.4fr_auto] gap-8 items-center">
-            <span className="hidden md:flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 text-white">
+          <div className="dot-grid-light" />
+          <div className="relative grid items-center gap-8 md:grid-cols-[auto_1.4fr_auto]">
+            <span className="hidden h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-white ring-1 ring-white/15 md:flex">
               <HandshakeIcon size={32} strokeWidth={1.6} />
             </span>
             <div>
-              <div className="inline-flex items-center gap-1.5 text-[12px] font-semibold tracking-[0.14em] uppercase text-white/70">
+              <div className="inline-flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.14em] text-white/60">
                 Rasmiy hamkorimiz
               </div>
-              <h2 className="mt-3 text-[30px] md:text-[40px] font-semibold tracking-tight leading-[1.05]">
+              <h2 className="mt-3 text-[30px] font-semibold leading-[1.05] tracking-tight md:text-[40px]">
                 Tayyor tur paketlari uchun {PARTNER_NAME}'ga tashrif buyuring
               </h2>
-              <p className="mt-3 text-[16px] text-white/80 max-w-xl">
+              <p className="mt-3 max-w-xl text-[16px] text-white/75">
                 Ipak Yo'li, tog' sarguzashtlari va boshqa marshrutlar bo'yicha tayyor
                 paketlarni bayConnect emas, hamkorimiz {PARTNER_NAME} platformasi taqdim etadi.
               </p>
             </div>
-            <span className="shrink-0 inline-flex items-center gap-2 rounded-full bg-white text-[#123f34] px-6 py-3.5 text-[14px] font-semibold group-hover:bg-[#ffc400] group-hover:text-[#123f34] transition">
+            <span className="inline-flex shrink-0 items-center gap-2 rounded-full bg-white px-6 py-3.5 text-[14px] font-semibold text-[#123f34] shadow-lg transition group-hover:bg-[#ffc400]">
               {PARTNER_NAME}.vercel.app
               <ExternalLinkIcon size={15} strokeWidth={2} />
             </span>
@@ -358,7 +400,7 @@ export default async function HomePage() {
       </Section>
 
       {/* HOW IT WORKS */}
-      <section className="defer-paint mt-16 border-y border-[#006b55]/10 bg-[#f8eee5] py-20">
+      <section className="defer-paint mt-16 border-y border-[#123f34]/[0.07] bg-[#f6f0e9] py-20">
         <div className="mx-auto max-w-6xl px-5">
           <SectionHeading
             align="center"
@@ -373,12 +415,12 @@ export default async function HomePage() {
               { step: "02", title: "Tekshiring", desc: "Reyting, sharhlar, tillar va tajribani bir qarashda ko'ring." },
               { step: "03", title: "Bron qiling", desc: "Zayavka yuboring — mutaxassis tez orada siz bilan bog'lanadi." },
             ].map((item) => (
-              <div key={item.step} className="surface-apple p-7">
-                <div className="text-[13px] font-semibold tracking-[0.14em] text-[#006b55]">
+              <div key={item.step} className="surface-apple group p-7 card-lift">
+                <div className="inline-flex rounded-full bg-[#eaf4ef] px-3 py-1.5 text-[13px] font-bold tracking-[0.14em] text-[#006b55]">
                   {item.step}
                 </div>
-                <h3 className="mt-4 text-[24px] font-semibold tracking-tight">{item.title}</h3>
-                <p className="mt-3 text-[15px] leading-relaxed text-[#6e6e73]">{item.desc}</p>
+                <h3 className="mt-5 text-[24px] font-semibold tracking-tight">{item.title}</h3>
+                <p className="mt-3 text-[15px] leading-relaxed text-[#5f6864]">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -387,25 +429,21 @@ export default async function HomePage() {
 
       {/* CTA */}
       <Section className="defer-paint py-16">
-        <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#006b55] via-[#0b5e4d] to-[#123f34] text-white p-8 md:p-14 apple-shadow-lg">
-          <div className="absolute -top-20 -right-16 w-72 h-72 rounded-full bg-white/15 blur-3xl" />
-          <div className="absolute -bottom-24 -left-10 w-72 h-72 rounded-full bg-black/10 blur-3xl" />
-          <div className="relative grid md:grid-cols-[1.4fr_auto] gap-8 items-center">
+        <div className="dark-panel relative overflow-hidden rounded-[32px] p-8 text-white apple-shadow-lg md:p-14">
+          <div className="dot-grid-light" />
+          <div className="relative grid items-center gap-8 md:grid-cols-[1.4fr_auto]">
             <div>
-              <div className="text-[13px] font-semibold tracking-[0.14em] uppercase text-white/70">
+              <div className="text-[13px] font-bold uppercase tracking-[0.14em] text-white/60">
                 Mutaxassislar uchun
               </div>
-              <h2 className="mt-3 text-[32px] md:text-[44px] font-semibold tracking-tight leading-[1.05]">
+              <h2 className="mt-3 text-[32px] font-semibold leading-[1.05] tracking-tight md:text-[44px]">
                 Turizm sohasida ishlaysizmi?
               </h2>
-              <p className="mt-3 text-[17px] text-white/85 max-w-xl">
+              <p className="mt-3 max-w-xl text-[17px] text-white/80">
                 bayConnect'ga qo'shiling va yangi mijozlar oqimini oching. Ro'yxatga olish bepul.
               </p>
             </div>
-            <Link
-              href="/register"
-              className="inline-flex items-center justify-center rounded-full bg-[#ffc400] hover:bg-[#ffd94a] text-[#123f34] font-semibold px-7 py-4 transition shadow-lg"
-            >
+            <Link href="/register" className="btn-gold !px-8 !py-4 text-[15px]">
               Hozir qo'shilish
             </Link>
           </div>
@@ -426,11 +464,11 @@ function StatCard({
 }) {
   return (
     <div className="surface-apple p-5">
-      <span className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#eaf4ef] text-[#006b55]">
+      <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eaf4ef] text-[#006b55]">
         <Icon size={22} />
       </span>
       <div className="mt-3 text-[32px] font-semibold tracking-tight">{value}</div>
-      <div className="text-[13px] text-[#86868b]">{label}</div>
+      <div className="text-[13px] text-[#7b827f]">{label}</div>
     </div>
   );
 }
@@ -449,7 +487,7 @@ function FloatingBubble({
   return (
     <div
       className={`identity-bubble ${shape === "tail" ? "identity-bubble-tail" : ""} animate-float absolute z-10 h-24 w-24 items-center justify-center rounded-[30px] ${className}`}
-      style={{ color: tone === "blue" ? "#0717b8" : "#006b55", background: tone === "yellow" ? "rgba(255,196,0,0.22)" : "rgba(255,255,255,0.62)" }}
+      style={{ color: tone === "blue" ? "#0717b8" : "#006b55" }}
     >
       <Icon size={42} strokeWidth={1.55} />
     </div>
@@ -474,28 +512,28 @@ function ServiceBigCard({
   const inner = (
     <>
       <div
-        className="absolute -right-10 -top-10 w-32 h-32 rounded-full opacity-15 blur-2xl transition group-hover:opacity-30"
+        className="absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-15 blur-2xl transition group-hover:opacity-30"
         style={{
           background:
-            color === "yellow" ? "#ffc400" : color === "blue" ? "#0717b8" : color === "dark" ? "#123f34" : "#ff6b4a",
+            color === "yellow" ? "#ffc400" : color === "blue" ? "#3d5bff" : color === "dark" ? "#123f34" : "#ff6b4a",
         }}
       />
       {external ? (
-        <span className="absolute top-5 right-5 inline-flex items-center gap-1 text-[10px] font-semibold text-[#0717b8] bg-[#eef1ff] px-2 py-1 rounded-full">
+        <span className="absolute right-5 top-5 inline-flex items-center gap-1 rounded-full bg-[#eef1ff] px-2 py-1 text-[10px] font-bold text-[#0717b8]">
           Hamkor <ExternalLinkIcon size={10} strokeWidth={2.2} />
         </span>
       ) : null}
       <div
-        className="relative w-14 h-14 rounded-2xl flex items-center justify-center text-white"
+        className="relative flex h-14 w-14 items-center justify-center rounded-2xl text-white"
         style={{ background: categoryGradient(color) }}
       >
         <Icon size={28} strokeWidth={1.8} />
       </div>
       <div className="relative mt-5">
         <h3 className="text-[20px] font-semibold tracking-tight">{title}</h3>
-        <p className="mt-2 text-[14px] leading-relaxed text-[#6e6e73]">{desc}</p>
+        <p className="mt-2 text-[14px] leading-relaxed text-[#5f6864]">{desc}</p>
       </div>
-      <div className="relative mt-5 text-[13px] font-semibold text-[#0717b8] opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition">
+      <div className="relative mt-5 translate-y-1 text-[13px] font-semibold text-[#0717b8] opacity-0 transition group-hover:translate-y-0 group-hover:opacity-100">
         {external ? "Saytga o'tish →" : "Ko'rish →"}
       </div>
     </>
@@ -507,7 +545,7 @@ function ServiceBigCard({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="surface-apple group relative overflow-hidden p-6 md:p-7 card-lift block"
+        className="surface-apple card-lift group relative block overflow-hidden p-6 md:p-7"
       >
         {inner}
       </a>
@@ -517,7 +555,7 @@ function ServiceBigCard({
   return (
     <Link
       href={href}
-      className="surface-apple group relative overflow-hidden p-6 md:p-7 card-lift"
+      className="surface-apple card-lift group relative overflow-hidden p-6 md:p-7"
     >
       {inner}
     </Link>

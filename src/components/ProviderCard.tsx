@@ -36,7 +36,7 @@ function ProviderCardImpl({
 
       <div className="flex items-start gap-4 pr-11">
         <span
-          className="shrink-0 flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-sm transition-transform duration-300 group-hover:scale-105"
+          className="shrink-0 flex h-14 w-14 items-center justify-center rounded-2xl text-white ring-1 ring-white/25 shadow-[0_10px_24px_rgba(12,43,35,0.18)] transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-3"
           style={{ background: categoryGradient(cover) }}
         >
           <CategoryIcon
@@ -87,13 +87,13 @@ function ProviderCardImpl({
 
       <div className="mt-5 flex items-end justify-between border-t border-[#123f34]/[0.07] pt-4">
         <div>
-          <div className="text-[21px] font-semibold tracking-tight text-[#123f34]">
+          <div className="text-[21px] font-bold tracking-tight text-[#123f34]">
             {formatPrice(p.pricePerDay)}
           </div>
           <div className="text-[12px] text-[#7b827f]">bir kunga</div>
         </div>
         <div className="text-right">
-          <div className="inline-flex items-center gap-1 rounded-full bg-[#fff6d7] px-2.5 py-1 text-[13px] font-semibold text-[#9c6a00]">
+          <div className="inline-flex items-center gap-1 rounded-full bg-gradient-to-b from-[#fff3c4] to-[#ffe9a3] px-2.5 py-1 text-[13px] font-bold text-[#8a5d00] ring-1 ring-[#ffc400]/40">
             <StarIcon size={12} />
             {formatRating(p.rating)}
           </div>

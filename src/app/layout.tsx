@@ -37,15 +37,16 @@ export const metadata: Metadata = {
     siteName: "bayConnect",
     locale: "uz_UZ",
     type: "website",
-    images: [{ url: "/bayconnect.png", width: 1200, height: 630, alt: "bayConnect" }],
+    // images kiritilmagan — Next.js `opengraph-image.tsx` konventsiyasi
+    // orqali brend dizaynidagi 1200×630 rasmni avtomatik ulaydi.
   },
   twitter: {
     card: "summary_large_image",
     title: "bayConnect",
     description: "Turizm mutaxassislarini topishning eng oddiy yo'li.",
-    images: ["/bayconnect.png"],
+    // images — `twitter-image.tsx` konventsiyasidan avtomatik olinadi.
   },
-  icons: { icon: "/bayconnect.png", apple: "/bayconnect.png" },
+  // Favicon — `app/icon.svg` konventsiyasi orqali avtomatik ulanadi.
   robots: {
     index: true,
     follow: true,
@@ -64,7 +65,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="uz">
-      <body className="min-h-screen flex flex-col bg-[#fff7ef] text-[#123f34] antialiased">
+      <body className="min-h-screen flex flex-col bg-[#fdfaf6] text-[#123f34] antialiased">
         <a href="#main" className="skip-link">
           Asosiy kontentga o'tish
         </a>

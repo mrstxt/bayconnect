@@ -37,7 +37,8 @@ export function SectionHeading({
     >
       <div className={align === "center" ? "max-w-2xl" : ""}>
         {eyebrow ? (
-          <div className="text-[12px] font-bold tracking-[0.14em] uppercase text-[#006b55] mb-3">
+          <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-[#006b55]/12 bg-[#eaf4ef] px-3 py-1 text-[11.5px] font-bold uppercase tracking-[0.13em] text-[#006b55]">
+            <span className="h-1 w-1 rounded-full bg-[#ff6b4a]" />
             {eyebrow}
           </div>
         ) : null}

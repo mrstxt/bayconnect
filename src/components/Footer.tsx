@@ -1,52 +1,71 @@
 import Link from "next/link";
 import { Logo } from "./Logo";
 import { EXPERT_CATEGORIES, TRANSFER_TYPES, PARTNER_NAME, PARTNER_URL } from "@/lib/brand";
-import { ExternalLinkIcon } from "./Icon";
-
-const linkCls = "text-[15px] text-[#123f34] hover:text-[#006b55] transition";
+import { ExternalLinkIcon, HandshakeIcon } from "./Icon";
 
 // Modul yuklanganda bir marta hisoblanadi (ISR revalidate'da yangilanadi).
 const YEAR = new Date().getFullYear();
 
+const linkCls =
+  "text-[15px] text-white/60 transition hover:text-white";
+
 export function Footer() {
   return (
-    <footer className="defer-paint mt-24 border-t border-[#123f34]/[0.06] bg-[#f8eee5]/80">
-      <div className="mx-auto max-w-6xl px-5 py-16">
+    <footer className="defer-paint dark-panel relative mt-24 overflow-hidden text-white">
+      <div className="dot-grid-light" />
+
+      <div className="relative mx-auto max-w-6xl px-5 py-16">
+        {/* Hamkor promosi */}
         <a
           href={PARTNER_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-[28px] bg-gradient-to-br from-[#0717b8] via-[#0d2097] to-[#123f34] text-white p-6 md:p-8 mb-14 apple-shadow-lg"
+          className="group mb-14 flex flex-col items-start justify-between gap-4 rounded-[28px] bg-white/[0.06] p-6 ring-1 ring-white/10 backdrop-blur transition hover:bg-white/[0.09] sm:flex-row sm:items-center md:p-8"
         >
-          <div>
-            <div className="text-[11px] font-semibold tracking-[0.14em] uppercase text-white/55">
-              Hamkorimiz
+          <div className="flex items-start gap-4">
+            <span className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white ring-1 ring-white/15 sm:flex">
+              <HandshakeIcon size={24} strokeWidth={1.6} />
+            </span>
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/50">
+                Hamkorimiz
+              </div>
+              <h3 className="mt-1.5 text-[21px] font-semibold tracking-tight md:text-[25px]">
+                Tayyor tur paketlarini {PARTNER_NAME} saytida ko'ring
+              </h3>
+              <p className="mt-1 max-w-lg text-[14px] text-white/55">
+                Ipak Yo'li, tog' sarguzashtlari va boshqa marshrutlar bo'yicha tayyor paketlar —
+                rasmiy hamkorimiz {PARTNER_NAME} platformasida.
+              </p>
             </div>
-            <h3 className="mt-2 text-[22px] md:text-[26px] font-semibold tracking-tight">
-              Tayyor tur paketlarini {PARTNER_NAME} saytida ko'ring
-            </h3>
-            <p className="mt-1.5 text-[14px] text-white/68 max-w-lg">
-              Ipak Yo'li, tog' sarguzashtlari va boshqa marshrutlar bo'yicha tayyor paketlar —
-              rasmiy hamkorimiz {PARTNER_NAME} platformasida.
-            </p>
           </div>
-          <span className="shrink-0 inline-flex items-center gap-2 rounded-full bg-white text-[#123f34] px-5 py-3 text-[14px] font-semibold group-hover:bg-[#ffc400] transition">
+          <span className="inline-flex shrink-0 items-center gap-2 rounded-full bg-white px-5 py-3 text-[14px] font-semibold text-[#123f34] transition group-hover:bg-[#ffc400]">
             {PARTNER_NAME}.vercel.app
             <ExternalLinkIcon size={15} strokeWidth={2} />
           </span>
         </a>
 
-        <div className="grid md:grid-cols-12 gap-10">
+        <div className="grid gap-10 md:grid-cols-12">
           <div className="md:col-span-4">
-            <Logo />
-            <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-[#5f6864]">
+            <Logo light />
+            <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-white/55">
               bayConnect — O'zbekiston va Markaziy Osiyo bo'ylab ishonchli turizm xizmatlarini
               topish uchun marketplace.
             </p>
+            <div className="mt-6 flex items-center gap-2">
+              {["Gidlar", "Transfer", "Mehmonxona"].map((t) => (
+                <span
+                  key={t}
+                  className="rounded-full border border-white/12 bg-white/[0.05] px-3 py-1 text-[11.5px] font-semibold text-white/60"
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
           </div>
 
           <div className="md:col-span-2">
-            <h4 className="text-xs font-semibold tracking-[0.08em] uppercase text-[#7b827f]">
+            <h4 className="text-xs font-bold uppercase tracking-[0.1em] text-white/40">
               Mutaxassislar
             </h4>
             <ul className="mt-4 space-y-2.5">
@@ -61,7 +80,7 @@ export function Footer() {
           </div>
 
           <div className="md:col-span-2">
-            <h4 className="text-xs font-semibold tracking-[0.08em] uppercase text-[#7b827f]">
+            <h4 className="text-xs font-bold uppercase tracking-[0.1em] text-white/40">
               Transfer
             </h4>
             <ul className="mt-4 space-y-2.5">
@@ -76,7 +95,7 @@ export function Footer() {
           </div>
 
           <div className="md:col-span-2">
-            <h4 className="text-xs font-semibold tracking-[0.08em] uppercase text-[#7b827f]">
+            <h4 className="text-xs font-bold uppercase tracking-[0.1em] text-white/40">
               Kashf qiling
             </h4>
             <ul className="mt-4 space-y-2.5">
@@ -85,7 +104,7 @@ export function Footer() {
                   href={PARTNER_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[15px] text-[#123f34] hover:text-[#0717b8] transition"
+                  className={`inline-flex items-center gap-1 ${linkCls}`}
                 >
                   Turlar ({PARTNER_NAME})
                   <ExternalLinkIcon size={12} strokeWidth={2} />
@@ -104,7 +123,7 @@ export function Footer() {
           </div>
 
           <div className="md:col-span-2">
-            <h4 className="text-xs font-semibold tracking-[0.08em] uppercase text-[#7b827f]">
+            <h4 className="text-xs font-bold uppercase tracking-[0.1em] text-white/40">
               Kompaniya
             </h4>
             <ul className="mt-4 space-y-2.5">
@@ -115,24 +134,24 @@ export function Footer() {
                 <a href="mailto:hello@bayconnect.uz" className={linkCls}>Aloqa</a>
               </li>
               <li>
-                <span className="text-[15px] text-[#123f34]">Maxfiylik</span>
+                <span className="text-[15px] text-white/60">Maxfiylik</span>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-14 pt-6 border-t border-[#123f34]/[0.06] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <p className="text-[13px] text-[#7b827f]">
+        <div className="mt-14 flex flex-col items-start justify-between gap-3 border-t border-white/10 pt-6 sm:flex-row sm:items-center">
+          <p className="text-[13px] text-white/45">
             Copyright © {YEAR} bayConnect. Barcha huquqlar himoyalangan.
           </p>
-          <p className="text-[13px] text-[#7b827f]">O'zbekiston · Markaziy Osiyo</p>
+          <p className="text-[13px] text-white/45">O'zbekiston · Markaziy Osiyo</p>
         </div>
 
         <div className="mt-6 flex items-center justify-center">
-          <span className="inline-flex items-center gap-2 text-[12px] font-medium text-[#7b827f]">
-            <span className="w-1 h-1 rounded-full bg-[#006b55]" />
+          <span className="inline-flex items-center gap-2 text-[12px] font-medium text-white/40">
+            <span className="h-1 w-1 rounded-full bg-[#ffc400]" />
             Powered by
-            <span className="font-semibold text-[#123f34]">bayTrip</span>
+            <span className="font-semibold text-white/75">bayTrip</span>
           </span>
         </div>
       </div>
