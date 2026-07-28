@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ScrollTop } from "@/components/ScrollTop";
+import { AutoTranslator } from "@/components/LanguageTools";
 import { siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -30,6 +31,11 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "bayConnect" }],
   alternates: { canonical: "/" },
+  icons: {
+    icon: "/bayconnect.png",
+    shortcut: "/bayconnect.png",
+    apple: "/bayconnect.png",
+  },
   openGraph: {
     title: "bayConnect",
     description: "Turizm mutaxassislarini topishning eng oddiy yo'li.",
@@ -46,7 +52,6 @@ export const metadata: Metadata = {
     description: "Turizm mutaxassislarini topishning eng oddiy yo'li.",
     // images — `twitter-image.tsx` konventsiyasidan avtomatik olinadi.
   },
-  // Favicon — `app/icon.svg` konventsiyasi orqali avtomatik ulanadi.
   robots: {
     index: true,
     follow: true,
@@ -75,6 +80,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </main>
         <Footer />
         <ScrollTop />
+        <AutoTranslator />
       </body>
     </html>
   );

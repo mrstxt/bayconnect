@@ -483,55 +483,110 @@ body {
    bloblari va halqa ornamentlari bilan almashtirildi.
    -------------------------------------------------------------------------- */
 .identity-hero {
+  min-height: calc(100svh - 60px);
   background:
-    radial-gradient(38rem 24rem at 16% 12%, rgba(255, 196, 0, 0.2), transparent 62%),
-    radial-gradient(34rem 26rem at 85% 8%, rgba(61, 91, 255, 0.12), transparent 62%),
-    radial-gradient(30rem 24rem at 55% 88%, rgba(0, 107, 85, 0.1), transparent 60%),
-    radial-gradient(24rem 20rem at 30% 70%, rgba(255, 107, 74, 0.09), transparent 60%),
-    linear-gradient(180deg, #f6f0e9 0%, #fdfaf6 88%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(253, 250, 246, 0.92) 72%, #fdfaf6),
+    linear-gradient(115deg, #f6f0e9 0%, #fff7ef 42%, #eef7f2 100%);
 }
 
-/* Yumshoq harakatlanuvchi nur blobi */
-.aurora-blob {
+.silk-road-scene {
   position: absolute;
-  border-radius: 999px;
-  filter: blur(70px);
+  inset: 0;
+  overflow: hidden;
   pointer-events: none;
 }
 
-.identity-mountain {
-  /* endi "tog'" emas — keng aurora paneli */
+.silk-road-scene::before {
+  content: "";
   position: absolute;
-  inset: auto -10% -32% 14%;
-  width: 78%;
-  height: 62%;
-  opacity: 0.5;
-  background: radial-gradient(closest-side, rgba(0, 107, 85, 0.1), transparent);
-  border-radius: 999px;
-  filter: blur(50px);
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 107, 85, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 107, 85, 0.045) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(180deg, black 0%, transparent 78%);
+  -webkit-mask-image: linear-gradient(180deg, black 0%, transparent 78%);
 }
 
-.identity-mountain-back {
-  inset: -14% 52% auto auto;
-  width: 46%;
-  height: 52%;
-  opacity: 0.6;
-  background: radial-gradient(closest-side, rgba(61, 91, 255, 0.1), transparent);
-  transform: none;
+.silk-road-sun {
+  position: absolute;
+  top: 118px;
+  right: max(8vw, 80px);
+  width: 156px;
+  height: 156px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 36% 34%, #fff1a8 0 14%, transparent 15%),
+    linear-gradient(145deg, #ffc400, #ff6b4a);
+  box-shadow:
+    0 0 0 22px rgba(255, 196, 0, 0.12),
+    0 26px 80px rgba(255, 107, 74, 0.2);
+  opacity: 0.82;
 }
 
-.identity-river {
-  /* eski daryo o'rniga iliq oltin nur */
+.silk-road-mountain {
   position: absolute;
-  left: -8%;
-  bottom: -22%;
-  width: 38%;
-  height: 56%;
-  opacity: 0.5;
-  background: radial-gradient(closest-side, rgba(255, 196, 0, 0.18), transparent);
-  border-radius: 999px;
-  transform: none;
-  filter: blur(40px);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 44%;
+  transform-origin: bottom center;
+}
+
+.silk-road-mountain-back {
+  bottom: 70px;
+  background: linear-gradient(180deg, rgba(191, 227, 214, 0.9), rgba(191, 227, 214, 0.22));
+  clip-path: polygon(0 74%, 10% 58%, 18% 66%, 30% 35%, 39% 55%, 48% 30%, 58% 64%, 70% 42%, 82% 63%, 100% 38%, 100% 100%, 0 100%);
+}
+
+.silk-road-mountain-front {
+  bottom: 28px;
+  background: linear-gradient(180deg, rgba(0, 107, 85, 0.22), rgba(0, 107, 85, 0.04));
+  clip-path: polygon(0 80%, 13% 48%, 24% 67%, 36% 36%, 47% 66%, 56% 50%, 68% 76%, 82% 44%, 100% 72%, 100% 100%, 0 100%);
+}
+
+.silk-road-path {
+  position: absolute;
+  left: 50%;
+  bottom: -82px;
+  width: min(760px, 82vw);
+  height: 250px;
+  transform: translateX(-50%);
+  border-radius: 50% 50% 0 0;
+  background:
+    linear-gradient(90deg, transparent 0 47%, rgba(255, 255, 255, 0.68) 47% 53%, transparent 53% 100%),
+    linear-gradient(180deg, rgba(255, 196, 0, 0.28), rgba(255, 107, 74, 0.16));
+  clip-path: polygon(42% 0, 58% 0, 88% 100%, 12% 100%);
+  box-shadow: 0 -20px 80px rgba(255, 196, 0, 0.18);
+}
+
+.silk-road-arch {
+  position: absolute;
+  bottom: 118px;
+  width: 96px;
+  height: 124px;
+  border: 10px solid rgba(0, 107, 85, 0.14);
+  border-bottom: 0;
+  border-radius: 999px 999px 0 0;
+}
+
+.silk-road-arch::after {
+  content: "";
+  position: absolute;
+  inset: 18px 18px 0;
+  border: 7px solid rgba(7, 23, 184, 0.11);
+  border-bottom: 0;
+  border-radius: 999px 999px 0 0;
+}
+
+.silk-road-arch-left {
+  left: max(4vw, 44px);
+  transform: rotate(-7deg);
+}
+
+.silk-road-arch-right {
+  right: max(5vw, 58px);
+  transform: rotate(8deg);
 }
 
 /* Brend halqa-ornamenti (Ipak yo'li kamon archasi motivida) */

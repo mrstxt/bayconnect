@@ -7,6 +7,7 @@ import { Logo } from "./Logo";
 import { NAV_ITEMS } from "@/lib/brand";
 import { useFavoritesCount } from "@/lib/useFavorites";
 import { HeartIcon, ExternalLinkIcon } from "./Icon";
+import { LanguageSwitcher } from "./LanguageTools";
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
@@ -211,6 +212,7 @@ export function Header() {
         </nav>
 
         <div className="hidden lg:flex items-center gap-1">
+          <LanguageSwitcher />
           <FavoritesLink variant="desktop" />
           <Link
             href="/register"
@@ -221,6 +223,7 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-1 lg:hidden">
+          <LanguageSwitcher />
           <FavoritesLink variant="desktop" />
           <button
             type="button"

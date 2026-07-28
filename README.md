@@ -1,487 +1,210 @@
 # bayConnect
 
-**bayConnect** — O'zbekiston bo'ylab turizm xizmatlarini (gid, tarjimon, fotograf, tur agent, transfer, mehmonxona) topish uchun Next.js marketplace.
+bayConnect — O'zbekiston bo'ylab gid, tarjimon, fotograf, tur agent, transfer va mehmonxona xizmatlarini topish uchun Next.js marketplace.
 
-Loyiha Vercel + Neon Postgres uchun moslashtirilgan, lekin har qanday Postgres bilan (Docker, Supabase, lokal) ishlaydi.
-
----
-
-## Mundarija
-
-1. [Stack](#stack)
-2. [Loyiha tuzilmasi](#loyiha-tuzilmasi)
-3. [Tez boshlash](#tez-boshlash)
-4. [Lokalda ishga tushirish (batafsil)](#lokalda-ishga-tushirish-batafsil)
-5. [Ma'lumotlar bazasi](#malumotlar-bazasi)
-6. [Environment o'zgaruvchilari](#environment-ozgaruvchilari)
-7. [Vercel'ga deploy](#vercelga-deploy)
-8. [Arxitektura va keshlash](#arxitektura-va-keshlash)
-9. [API endpointlar](#api-endpointlar)
-10. [Tekshiruv buyruqlari](#tekshiruv-buyruqlari)
-11. [Muammolarni bartaraf etish](#muammolarni-bartaraf-etish)
-
----
+Loyiha Vercel + Neon Postgres uchun tayyorlangan. Telegram bot orqali mutaxassis ro'yxatdan o'tishi va yangi buyurtmalarni bot chatida qabul qilishi mumkin.
 
 ## Stack
 
-| Qatlam | Texnologiya |
-|---|---|
-| Framework | Next.js 16 (App Router, Turbopack) |
-| UI | React 19, Tailwind CSS 4 |
-| Til | TypeScript 5.9 (strict) |
-| Baza | PostgreSQL (Neon) |
-| ORM | Drizzle ORM 0.45 |
+| Qism | Texnologiya |
+| --- | --- |
+| Frontend | Next.js 16 App Router, React 19, Tailwind CSS 4 |
+| Backend | Next.js Route Handlers |
+| Database | PostgreSQL |
+| ORM | Drizzle ORM / Drizzle Kit |
 | Hosting | Vercel |
+| Bot | Telegram Bot API webhook |
 
-**Talab:** Node.js 20 yoki 22 (`>=20 <25`).
+Node.js talabi: `>=20 <25`.
 
----
-
-## Loyiha tuzilmasi
+## Loyiha Tuzilmasi
 
 ```text
 src/
-├── app/
-│   ├── layout.tsx              Root layout, SEO metadata, skip-link
-│   ├── page.tsx                Bosh sahifa (ISR 5 daq)
-│   ├── sitemap.ts              Avtomatik sitemap.xml
-│   ├── robots.ts               Avtomatik robots.txt
-│   ├── experts/                Mutaxassislar katalogi (sahifalangan)
-│   ├── transfer/               Transfer xizmatlari
-│   ├── hotels/                 Mehmonxonalar
-│   ├── blog/                   Blog ro'yxati + [slug] (SSG)
-│   ├── providers/[id]/         Profil sahifasi + booking forma
-│   ├── favorites/              Sevimlilar (client, localStorage)
-│   ├── register/               Mutaxassis ro'yxatdan o'tishi (3 qadam)
-│   └── api/
-│       ├── health/             DB ulanish tekshiruvi
-│       ├── providers/          POST — yangi profil
-│       ├── providers/by-ids/   POST — ID bo'yicha olish
-│       └── bookings/           POST — zayavka
-├── components/                 UI komponentlar (Header, Card, Pagination...)
-├── db/
-│   ├── schema.ts               Drizzle schema + indekslar
-│   └── index.ts                Lazy pool + Drizzle klienti
-└── lib/
-    ├── queries.ts              Barcha DB so'rovlari (keshlangan)
-    ├── searchParams.ts         Filtr/URL yordamchilari
-    ├── validation.ts           Validatsiya + rate limiting
-    ├── favorites.ts            localStorage store
-    ├── useFavorites.ts         React hook (useSyncExternalStore)
-    ├── brand.ts                Brend tokenlari, kategoriyalar
-    └── site.ts                 Kanonik URL aniqlash
+  app/
+    api/
+      bookings/            Buyurtma yaratish
+      providers/           Mutaxassis yaratish
+      providers/by-ids/    Sevimlilar uchun providerlarni olish
+      telegram/webhook/    Telegram bot webhook
+      telegram/setup/      Telegram webhookni sozlash
+      health/              DB health check
+    experts/               Mutaxassislar katalogi
+    transfer/              Transfer katalogi
+    hotels/                Mehmonxonalar katalogi
+    providers/[id]/        Provider profili va booking forma
+    register/              Web orqali ro'yxatdan o'tish
+    blog/                  Blog
+  components/              UI komponentlar
+  db/                      Drizzle schema va DB client
+  lib/                     Query, validation, brand, telegram, i18n helperlar
+scripts/
+  seed.ts                  Demo ma'lumot yozish
 ```
 
----
-
-## Tez boshlash
+## Tez Boshlash
 
 ```bash
-git clone https://github.com/mrstxt/bayconnect.git
-cd bayconnect
 npm install
-cp .env.example .env      # ichiga DATABASE_URL yozing
-npm run db:push           # jadval va indekslarni yaratadi
-npm run db:seed           # demo ma'lumot (ixtiyoriy)
+cp .env.example .env
+npm run db:push
+npm run db:seed
 npm run dev
 ```
 
-Brauzer: **http://localhost:3000**
+Sayt: `http://localhost:3000`
 
----
-
-## Lokalda ishga tushirish (batafsil)
-
-### 1-qadam. Node.js versiyasini tekshiring
+Health check:
 
 ```bash
-node -v     # v20.x yoki v22.x bo'lishi kerak
-npm -v
+curl http://localhost:3000/api/health
 ```
 
-Agar versiya mos kelmasa, [nvm](https://github.com/nvm-sh/nvm) orqali:
+## Environment
 
-```bash
-nvm install 22
-nvm use 22
-```
-
-### 2-qadam. Repozitoriyani klonlang va paketlarni o'rnating
-
-```bash
-git clone https://github.com/mrstxt/bayconnect.git
-cd bayconnect
-npm install
-```
-
-> `npm warn deprecated @esbuild-kit/...` ogohlantirishlari normal — bu `tsx` paketining ichki bog'liqligi, deployga ta'sir qilmaydi.
-
-### 3-qadam. Postgres bazasini tayyorlang
-
-Uch variantdan birini tanlang.
-
-#### Variant A — Neon (bulut, eng oson, tavsiya etiladi)
-
-1. [neon.tech](https://neon.tech) da ro'yxatdan o'ting.
-2. **Create Project** → nom: `bayconnect`.
-3. Region: **Frankfurt** yoki **Singapore** (O'zbekistonga eng yaqin).
-4. **Connection Details** → **Connection string** ni nusxalang.
-5. **Pooled connection** variantini tanlang (Vercel uchun muhim).
-
-Ko'rinishi:
-
-```text
-postgresql://neondb_owner:PAROL@ep-xxx-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require
-```
-
-#### Variant B — Docker (lokal, internetsiz ishlaydi)
-
-```bash
-docker run --name bayconnect-db \
-  -e POSTGRES_PASSWORD=postgres \
-  -e POSTGRES_DB=bayconnect \
-  -p 5432:5432 \
-  -d postgres:16-alpine
-```
-
-Tekshirish:
-
-```bash
-docker ps                          # konteyner ishlayaptimi
-docker logs bayconnect-db --tail 5
-```
-
-Connection string:
-
-```text
-postgresql://postgres:postgres@127.0.0.1:5432/bayconnect
-```
-
-To'xtatish / qayta ishga tushirish:
-
-```bash
-docker stop bayconnect-db
-docker start bayconnect-db
-```
-
-#### Variant C — Tizimga o'rnatilgan Postgres
-
-```bash
-# Ubuntu / Debian
-sudo apt install postgresql
-sudo -u postgres createdb bayconnect
-sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
-
-# macOS (Homebrew)
-brew install postgresql@16
-brew services start postgresql@16
-createdb bayconnect
-```
-
-### 4-qadam. `.env` faylini yarating
-
-```bash
-cp .env.example .env
-```
-
-`.env` ichini tahrirlang:
+`.env.example` faqat namuna. Haqiqiy parollarni hech qachon gitga qo'shmang.
 
 ```env
-DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:5432/bayconnect"
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require"
 NEXT_PUBLIC_SITE_URL="http://localhost:3000"
+TELEGRAM_BOT_TOKEN=""
+TELEGRAM_WEBHOOK_SECRET=""
 ```
 
-> ⚠️ `.env` fayli `.gitignore` da — uni **hech qachon** git'ga qo'shmang.
+### Vercel Envga Nima Joylanadi
 
-### 5-qadam. Jadvallarni yarating
+Vercel dashboard: Project → Settings → Environment Variables.
+
+| Kalit | Qayerdan olinadi | Production qiymat |
+| --- | --- | --- |
+| `DATABASE_URL` | Neon/Supabase/Postgres connection string | Pooled Postgres URL, `sslmode=require` bilan |
+| `NEXT_PUBLIC_SITE_URL` | Deploy domain | `https://your-domain.uz` yoki Vercel production URL |
+| `TELEGRAM_BOT_TOKEN` | BotFather | `123456:ABC...` ko'rinishidagi token |
+| `TELEGRAM_WEBHOOK_SECRET` | O'zingiz yaratasiz | Uzun random matn, masalan `openssl rand -hex 32` |
+
+Vercel preview muhitida ham alohida `NEXT_PUBLIC_SITE_URL` qo'ysangiz canonical URL va Telegram setup to'g'ri ishlaydi.
+
+## Database
+
+Schema: `src/db/schema.ts`.
+
+Asosiy jadvallar:
+
+| Jadval | Maqsad |
+| --- | --- |
+| `providers` | Mutaxassislar, transferlar, mehmonxonalar |
+| `bookings` | Mijoz buyurtmalari |
+| `reviews` | Provider sharhlari |
+| `posts` | Blog maqolalari |
+| `telegram_registrations` | Telegram ro'yxatdan o'tish sessiyasi |
+
+Jadvallarni yaratish yoki yangilash:
 
 ```bash
 npm run db:push
 ```
 
-Bu buyruq `src/db/schema.ts` asosida 4 ta jadval (`providers`, `bookings`, `reviews`, `posts`) va 11 ta indeks yaratadi.
-
-Kutilayotgan natija:
-
-```text
-4 tables
-bookings 11 columns 2 indexes 1 fks
-posts 10 columns 2 indexes 0 fks
-providers 20 columns 6 indexes 0 fks
-reviews 6 columns 1 indexes 1 fks
-```
-
-### 6-qadam. Demo ma'lumot (ixtiyoriy)
+Demo ma'lumot:
 
 ```bash
 npm run db:seed
 ```
 
-> ⚠️ Bu skript `providers`, `reviews`, `posts`, `bookings` jadvallarini **tozalab**, demo ma'lumot yozadi. Production bazada ishlatmang — skript `NODE_ENV=production` bo'lsa o'zini bloklaydi.
+Production bazada `db:seed` ishlatmang.
 
-### 7-qadam. Serverni ishga tushiring
+## Telegram Botni Ishga Tushirish
+
+1. Telegramda `@BotFather`ga kiring.
+2. `/newbot` orqali bot yarating.
+3. BotFather bergan tokenni `TELEGRAM_BOT_TOKEN`ga yozing.
+4. `TELEGRAM_WEBHOOK_SECRET` uchun uzun random qiymat yarating:
 
 ```bash
-npm run dev
+openssl rand -hex 32
 ```
+
+5. Vercelga deploy qiling.
+6. Deploydan keyin webhookni bir marta sozlang:
 
 ```text
-▲ Next.js 16.2.6 (Turbopack)
-- Local:  http://localhost:3000
-✓ Ready in 1.2s
+https://YOUR_DOMAIN/api/telegram/setup?secret=TELEGRAM_WEBHOOK_SECRET_QIYMATI
 ```
 
-Tekshiring:
+Endpoint Telegramga quyidagi webhookni o'rnatadi:
 
-```bash
-curl http://localhost:3000/api/health
-# {"ok":true,"latencyMs":14}
+```text
+https://YOUR_DOMAIN/api/telegram/webhook
 ```
 
-### 8-qadam. Production build'ni lokal sinash
+Bot oqimi:
 
-Deploydan oldin real build'ni tekshirish foydali:
+1. Mutaxassis botga `/start` yoki `/register` yuboradi.
+2. Telefon raqamini Telegram contact tugmasi orqali yuboradi.
+3. Xizmat turini tanlaydi.
+4. Shahar, tillar, narx, tajriba va bio kiritadi.
+5. Profil `providers` jadvaliga yoziladi.
+6. Keyingi bookinglar shu Telegram chatga yuboriladi.
+
+Muhim: botdan ro'yxatdan o'tgan providerlarda `telegram_chat_id` saqlanadi. Web formadan ro'yxatdan o'tgan providerga bot xabari borishi uchun hozircha chat ID yo'q; buni keyin web profilni bot bilan bog'lash oqimi orqali kengaytirish mumkin.
+
+## Til Va Tarjima
+
+Saytda `UZ / RU / EN` til switcheri bor. U cookie (`bc_locale`) orqali tanlovni saqlaydi va asosiy UI matnlarini frontda tarjima qiladi.
+
+Hozir tarjima qamrovi:
+
+| Qism | Holat |
+| --- | --- |
+| Header, footer, tugmalar | UZ/RU/EN |
+| Katalog filtr va empty state matnlari | UZ/RU/EN |
+| Booking va register formadagi asosiy matnlar | UZ/RU/EN |
+| API error javoblari | Hozircha Uzbek |
+| DBdagi bio, blog body, review matnlari | Avtomatik tarjima qilinmaydi |
+
+Eski va yangi erkin matnlarni ham avtomatik tarjima qilish mumkin, lekin buning uchun alohida translation provider kerak bo'ladi: masalan OpenAI API, Google Translate yoki DeepL. Bunday qatlam qo'shilsa, provider bio/blog/review matnlari so'rov paytida yoki yozilish vaqtida tarjima qilinib, cache qilinadi.
+
+## API Endpointlar
+
+| Endpoint | Method | Vazifa |
+| --- | --- | --- |
+| `/api/health` | GET | DB ulanishini tekshiradi |
+| `/api/providers` | POST | Mutaxassis yaratadi |
+| `/api/providers/by-ids` | POST | IDlar bo'yicha providerlarni qaytaradi |
+| `/api/bookings` | POST | Buyurtma yaratadi va Telegramga xabar yuboradi |
+| `/api/telegram/webhook` | POST | Telegram update qabul qiladi |
+| `/api/telegram/setup?secret=...` | GET | Telegram webhookni o'rnatadi |
+
+## Tekshiruv Buyruqlari
 
 ```bash
+npm run lint
+npm run typecheck
+npm run check
 npm run build
-npm run start
 ```
 
-Sayt **http://localhost:3000** da production rejimida ochiladi.
+## Deploy
 
-### Port band bo'lsa
-
-```bash
-npm run dev -- -p 3001
-```
-
----
-
-## Ma'lumotlar bazasi
-
-### Jadvallar
-
-| Jadval | Vazifasi |
-|---|---|
-| `providers` | Xizmat ko'rsatuvchilar (gid, transfer, mehmonxona...) |
-| `bookings` | Mijoz zayavkalari |
-| `reviews` | Profil sharhlari |
-| `posts` | Blog maqolalari |
-
-### Buyruqlar
-
-```bash
-npm run db:push       # schema'ni bazaga qo'llash (dev uchun)
-npm run db:generate   # SQL migration fayli yaratish (prod uchun)
-npm run db:migrate    # migration'larni qo'llash
-npm run db:studio     # brauzerda vizual DB redaktori
-npm run db:seed       # demo ma'lumot
-```
-
-### Indekslar
-
-`providers` jadvalida 6 ta indeks bor — ular filtr va saralashni tezlashtiradi:
-
-| Indeks | Qaysi so'rov uchun |
-|---|---|
-| `providers_category_idx` | `/experts`, `/hotels` kategoriya filtri |
-| `providers_category_sub_idx` | `/transfer` transport turi |
-| `providers_city_idx` | Shahar filtri |
-| `providers_price_idx` | Narx diapazoni va saralash |
-| `providers_rank_idx` | Default saralash (verified → rating) |
-| `providers_created_idx` | "Yangi" saralash |
-
----
-
-## Environment o'zgaruvchilari
-
-| Nom | Majburiy | Tavsif |
-|---|:---:|---|
-| `DATABASE_URL` | ✅ | Postgres connection string |
-| `NEXT_PUBLIC_SITE_URL` | ❌ | Kanonik URL (sitemap, OG teglar). Vercel'da avtomatik aniqlanadi |
-
----
-
-## Vercel'ga deploy
-
-### 1. Kodni GitHub'ga yuklang
-
-```bash
-git add .
-git commit -m "perf: keshlash, sahifalash va validatsiya yaxshilandi"
-git push origin main
-```
-
-### 2. Vercel'da loyiha yarating
-
-1. [vercel.com/new](https://vercel.com/new) → **Import Git Repository**.
-2. `bayconnect` repozitoriyasini tanlang.
-3. Framework Preset: **Next.js** (avtomatik aniqlanadi).
-4. Build sozlamalarini o'zgartirmang:
-
-```text
-Install Command: npm install
-Build Command:   npm run build
-Output:          (bo'sh — Next.js avtomatik)
-Root Directory:  ./
-```
-
-### 3. Environment Variables qo'shing
-
-**Settings → Environment Variables** bo'limida:
-
-| Name | Value | Environments |
-|---|---|---|
-| `DATABASE_URL` | Neon **pooled** connection string | Production, Preview, Development |
-
-> Neon'ning **`-pooler`** li manzilini ishlating. Serverless funksiyalar tez-tez ishga tushadi va oddiy (direct) ulanish limitini tez tugatadi.
-
-### 4. Deploy
-
-**Deploy** tugmasini bosing. Env keyinroq qo'shilgan bo'lsa — **Redeploy** qiling.
-
-### 5. Bazani tayyorlang
-
-Vercel jadvallarni avtomatik yaratmaydi. Lokal mashinangizdan **production** `DATABASE_URL` bilan bir marta bajaring:
-
-```bash
-DATABASE_URL="postgresql://...neon.tech/neondb?sslmode=require" npm run db:push
-```
-
-### 6. Tekshiring
-
-```text
-https://SIZNING-DOMEN.vercel.app/api/health
-```
-
-Kutilgan javob:
-
-```json
-{ "ok": true, "latencyMs": 23 }
-```
-
----
-
-## Arxitektura va keshlash
-
-### Renderlash strategiyasi
-
-| Sahifa | Rejim | Yangilanish |
-|---|---|---|
-| `/` | ISR | 5 daqiqa |
-| `/experts`, `/transfer`, `/hotels` | ISR + kesh | 2 daqiqa |
-| `/blog` | ISR | 10 daqiqa |
-| `/blog/[slug]` | **SSG** (build vaqtida) | 10 daqiqa |
-| `/providers/[id]` | ISR | 5 daqiqa |
-| `/favorites`, `/register` | Statik + client | — |
-| `/api/*` | Dynamic | keshlanmaydi |
-
-### Kesh invalidatsiyasi
-
-Yangi mutaxassis qo'shilganda `POST /api/providers` avtomatik ravishda `revalidateTag("providers", "max")` chaqiradi — ro'yxatlar darhol yangilanadi, keshning tugashini kutish shart emas.
-
-### DB xatosiga chidamlilik
-
-Barcha so'rovlar `safe()` o'ramida. Agar baza yetib bormasa:
-
-- `next build` **yiqilmaydi** — sahifalar bo'sh holatda generatsiya bo'ladi;
-- xato konsolga yoziladi;
-- bo'sh natija **keshlanmaydi**, keyingi so'rov qayta urinadi.
-
----
-
-## API endpointlar
-
-| Method | Endpoint | Tavsif | Rate limit |
-|---|---|---|---|
-| `GET` | `/api/health` | DB ulanishi + kechikish | — |
-| `POST` | `/api/providers` | Yangi profil yaratadi | 10 / soat |
-| `POST` | `/api/providers/by-ids` | ID ro'yxati bo'yicha (maks. 60) | 60 / daq |
-| `POST` | `/api/bookings` | Zayavka yaratadi | 5 / daq |
-
-Namuna:
-
-```bash
-curl -X POST http://localhost:3000/api/bookings \
-  -H "Content-Type: application/json" \
-  -d '{
-    "providerId": 1,
-    "clientName": "Ali Valiyev",
-    "clientEmail": "ali@mail.uz",
-    "clientPhone": "+998 90 123 45 67",
-    "startDate": "2026-08-01",
-    "endDate": "2026-08-05",
-    "peopleCount": 2
-  }'
-```
-
----
-
-## Tekshiruv buyruqlari
-
-```bash
-npm run lint         # ESLint
-npm run typecheck    # TypeScript
-npm run check        # ikkalasi birga
-npm run build        # production build
-```
-
-Deploydan oldin `npm run check` ni bajaring — Vercel'da tip xatosi build'ni to'xtatadi.
-
----
-
-## Muammolarni bartaraf etish
-
-### `DATABASE_URL topilmadi`
-
-`.env` fayli yo'q yoki bo'sh. `cp .env.example .env` qilib, ichini to'ldiring. Faylni yaratgandan keyin dev serverni **qayta ishga tushiring**.
-
-### `/api/health` → `{"ok": false}` yoki 503
-
-Ketma-ket tekshiring:
-
-1. Docker ishlatayotgan bo'lsangiz: `docker ps` — konteyner ishlayaptimi?
-2. Connection string'da user/parol/port to'g'rimi?
-3. Neon ishlatayotgan bo'lsangiz `?sslmode=require` bormi?
-4. `npm run db:push` bajarilganmi?
-5. Vercel'da: env qo'shilgandan keyin **Redeploy** qilinganmi?
-
-### `relation "providers" does not exist`
-
-Jadvallar yaratilmagan:
+1. Repo GitHubga push qilinadi.
+2. Vercelda project import qilinadi.
+3. Envlar qo'shiladi.
+4. Build command: `npm run build`.
+5. Deploydan keyin:
 
 ```bash
 npm run db:push
 ```
 
-### `ECONNREFUSED 127.0.0.1:5432`
+Vercelda lokal command ishlatmasangiz, `DATABASE_URL` bilan terminaldan Drizzle push qiling yoki Drizzle Studio/Neon console orqali migrationni bajaring.
 
-Lokal Postgres ishlamayapti:
+## Xavfsizlik Eslatmalari
 
-```bash
-docker start bayconnect-db          # Docker
-brew services start postgresql@16   # macOS
-sudo systemctl start postgresql     # Linux
-```
+- `.env` va real tokenlarni commit qilmang.
+- Agar `.env.example` yoki boshqa faylga real DB URL tushib qolgan bo'lsa, DB parolini rotate qiling.
+- `TELEGRAM_WEBHOOK_SECRET` kamida 32 random belgidan iborat bo'lsin.
+- Booking va register endpointlarda oddiy rate limit va input validation bor.
+- Serverless memory rate limit mutlaq himoya emas; katta trafficda Upstash Redis yoki Vercel Firewall ishlating.
 
-### Neon: `too many connections`
+## UI/UX Izohlar
 
-Direct connection string ishlatilgan. Neon panelidan **`-pooler`** li manzilga o'ting.
-
-### Sayt sekin ochilyapti
-
-1. Neon region'i foydalanuvchilarga yaqinmi? (Frankfurt / Singapore)
-2. Vercel funksiya region'i baza region'iga mos kelyaptimi? (**Settings → Functions → Region**)
-3. Neon bepul tarifda 5 daqiqa faoliyatsizlikdan keyin "uxlaydi" — birinchi so'rov 1–3 soniya sekinroq bo'ladi. Bu normal.
-
-### Port 3000 band
-
-```bash
-npm run dev -- -p 3001
-```
-
----
-
-## Litsenziya
-
-Xususiy loyiha. Barcha huquqlar himoyalangan.
+Saytda mobil menyu, sticky header, katalog filtrlar, empty state, booking formasi va sticky mobile booking bar bor. Dekorativ fonlar yengillashtirilgan, til switcheri headerga joylangan, statik UI matnlari UZ/RU/EN uchun tarjima qilinadi.

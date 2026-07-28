@@ -30,6 +30,9 @@ export const providers = pgTable(
     bio: text("bio").notNull(),
     phone: varchar("phone", { length: 40 }).notNull(),
     email: varchar("email", { length: 160 }).notNull(),
+    // Telegram botdagi chat: buyurtmalar bevosita shu yerga yuboriladi.
+    telegramChatId: varchar("telegram_chat_id", { length: 32 }).unique(),
+    telegramUsername: varchar("telegram_username", { length: 80 }),
     avatarEmoji: varchar("avatar_emoji", { length: 8 }).notNull().default("🌴"),
     coverColor: varchar("cover_color", { length: 20 }).notNull().default("orange"),
     tags: jsonb("tags").$type<string[]>().notNull().default([]),
@@ -77,6 +80,21 @@ export const bookings = pgTable(
   ],
 );
 
+export const telegramRegistrations = pgTable(
+  "telegram_registrations",
+  {
+    chatId: varchar("chat_id", { length: 32 }).primaryKey(),
+    telegramUserId: varchar("telegram_user_id", { length: 32 }).notNull(),
+    fullName: varchar("full_name", { length: 160 }).notNull().default(""),
+    username: varchar("username", { length: 80 }).notNull().default(""),
+    phone: varchar("phone", { length: 40 }).notNull().default(""),
+    step: varchar("step", { length: 30 }).notNull().default("start"),
+    data: jsonb("data").$type<Record<string, string>>().notNull().default({}),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("telegram_registrations_updated_idx").on(t.updatedAt)],
+);
+
 export const reviews = pgTable(
   "reviews",
   {
@@ -121,6 +139,7 @@ export type Provider = typeof providers.$inferSelect;
 export type NewProvider = typeof providers.$inferInsert;
 export type Booking = typeof bookings.$inferSelect;
 export type NewBooking = typeof bookings.$inferInsert;
+export type TelegramRegistration = typeof telegramRegistrations.$inferSelect;
 export type Review = typeof reviews.$inferSelect;
 export type NewReview = typeof reviews.$inferInsert;
 export type Post = typeof posts.$inferSelect;

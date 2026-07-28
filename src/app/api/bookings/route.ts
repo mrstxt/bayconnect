@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { bookings, providers } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { telegramSendMessage } from "@/lib/telegram";
+import { categoryLabel } from "@/lib/brand";
 import {
   clean,
   cleanMultiline,
@@ -118,7 +120,7 @@ export async function POST(req: Request) {
 
   try {
     const [provider] = await db
-      .select({ id: providers.id })
+      .select({ id: providers.id, fullName: providers.fullName, category: providers.category, telegramChatId: providers.telegramChatId })
       .from(providers)
       .where(eq(providers.id, providerId))
       .limit(1);
@@ -140,6 +142,23 @@ export async function POST(req: Request) {
         message,
       })
       .returning({ id: bookings.id });
+
+    // Buyurtma bazaga muvaffaqiyatli tushgach, mutaxassis bot chatiga xabar jo'natamiz.
+    // Telegram ishlamasa ham mijoz zayavkasi yo'qolmaydi.
+    if (provider.telegramChatId) {
+      const messageText = [
+        "🔔 Yangi buyurtma",
+        `Xizmat: ${categoryLabel(provider.category)}`,
+        `Mijoz: ${clientName}`,
+        `Telefon: ${clientPhone}`,
+        `Email: ${clientEmail}`,
+        `Sana: ${startDate} — ${endDate}`,
+        `Odamlar: ${Math.trunc(peopleCount)}`,
+        message ? `Izoh: ${message}` : "",
+        `Buyurtma #${row.id}`,
+      ].filter(Boolean).join("\n");
+      void telegramSendMessage(provider.telegramChatId, messageText);
+    }
 
     return NextResponse.json({ ok: true, id: row.id }, { status: 201 });
   } catch (e) {
