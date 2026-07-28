@@ -137,5 +137,6 @@ export const NAV_ITEMS = [
   { href: "/experts", label: "Mutaxassislar", external: false },
   { href: "/transfer", label: "Transfer", external: false },
   { href: "/hotels", label: "Mehmonxonalar", external: false },
+  { href: "/stats", label: "Statistika", external: false },
   { href: "/blog", label: "Blog", external: false },
 ] as const;

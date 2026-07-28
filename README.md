@@ -241,6 +241,19 @@ Vercelda lokal command ishlatmasangiz, `DATABASE_URL` bilan terminaldan Drizzle 
 - Booking va register endpointlarda oddiy rate limit va input validation bor.
 - Serverless memory rate limit mutlaq himoya emas; katta trafficda Upstash Redis yoki Vercel Firewall ishlating.
 
+### npm Audit Holati (2026-07-28)
+
+`npm audit --omit=dev` (production daraxti) → **0 zaiflik**.
+
+Dev-only daraxtda 2 ta ochiq CVE qolgan, ikkalasi ham deploy'dagi runtime'ga kirmaydi:
+
+| Paket | Qayerdan | Nega hozircha tuzatilmaydi |
+| --- | --- | --- |
+| `brace-expansion@1.x` (high, GHSA-mh99-v99m-4gvg) | eslint pluginlari → `minimatch@3` | 1.x liniyasi uchun patch backport hali chiqmagan; zo'riqtirish kodni buzadi |
+| `esbuild@0.24` (moderate, GHSA-67mh-4wv8-2f99) | `drizzle-kit` → `@esbuild-kit` | Zaiflik faqat esbuild'ning dev-serveriga taalluqli; drizzle-kit buni ishga tushirmaydi |
+
+Ikkalasi ham build/lint paytidagi lokal vositalar. Backport chiqqach `npm update` avtomatik oladi.
+
 ## UI/UX Izohlar
 
 Saytda mobil menyu, sticky header, katalog filtrlar, empty state, booking formasi va sticky mobile booking bar bor. Dekorativ fonlar yengillashtirilgan, til switcheri headerga joylangan, statik UI matnlari UZ/RU/EN uchun tarjima qilinadi.

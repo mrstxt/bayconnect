@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { db } from "@/db";
-import { providers, posts, reviews } from "@/db/schema";
+import { providers, posts, reviews, bookings } from "@/db/schema";
 import {
   and,
   eq,
@@ -365,4 +365,108 @@ export function getPostBySlug(slug: string) {
 export async function getAllPostSlugs(): Promise<string[]> {
   const rows = await db.select({ slug: posts.slug }).from(posts).limit(500);
   return rows.map((r) => r.slug);
+}
+
+/* ------------------------------ PLATFORM STATS ( /stats ) ------------------------------ */
+
+export type PlatformStats = {
+  providers: {
+    total: number;
+    verified: number;
+    viaBot: number; // telegram bot orqali ro'yxatdan o'tgan (telegram_chat_id bor)
+    viaWeb: number; // web forma orqali
+    thisMonth: number; // joriy oyda qo'shilgan
+  };
+  categories: { key: string; count: number }[];
+  cities: { city: string; count: number }[];
+  bookings: { total: number; pending: number; thisWeek: number };
+  recent: {
+    id: number;
+    fullName: string;
+    category: string;
+    city: string;
+    coverColor: string;
+    viaBot: boolean;
+    createdAt: string; // ISO — kesh ichida Date emas, string saqlanadi
+  }[];
+};
+
+const EMPTY_PLATFORM_STATS: PlatformStats = {
+  providers: { total: 0, verified: 0, viaBot: 0, viaWeb: 0, thisMonth: 0 },
+  categories: [],
+  cities: [],
+  bookings: { total: 0, pending: 0, thisWeek: 0 },
+  recent: [],
+};
+
+const cachedPlatformStats = unstable_cache(
+  async (): Promise<PlatformStats> => {
+    const [totalsRows, categoryRows, cityRows, bookingRows, recentRows] = await Promise.all([
+      db
+        .select({
+          total: sql<number>`count(*)`.mapWith(Number),
+          verified: sql<number>`count(*) filter (where ${providers.verified})`.mapWith(Number),
+          viaBot: sql<number>`count(*) filter (where ${providers.telegramChatId} is not null)`.mapWith(Number),
+          viaWeb: sql<number>`count(*) filter (where ${providers.telegramChatId} is null)`.mapWith(Number),
+          thisMonth: sql<number>`count(*) filter (where ${providers.createdAt} >= date_trunc('month', now()))`.mapWith(Number),
+        })
+        .from(providers),
+      db
+        .select({
+          key: providers.category,
+          count: sql<number>`count(*)`.mapWith(Number),
+        })
+        .from(providers)
+        .groupBy(providers.category)
+        .orderBy(desc(sql`count(*)`)),
+      db
+        .select({
+          city: providers.city,
+          count: sql<number>`count(*)`.mapWith(Number),
+        })
+        .from(providers)
+        .groupBy(providers.city)
+        .orderBy(desc(sql`count(*)`))
+        .limit(8),
+      db
+        .select({
+          total: sql<number>`count(*)`.mapWith(Number),
+          pending: sql<number>`count(*) filter (where ${bookings.status} = 'pending')`.mapWith(Number),
+          thisWeek: sql<number>`count(*) filter (where ${bookings.createdAt} >= now() - interval '7 days')`.mapWith(Number),
+        })
+        .from(bookings),
+      db
+        .select({
+          id: providers.id,
+          fullName: providers.fullName,
+          category: providers.category,
+          city: providers.city,
+          coverColor: providers.coverColor,
+          viaBot: sql<boolean>`${providers.telegramChatId} is not null`.mapWith(Boolean),
+          createdAt: providers.createdAt,
+        })
+        .from(providers)
+        .orderBy(desc(providers.createdAt), desc(providers.id))
+        .limit(6),
+    ]);
+
+    const t = totalsRows[0];
+    const b = bookingRows[0];
+
+    return {
+      providers: t ?? EMPTY_PLATFORM_STATS.providers,
+      categories: categoryRows,
+      cities: cityRows,
+      bookings: b ?? EMPTY_PLATFORM_STATS.bookings,
+      recent: recentRows.map((r) => ({ ...r, createdAt: r.createdAt.toISOString() })),
+    };
+  },
+  ["platform:stats"],
+  // `providers` tegi: bot yoki web ro'yxatdan o'tish revalidateTag qiladi —
+  // statistika registratsiyadan keyin darhol yangilanadi.
+  { revalidate: 300, tags: [CACHE_TAGS.providers] },
+);
+
+export function getPlatformStats(): Promise<PlatformStats> {
+  return safe(cachedPlatformStats, EMPTY_PLATFORM_STATS, "platformStats");
 }

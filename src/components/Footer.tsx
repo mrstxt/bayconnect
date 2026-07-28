@@ -114,6 +114,9 @@ export function Footer() {
                 <Link href="/hotels" className={linkCls}>Mehmonxonalar</Link>
               </li>
               <li>
+                <Link href="/stats" className={linkCls}>Statistika</Link>
+              </li>
+              <li>
                 <Link href="/blog" className={linkCls}>Blog</Link>
               </li>
               <li>

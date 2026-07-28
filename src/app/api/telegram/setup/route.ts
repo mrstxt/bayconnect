@@ -6,6 +6,13 @@ export const dynamic = "force-dynamic";
 
 const API = "https://api.telegram.org";
 
+type WebhookInfo = {
+  url?: string;
+  pending_update_count?: number;
+  last_error_message?: string;
+  last_error_date?: number;
+};
+
 async function telegramApi<T>(token: string, method: string, body?: Record<string, unknown>) {
   const response = await fetch(`${API}/bot${token}/${method}`, {
     method: body ? "POST" : "GET",
@@ -14,6 +21,21 @@ async function telegramApi<T>(token: string, method: string, body?: Record<strin
   });
   const result = (await response.json().catch(() => null)) as T;
   return { ok: response.ok, result };
+}
+
+/** Telegram xatosidan odam o'qiydigan maslahat chiqaradi. */
+function hintFor(result: unknown): string {
+  const text = JSON.stringify(result ?? {});
+  if (text.includes('"error_code":429') || text.includes("Too Many Requests")) {
+    return "Telegram setWebhook'ni vaqtincha chekladi (429) — bu sahifani tez-tez refresh qilishdan bo'ladi. 1–2 daqiqa kuting. Webhook allaqachon o'rnatilgan bo'lsa, qayta sozlash UMUMAN kerak emas — botga /start yuborib sinab ko'ring.";
+  }
+  if (text.includes("Unauthorized")) {
+    return "TELEGRAM_BOT_TOKEN noto'g'ri — @BotFather'dagi token bilan Vercel env'dagini solishtiring.";
+  }
+  if (text.includes("resolve host") || text.includes("Failed to resolve")) {
+    return "Webhook domeni DNS'da topilmayapti — NEXT_PUBLIC_SITE_URL'dagi domen yozuvini tekshiring.";
+  }
+  return "Tafsilotlar 'webhook' maydonida. Umumiy muammolar: npm run bot:check bajarib ko'ring.";
 }
 
 export async function GET(req: Request) {
@@ -47,8 +69,30 @@ export async function GET(req: Request) {
       { status: 400 },
     );
   }
-  const [me, commands, webhook] = await Promise.all([
-    telegramApi(token, "getMe"),
+
+  const me = await telegramApi(token, "getMe");
+  const infoBefore = await telegramApi<WebhookInfo>(token, "getWebhookInfo");
+
+  // 1. IDEMPOTENT TEKSHIRUV: webhook allaqachon shu URL'ga o'rnatilgan bo'lsa,
+  //    setWebhook'ni qayta chaqirmaymiz — Telegram har bir setWebhook'ni
+  //    rate-limit qiladi va takroriy so'rovlar 429 bilan rad etilardi.
+  //    (?force=1 bilan majburlash mumkin — masalan, secret almashtirilganda.)
+  const force = url.searchParams.get("force") === "1";
+  const alreadySet = infoBefore.ok && infoBefore.result?.url === webhookUrl;
+
+  if (alreadySet && !force) {
+    return NextResponse.json({
+      ok: true,
+      alreadyConfigured: true,
+      webhookUrl,
+      bot: me.result,
+      webhookInfo: infoBefore.result,
+      hint: "Webhook allaqachon to'g'ri o'rnatilgan — qayta sozlash shart emas. Botga /start yuborib sinang. Agar bot javob bermasa, sababini buyruqdan ko'ring: npm run bot:check. Secret'ni almashtirgan bo'lsangiz: ?force=1 qo'shib qayta chaqiring.",
+    });
+  }
+
+  // 2. To'liq sozlash (webhook o'rnatilmagan yoki force rejimi)
+  const [commands, webhook] = await Promise.all([
     telegramApi(token, "setMyCommands", {
       commands: [
         { command: "start", description: "Ro'yxatdan o'tishni boshlash" },
@@ -73,6 +117,8 @@ export async function GET(req: Request) {
       commands: commands.result,
       webhook: webhook.result,
       webhookInfo: info.result,
+      // 502 holatida ham foydalanuvchi nima qilishini darhol tushunsin.
+      ...(webhook.ok ? {} : { hint: hintFor(webhook.result) }),
     },
     { status: webhook.ok ? 200 : 502 },
   );
