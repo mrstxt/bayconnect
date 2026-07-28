@@ -136,6 +136,42 @@ Endpoint Telegramga quyidagi webhookni o'rnatadi:
 https://YOUR_DOMAIN/api/telegram/webhook
 ```
 
+## Bot Ishlamayaptimi? (Troubleshooting)
+
+Avval diagnostikani ishga tushiring — muammoni o'zi topib, yechimni yozib beradi:
+
+```bash
+npm run bot:check            # faqat tekshiradi
+npm run bot:check -- --fix   # webhookni to'g'ri URL bilan o'zi qayta o'rnatadi
+```
+
+Eng ko'p uchraydigan 5 ta sabab:
+
+| # | Sabab | Belgisi | Yechim |
+| --- | --- | --- | --- |
+| 1 | Webhook hech qachon o'rnatilmagan | Bot jimgina javob bermaydi | Deploydan keyin bir marta `https://DOMEN/api/telegram/setup?secret=SECRET` ni oching |
+| 2 | `NEXT_PUBLIC_SITE_URL` da `http://localhost:3000` qoldirilgan | Setup endpoint 400/502 qaytaradi | Telegram FAQAT HTTPS public domenni qabul qiladi — env'ga production domenni yozing, redeploy qiling, setup'ni qayta chaqiring |
+| 3 | Envlar faqat lokal `.env`da — Vercel'ga yozilmagan | GET `/api/telegram/webhook` `botTokenConfigured:false` ko'rsatadi | Vercel `Settings → Environment Variables` ga 4 tasini yozing + Redeploy |
+| 4 | `npm run db:push` bajarilmagan | Bot "vaqtincha sozlanmoqda" deb javob beradi | `npm run db:push` — `telegram_registrations` jadvali yaratilishi shart |
+| 5 | Lokalda (`npm run dev`) test qilinmoqda | Bot umuman sekin | Telegram localhost'ga update yubora olmaydi; ngrok/cloudflared tunnel bilan public https URL olib, webhookni shunga yo'naltiring |
+
+Qo'shimcha tekshiruvlar:
+
+```bash
+# 1. Envlar serverga chiqqanmi?
+curl https://DOMEN/api/telegram/webhook
+#    → {"botTokenConfigured":true,"webhookSecretConfigured":true} bo'lishi shart
+
+# 2. Webhook nima deyapti? (simptom shu yerda ko'rinadi)
+curl "https://api.telegram.org/bot<TOKEN>/getWebhookInfo"
+#    → "url" bo'shmi? "last_error_message" nima degan?
+```
+
+`webhookInfo.last_error_message`:
+- `401 Unauthorized` → secret mos kelmadi; setup'ni joriy secret bilan qayta chaqiring
+- `Connection refused` / DNS xatosı → domen yoki deploy ishlamayapti
+- hech qanday xato yo'q + `pending_update_count=0` → hammasi yaxshi, botga `/start` yuboring
+
 Bot oqimi:
 
 1. Mutaxassis botga `/start` yoki `/register` yuboradi.

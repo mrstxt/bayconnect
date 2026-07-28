@@ -33,6 +33,20 @@ export async function GET(req: Request) {
   }
 
   const webhookUrl = `${siteUrl().replace(/\/$/, "")}/api/telegram/webhook`;
+
+  // Telegram faqat https:// (public domen, valid sertifikat) webhookni qabul qiladi.
+  // localhost yoki http:// bilan setWebhook chaqirsangiz Telegram rad etadi va
+  // bot hech qanday javob bermaydi — bu eng ko'p uchraydigan sozlash xatosi.
+  if (!webhookUrl.startsWith("https://")) {
+    return NextResponse.json(
+      {
+        error: "Webhook URL https:// bo'lishi shart",
+        webhookUrl,
+        hint: "NEXT_PUBLIC_SITE_URL'ga loyihangizning https:// bilan yozilgan public domenini kiriting (masalan, https://bayconnect.vercel.app yoki https://bayconnect.uz), keyin bu endpointni qayta chaqiring. Lokalda test uchun ngrok/cloudflared tunnel kerak.",
+      },
+      { status: 400 },
+    );
+  }
   const [me, commands, webhook] = await Promise.all([
     telegramApi(token, "getMe"),
     telegramApi(token, "setMyCommands", {
