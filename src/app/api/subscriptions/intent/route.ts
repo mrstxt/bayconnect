@@ -171,7 +171,7 @@ export async function POST(req: Request) {
 
   if (fullName.length < 2) return NextResponse.json({ error: "Ism juda qisqa" }, { status: 400 });
   if (!isValidPhone(phone)) return NextResponse.json({ error: "Telefon raqami noto'g'ri" }, { status: 400 });
-  if (!/^[a-f0-9]{48}$/.test(telegramVerificationToken)) {
+  if (!/^(?:[a-f0-9]{40}|[a-f0-9]{48})$/.test(telegramVerificationToken)) {
     return NextResponse.json({ error: "Avval Telegram profilingizni tasdiqlang" }, { status: 400 });
   }
 

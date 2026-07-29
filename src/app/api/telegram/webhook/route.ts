@@ -286,8 +286,8 @@ export async function POST(req: Request) {
   const payload = commandPayload(text);
 
   if (command === "/start" && payload.startsWith("verify_")) {
-    const [, token = "", audience = "community"] = payload.match(/^verify_([a-f0-9]{48})(?:_(specialist|community))?$/) ?? [];
-    if (!/^[a-f0-9]{48}$/.test(token)) {
+    const [, token = "", audience = "community"] = payload.match(/^verify_([a-f0-9]{40}|[a-f0-9]{48})(?:_(specialist|community))?$/) ?? [];
+    if (!/^(?:[a-f0-9]{40}|[a-f0-9]{48})$/.test(token)) {
       await telegramSendMessage(chatId, "Tasdiqlash havolasi noto'g'ri. Saytdan qayta urinib ko'ring.");
       return NextResponse.json({ ok: true });
     }

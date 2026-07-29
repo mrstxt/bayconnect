@@ -33,7 +33,9 @@ export async function POST(req: Request) {
 
   const body = await readJson<{ audience?: unknown }>(req);
   const audience = clean(body?.audience, 30) === "specialist" ? "specialist" : "community";
-  const token = randomBytes(24).toString("hex");
+  // Telegram deep-link start payload 64 belgidan oshmasligi kerak.
+  // verify_<40 hex>_<specialist|community> eng uzun holatda 58 belgi bo'ladi.
+  const token = randomBytes(20).toString("hex");
   const expiresAt = new Date(Date.now() + 15 * 60_000);
   await db.insert(telegramVerifications).values({ token, expiresAt, updatedAt: new Date() });
   const username = await botUsername();

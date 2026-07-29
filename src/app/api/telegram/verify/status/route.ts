@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const token = clean(url.searchParams.get("token") ?? "", 80);
-  if (!/^[a-f0-9]{48}$/.test(token)) {
+  if (!/^(?:[a-f0-9]{40}|[a-f0-9]{48})$/.test(token)) {
     return NextResponse.json({ error: "Tasdiqlash tokeni noto'g'ri" }, { status: 400 });
   }
 
