@@ -319,6 +319,30 @@ export async function POST(req: Request) {
       await telegramSendMessage(chatId, "Siz allaqachon ro'yxatdan o'tgansiz. Yangi buyurtmalar shu botga keladi.");
       return NextResponse.json({ ok: true });
     }
+    const [existingProvider] = await db
+      .select({ id: providers.id, fullName: providers.fullName })
+      .from(providers)
+      .where(
+        or(
+          eq(providers.telegramUserId, String(from.id)),
+          eq(providers.telegramUsername, normalizeUsername(from.username ?? reg.username)),
+          eq(providers.telegramChatId, chatId),
+          eq(providers.phone, reg.phone),
+        ),
+      )
+      .limit(1);
+
+    if (existingProvider) {
+      reg.step = "done";
+      await save(reg);
+      await telegramSendMessage(
+        chatId,
+        `Siz allaqachon hamkor sifatida ro'yxatdan o'tgansiz.\n\nProfil: ${existingProvider.fullName}\n${process.env.NEXT_PUBLIC_SITE_URL ?? "https://bayconnect.uz"}/providers/${existingProvider.id}`,
+        { reply_markup: { remove_keyboard: true } },
+      );
+      return NextResponse.json({ ok: true });
+    }
+
     const subscription = await findActiveSpecialistSubscription(String(from.id), from.username ?? reg.username);
     if (!subscription) {
       await telegramSendMessage(
@@ -454,6 +478,29 @@ export async function POST(req: Request) {
       await telegramSendMessage(
         chatId,
         `Obunangiz active emas. Avval saytda to'lov/promokodni yakunlang:\n${process.env.NEXT_PUBLIC_SITE_URL ?? "https://bayconnect.uz"}/register`,
+        { reply_markup: { remove_keyboard: true } },
+      );
+      return NextResponse.json({ ok: true });
+    }
+    const [existingProvider] = await db
+      .select({ id: providers.id, fullName: providers.fullName })
+      .from(providers)
+      .where(
+        or(
+          eq(providers.telegramUserId, String(from.id)),
+          eq(providers.telegramUsername, normalizeUsername(from.username ?? reg.username)),
+          eq(providers.telegramChatId, chatId),
+          eq(providers.phone, reg.phone),
+        ),
+      )
+      .limit(1);
+
+    if (existingProvider) {
+      reg.step = "done";
+      await save(reg);
+      await telegramSendMessage(
+        chatId,
+        `Sizda allaqachon profil bor, yangi profil ochilmaydi.\n\nProfil: ${existingProvider.fullName}\n${process.env.NEXT_PUBLIC_SITE_URL ?? "https://bayconnect.uz"}/providers/${existingProvider.id}`,
         { reply_markup: { remove_keyboard: true } },
       );
       return NextResponse.json({ ok: true });

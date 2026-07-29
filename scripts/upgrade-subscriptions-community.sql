@@ -29,6 +29,8 @@ CREATE TABLE IF NOT EXISTS "subscriptions" (
 	"provider_id" integer REFERENCES "public"."providers"("id") ON DELETE cascade,
 	"telegram_user_id" varchar(32),
 	"telegram_username" varchar(80),
+	"full_name" varchar(160),
+	"phone" varchar(40),
 	"plan_key" varchar(40) NOT NULL,
 	"status" varchar(30) DEFAULT 'pending' NOT NULL,
 	"promo_code" varchar(40),
@@ -37,6 +39,9 @@ CREATE TABLE IF NOT EXISTS "subscriptions" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
+
+ALTER TABLE "subscriptions" ADD COLUMN IF NOT EXISTS "full_name" varchar(160);
+ALTER TABLE "subscriptions" ADD COLUMN IF NOT EXISTS "phone" varchar(40);
 
 CREATE TABLE IF NOT EXISTS "community_access_requests" (
 	"id" serial PRIMARY KEY NOT NULL,
@@ -71,6 +76,7 @@ CREATE INDEX IF NOT EXISTS "promo_codes_code_idx" ON "promo_codes" USING btree (
 CREATE INDEX IF NOT EXISTS "promo_codes_active_idx" ON "promo_codes" USING btree ("active");
 CREATE INDEX IF NOT EXISTS "subscriptions_provider_idx" ON "subscriptions" USING btree ("provider_id");
 CREATE INDEX IF NOT EXISTS "subscriptions_telegram_user_idx" ON "subscriptions" USING btree ("telegram_user_id");
+CREATE INDEX IF NOT EXISTS "subscriptions_phone_idx" ON "subscriptions" USING btree ("phone");
 CREATE INDEX IF NOT EXISTS "subscriptions_status_expires_idx" ON "subscriptions" USING btree ("status","expires_at");
 CREATE INDEX IF NOT EXISTS "community_access_username_idx" ON "community_access_requests" USING btree ("telegram_username");
 CREATE INDEX IF NOT EXISTS "community_access_user_idx" ON "community_access_requests" USING btree ("telegram_user_id");

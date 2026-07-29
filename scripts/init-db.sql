@@ -84,6 +84,8 @@ CREATE TABLE "subscriptions" (
 	"provider_id" integer,
 	"telegram_user_id" varchar(32),
 	"telegram_username" varchar(80),
+	"full_name" varchar(160),
+	"phone" varchar(40),
 	"plan_key" varchar(40) NOT NULL,
 	"status" varchar(30) DEFAULT 'pending' NOT NULL,
 	"promo_code" varchar(40),
@@ -159,6 +161,7 @@ CREATE INDEX "promo_codes_code_idx" ON "promo_codes" USING btree ("code");--> st
 CREATE INDEX "promo_codes_active_idx" ON "promo_codes" USING btree ("active");--> statement-breakpoint
 CREATE INDEX "subscriptions_provider_idx" ON "subscriptions" USING btree ("provider_id");--> statement-breakpoint
 CREATE INDEX "subscriptions_telegram_user_idx" ON "subscriptions" USING btree ("telegram_user_id");--> statement-breakpoint
+CREATE INDEX "subscriptions_phone_idx" ON "subscriptions" USING btree ("phone");--> statement-breakpoint
 CREATE INDEX "subscriptions_status_expires_idx" ON "subscriptions" USING btree ("status","expires_at");--> statement-breakpoint
 CREATE INDEX "community_access_username_idx" ON "community_access_requests" USING btree ("telegram_username");--> statement-breakpoint
 CREATE INDEX "community_access_user_idx" ON "community_access_requests" USING btree ("telegram_user_id");--> statement-breakpoint

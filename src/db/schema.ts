@@ -107,6 +107,8 @@ export const subscriptions = pgTable(
     providerId: integer("provider_id").references(() => providers.id, { onDelete: "cascade" }),
     telegramUserId: varchar("telegram_user_id", { length: 32 }),
     telegramUsername: varchar("telegram_username", { length: 80 }),
+    fullName: varchar("full_name", { length: 160 }),
+    phone: varchar("phone", { length: 40 }),
     planKey: varchar("plan_key", { length: 40 }).notNull(),
     status: varchar("status", { length: 30 }).notNull().default("pending"),
     // pending | active | expired | canceled | payment_required
@@ -119,6 +121,7 @@ export const subscriptions = pgTable(
   (t) => [
     index("subscriptions_provider_idx").on(t.providerId),
     index("subscriptions_telegram_user_idx").on(t.telegramUserId),
+    index("subscriptions_phone_idx").on(t.phone),
     index("subscriptions_status_expires_idx").on(t.status, t.expiresAt),
   ],
 );

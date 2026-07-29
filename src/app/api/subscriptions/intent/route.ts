@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
-import { and, eq, or, sql } from "drizzle-orm";
+import { and, desc, eq, gt, or, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { communityAccessRequests, promoCodes, subscriptions, telegramVerifications } from "@/db/schema";
+import {
+  communityAccessRequests,
+  promoCodes,
+  providers,
+  subscriptions,
+  telegramVerifications,
+} from "@/db/schema";
 import { COMMUNITY_PLAN, SPECIALIST_PLANS } from "@/lib/brand";
 import {
   clean,
@@ -65,6 +71,7 @@ export async function POST(req: Request) {
   const fullName = clean(body.fullName, 160);
   const phone = clean(body.phone, 40);
   const telegramVerificationToken = clean(body.telegramVerificationToken, 80);
+  let telegramUserId = "";
   let telegramUsername = normalizeUsername(body.telegramUsername);
   const promoCode = normalizeCode(body.promoCode);
   const method = clean(body.method, 20) || "promo";
@@ -95,6 +102,7 @@ export async function POST(req: Request) {
     if (!verification || verification.status !== "verified" || verification.expiresAt <= new Date()) {
       return NextResponse.json({ error: "Telegram tasdiqlanmagan yoki muddati tugagan" }, { status: 400 });
     }
+    telegramUserId = verification.telegramUserId ?? "";
     telegramUsername = normalizeUsername(verification.telegramUsername ?? "");
   } catch (error) {
     console.error("[api/subscriptions/intent] telegram verify xato:", error);
@@ -110,6 +118,9 @@ export async function POST(req: Request) {
   if (!/^[a-z0-9_]{5,32}$/.test(telegramUsername)) {
     return NextResponse.json({ error: "Telegram username topilmadi. Telegramda username ochib qayta tasdiqlang." }, { status: 400 });
   }
+  if (!/^\d+$/.test(telegramUserId)) {
+    return NextResponse.json({ error: "Telegram profil ID topilmadi. Qayta tasdiqlang." }, { status: 400 });
+  }
 
   const now = new Date();
   let status = "payment_required";
@@ -117,6 +128,81 @@ export async function POST(req: Request) {
   let freeMonths = 0;
 
   try {
+    const [existingActive] = await db
+      .select()
+      .from(subscriptions)
+      .where(
+        and(
+          eq(subscriptions.audience, audience),
+          eq(subscriptions.status, "active"),
+          gt(subscriptions.expiresAt, now),
+          or(
+            eq(subscriptions.telegramUserId, telegramUserId),
+            eq(subscriptions.telegramUsername, telegramUsername),
+            eq(subscriptions.phone, phone),
+          ),
+        ),
+      )
+      .orderBy(desc(subscriptions.createdAt))
+      .limit(1);
+
+    if (existingActive) {
+      if (!existingActive.telegramUserId) {
+        await db
+          .update(subscriptions)
+          .set({ telegramUserId, telegramUsername, fullName, phone, updatedAt: now })
+          .where(eq(subscriptions.id, existingActive.id));
+      }
+
+      const [existingProvider] =
+        audience === "specialist"
+          ? await db
+              .select({ id: providers.id })
+              .from(providers)
+              .where(
+                or(
+                  eq(providers.telegramUserId, telegramUserId),
+                  eq(providers.telegramUsername, telegramUsername),
+                ),
+              )
+              .limit(1)
+          : [];
+
+      const communityJoinUrl = await telegramCreateJoinRequestInviteLink(`BayCommunity ${existingActive.id}`);
+
+      return NextResponse.json({
+        ok: true,
+        id: existingActive.id,
+        audience,
+        status: "active",
+        alreadyActive: true,
+        providerId: existingProvider?.id ?? existingActive.providerId ?? null,
+        expiresAt: existingActive.expiresAt?.toISOString() ?? null,
+        communityJoinUrl,
+        nextStep:
+          audience === "specialist" && (existingProvider?.id ?? existingActive.providerId)
+            ? "Sizda faol hamkor obunasi va profil bor. Yangi profil ochilmaydi."
+            : audience === "specialist"
+              ? "Sizda faol hamkor obunasi bor. Endi botga /start yuborib profilni yakunlang."
+              : "Sizda faol BayCommunity obunasi bor. Guruhga kirish uchun ariza yuboring.",
+      });
+    }
+
+    const [preExistingProvider] =
+      audience === "specialist"
+        ? await db
+            .select({ id: providers.id })
+            .from(providers)
+            .where(
+              or(
+                eq(providers.telegramUserId, telegramUserId),
+                eq(providers.telegramUsername, telegramUsername),
+                eq(providers.phone, phone),
+              ),
+            )
+            .limit(1)
+        : [];
+
     if (method === "promo") {
       if (!promoCode) return NextResponse.json({ error: "Promokodni kiriting" }, { status: 400 });
 
@@ -148,7 +234,11 @@ export async function POST(req: Request) {
       .insert(subscriptions)
       .values({
         audience,
+        providerId: preExistingProvider?.id ?? null,
+        telegramUserId,
         telegramUsername,
+        fullName,
+        phone,
         planKey,
         status,
         promoCode: promoCode || null,
@@ -162,6 +252,7 @@ export async function POST(req: Request) {
       await db.insert(communityAccessRequests).values({
         fullName,
         phone,
+        telegramUserId,
         telegramUsername,
         audience,
         planKey,
@@ -189,12 +280,15 @@ export async function POST(req: Request) {
       id: subscription.id,
       audience,
       status,
+      providerId: preExistingProvider?.id ?? null,
       freeMonths,
       expiresAt: expiresAt?.toISOString() ?? null,
       communityJoinUrl,
       nextStep:
         status === "active"
-          ? "BayCommunity guruhiga kirish uchun bot taklif havolasi orqali ariza yuboring. Bot profilingizni tekshiradi va mos bo'lsa tasdiqlaydi."
+          ? audience === "specialist" && preExistingProvider
+            ? "Obuna mavjud profilingizga ulandi. BayCommunity guruhiga kirish uchun bot taklif havolasi orqali ariza yuboring."
+            : "BayCommunity guruhiga kirish uchun bot taklif havolasi orqali ariza yuboring. Bot profilingizni tekshiradi va mos bo'lsa tasdiqlaydi."
           : "To'lov integratsiyasi orqali to'lov tasdiqlangach obuna active bo'ladi.",
     });
   } catch (error) {
