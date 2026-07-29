@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { and, desc, eq, gt, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
@@ -6,17 +7,20 @@ import {
   promoCodes,
   providers,
   subscriptions,
+  telegramRegistrations,
   telegramVerifications,
 } from "@/db/schema";
-import { COMMUNITY_PLAN, SPECIALIST_PLANS } from "@/lib/brand";
+import { CACHE_TAGS } from "@/lib/queries";
+import { categoryLabel, COMMUNITY_PLAN, SPECIALIST_PLANS } from "@/lib/brand";
 import {
   clean,
+  cleanMultiline,
   clientIp,
   isValidPhone,
   rateLimit,
   readJson,
 } from "@/lib/validation";
-import { telegramCreateJoinRequestInviteLink } from "@/lib/telegram";
+import { telegramCreateJoinRequestInviteLink, telegramSendMessage } from "@/lib/telegram";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -52,6 +56,85 @@ function isMissingTableError(error: unknown): boolean {
   if (!(error instanceof Error)) return false;
   const cause = (error as Error & { cause?: { code?: string } }).cause;
   return cause?.code === "42P01" || error.message.includes("does not exist");
+}
+
+async function publishProviderFromBotRegistration(params: {
+  telegramUserId: string;
+  telegramUsername: string;
+  subscriptionId: number;
+  expiresAt: Date | null;
+  planKey: string;
+}) {
+  const { telegramUserId, telegramUsername, subscriptionId, expiresAt, planKey } = params;
+  const [existingProvider] = await db
+    .select({ id: providers.id, fullName: providers.fullName, telegramChatId: providers.telegramChatId })
+    .from(providers)
+    .where(or(eq(providers.telegramUserId, telegramUserId), eq(providers.telegramUsername, telegramUsername)))
+    .limit(1);
+
+  if (existingProvider) {
+    await db
+      .update(subscriptions)
+      .set({ providerId: existingProvider.id, updatedAt: new Date() })
+      .where(eq(subscriptions.id, subscriptionId));
+    return existingProvider;
+  }
+
+  const [reg] = await db
+    .select()
+    .from(telegramRegistrations)
+    .where(eq(telegramRegistrations.telegramUserId, telegramUserId))
+    .orderBy(desc(telegramRegistrations.updatedAt))
+    .limit(1);
+
+  if (!reg || reg.step !== "profileReady") return null;
+
+  const bio = cleanMultiline(reg.data.bio, 2000);
+  if (!reg.fullName || !reg.phone || !reg.data.category || !reg.data.city || !bio) return null;
+
+  const languages = (reg.data.languages ?? "").split(",").map((x) => clean(x, 40)).filter(Boolean).slice(0, 12);
+  const [provider] = await db
+    .insert(providers)
+    .values({
+      fullName: reg.fullName,
+      category: reg.data.category,
+      subCategory: reg.data.category === "transfer" ? reg.data.subCategory ?? "sedan" : "",
+      city: reg.data.city,
+      languages,
+      pricePerDay: Number(reg.data.pricePerDay),
+      experienceYears: Number(reg.data.experienceYears),
+      capacity: Number(reg.data.capacity ?? 0),
+      bio,
+      phone: reg.phone,
+      email: reg.data.email || `telegram-${telegramUserId}@bayconnect.local`,
+      telegramChatId: reg.chatId,
+      telegramUserId,
+      telegramUsername,
+      avatarEmoji: reg.data.category === "transfer" ? "✈️" : "🕌",
+      coverColor: reg.data.category === "transfer" ? "blue" : "orange",
+    })
+    .returning({ id: providers.id, fullName: providers.fullName, telegramChatId: providers.telegramChatId });
+
+  await db
+    .update(subscriptions)
+    .set({ providerId: provider.id, updatedAt: new Date() })
+    .where(eq(subscriptions.id, subscriptionId));
+
+  await db
+    .update(telegramRegistrations)
+    .set({ step: "done", updatedAt: new Date() })
+    .where(eq(telegramRegistrations.chatId, reg.chatId));
+
+  revalidateTag(CACHE_TAGS.providers, "max");
+
+  const planLabel = SPECIALIST_PLANS.find((plan) => plan.key === planKey)?.label ?? planKey;
+  await telegramSendMessage(
+    reg.chatId,
+    `✅ Siz ${planLabel} tarifi bo'yicha obuna bo'ldingiz.\n\nObuna muddati: ${expiresAt ? expiresAt.toLocaleDateString("uz-UZ") : "to'lov tasdiqlanguncha"} gacha.\nProfilingiz saytga joylandi: ${process.env.NEXT_PUBLIC_SITE_URL ?? "https://bayconnect.uz"}/providers/${provider.id}\n\nKategoriya: ${categoryLabel(reg.data.category)}\nBayCommunity guruhiga kirish tugmasi saytda chiqadi.`,
+    { reply_markup: { remove_keyboard: true } },
+  );
+
+  return provider;
 }
 
 export async function POST(req: Request) {
@@ -99,7 +182,7 @@ export async function POST(req: Request) {
       .where(eq(telegramVerifications.token, telegramVerificationToken))
       .limit(1);
 
-    if (!verification || verification.status !== "verified" || verification.expiresAt <= new Date()) {
+    if (!verification || verification.status !== "verified") {
       return NextResponse.json({ error: "Telegram tasdiqlanmagan yoki muddati tugagan" }, { status: 400 });
     }
     telegramUserId = verification.telegramUserId ?? "";
@@ -168,6 +251,17 @@ export async function POST(req: Request) {
               .limit(1)
           : [];
 
+      const publishedProvider =
+        audience === "specialist" && !existingProvider
+          ? await publishProviderFromBotRegistration({
+              telegramUserId,
+              telegramUsername,
+              subscriptionId: existingActive.id,
+              expiresAt: existingActive.expiresAt,
+              planKey: existingActive.planKey,
+            })
+          : null;
+
       const communityJoinUrl = await telegramCreateJoinRequestInviteLink(`BayCommunity ${existingActive.id}`);
 
       return NextResponse.json({
@@ -176,14 +270,14 @@ export async function POST(req: Request) {
         audience,
         status: "active",
         alreadyActive: true,
-        providerId: existingProvider?.id ?? existingActive.providerId ?? null,
+        providerId: existingProvider?.id ?? publishedProvider?.id ?? existingActive.providerId ?? null,
         expiresAt: existingActive.expiresAt?.toISOString() ?? null,
         communityJoinUrl,
         nextStep:
-          audience === "specialist" && (existingProvider?.id ?? existingActive.providerId)
+          audience === "specialist" && (existingProvider?.id ?? publishedProvider?.id ?? existingActive.providerId)
             ? "Sizda faol hamkor obunasi va profil bor. Yangi profil ochilmaydi."
             : audience === "specialist"
-              ? "Sizda faol hamkor obunasi bor. Endi botga /start yuborib profilni yakunlang."
+              ? "Sizda faol hamkor obunasi bor. Endi botda ro'yxatdan o'tishni yakunlang."
               : "Sizda faol BayCommunity obunasi bor. Guruhga kirish uchun ariza yuboring.",
       });
     }
@@ -270,6 +364,17 @@ export async function POST(req: Request) {
         .where(eq(promoCodes.code, promoCode));
     }
 
+    const publishedProvider =
+      audience === "specialist" && status === "active"
+        ? await publishProviderFromBotRegistration({
+            telegramUserId,
+            telegramUsername,
+            subscriptionId: subscription.id,
+            expiresAt,
+            planKey,
+          })
+        : null;
+
     const communityJoinUrl =
       status === "active"
         ? await telegramCreateJoinRequestInviteLink(`BayCommunity ${subscription.id}`)
@@ -280,14 +385,16 @@ export async function POST(req: Request) {
       id: subscription.id,
       audience,
       status,
-      providerId: preExistingProvider?.id ?? null,
+      providerId: preExistingProvider?.id ?? publishedProvider?.id ?? null,
       freeMonths,
       expiresAt: expiresAt?.toISOString() ?? null,
       communityJoinUrl,
       nextStep:
         status === "active"
-          ? audience === "specialist" && preExistingProvider
-            ? "Obuna mavjud profilingizga ulandi. BayCommunity guruhiga kirish uchun bot taklif havolasi orqali ariza yuboring."
+          ? audience === "specialist" && (preExistingProvider || publishedProvider)
+            ? "Obuna tasdiqlandi, profilingiz saytga joylandi. BayCommunity guruhiga kirish uchun bot taklif havolasi orqali ariza yuboring."
+            : audience === "specialist"
+              ? "Obuna tasdiqlandi. Endi botda ro'yxatdan o'tishni yakunlang, keyin profilingiz saytga joylanadi."
             : "BayCommunity guruhiga kirish uchun bot taklif havolasi orqali ariza yuboring. Bot profilingizni tekshiradi va mos bo'lsa tasdiqlaydi."
           : "To'lov integratsiyasi orqali to'lov tasdiqlangach obuna active bo'ladi.",
     });

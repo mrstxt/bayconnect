@@ -2,7 +2,7 @@ import { randomBytes } from "crypto";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { telegramVerifications } from "@/db/schema";
-import { clientIp, rateLimit } from "@/lib/validation";
+import { clean, clientIp, rateLimit, readJson } from "@/lib/validation";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,6 +31,8 @@ export async function POST(req: Request) {
     );
   }
 
+  const body = await readJson<{ audience?: unknown }>(req);
+  const audience = clean(body?.audience, 30) === "specialist" ? "specialist" : "community";
   const token = randomBytes(24).toString("hex");
   const expiresAt = new Date(Date.now() + 15 * 60_000);
   await db.insert(telegramVerifications).values({ token, expiresAt, updatedAt: new Date() });
@@ -45,6 +47,6 @@ export async function POST(req: Request) {
   return NextResponse.json({
     ok: true,
     token,
-    botUrl: `https://t.me/${username}?start=verify_${token}`,
+    botUrl: `https://t.me/${username}?start=verify_${token}_${audience}`,
   });
 }

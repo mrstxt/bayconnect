@@ -87,7 +87,11 @@ export function SubscribeButton({
     setVerifiedUsername("");
 
     try {
-      const res = await fetch("/api/telegram/verify/start", { method: "POST" });
+      const res = await fetch("/api/telegram/verify/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ audience }),
+      });
       const json = (await res.json().catch(() => ({}))) as VerifyStart;
       if (!res.ok || !json.token || !json.botUrl) {
         throw new Error(json.error ?? "Telegram tasdiqlash ochilmadi");

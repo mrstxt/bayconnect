@@ -21,7 +21,7 @@ export async function GET(req: Request) {
     .limit(1);
 
   if (!row) return NextResponse.json({ error: "Tasdiqlash topilmadi" }, { status: 404 });
-  if (row.expiresAt <= new Date()) {
+  if (row.status !== "verified" && row.expiresAt <= new Date()) {
     return NextResponse.json({ ok: true, status: "expired" });
   }
 
