@@ -137,6 +137,28 @@ async function publishProviderFromBotRegistration(params: {
   return provider;
 }
 
+async function sendCommunitySubscriptionMessage(params: {
+  telegramUserId: string;
+  fullName: string;
+  expiresAt: Date | null;
+  communityJoinUrl: string | null;
+  alreadyActive?: boolean;
+}) {
+  const { telegramUserId, fullName, expiresAt, communityJoinUrl, alreadyActive = false } = params;
+  const features = COMMUNITY_PLAN.features.map((feature) => `• ${feature}`).join("\n");
+  const title = alreadyActive
+    ? "BayCommunity obunangiz faol"
+    : "BayCommunity obunangiz yoqildi";
+  const joinText = communityJoinUrl
+    ? `\n\nGuruhga kirish uchun shu havola orqali ariza yuboring:\n${communityJoinUrl}`
+    : "\n\nGuruh havolasi hozircha sozlanmoqda. Iltimos, admin bilan bog'laning.";
+
+  await telegramSendMessage(
+    telegramUserId,
+    `✅ ${title}\n\nIsm: ${fullName}\nObuna muddati: ${expiresAt ? expiresAt.toLocaleDateString("uz-UZ") : "to'lov tasdiqlanguncha"} gacha\n\nObuna imkoniyatlari:\n${features}${joinText}\n\nAriza yuborganingizdan keyin bot profilingizni tekshiradi va mos bo'lsa avtomatik tasdiqlaydi.`,
+  );
+}
+
 export async function POST(req: Request) {
   const limit = rateLimit(`subscription:${clientIp(req)}`, { limit: 12, windowMs: 60 * 60_000 });
   if (!limit.ok) {
@@ -263,6 +285,15 @@ export async function POST(req: Request) {
           : null;
 
       const communityJoinUrl = await telegramCreateJoinRequestInviteLink(`BayCommunity ${existingActive.id}`);
+      if (audience === "community") {
+        await sendCommunitySubscriptionMessage({
+          telegramUserId,
+          fullName,
+          expiresAt: existingActive.expiresAt,
+          communityJoinUrl,
+          alreadyActive: true,
+        });
+      }
 
       return NextResponse.json({
         ok: true,
@@ -379,6 +410,15 @@ export async function POST(req: Request) {
       status === "active"
         ? await telegramCreateJoinRequestInviteLink(`BayCommunity ${subscription.id}`)
         : null;
+
+    if (audience === "community" && status === "active") {
+      await sendCommunitySubscriptionMessage({
+        telegramUserId,
+        fullName,
+        expiresAt,
+        communityJoinUrl,
+      });
+    }
 
     return NextResponse.json({
       ok: true,
