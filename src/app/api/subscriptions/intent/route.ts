@@ -40,6 +40,12 @@ function normalizeUsername(value: unknown) {
   return clean(value, 80).replace(/^@+/, "").toLowerCase();
 }
 
+function isMissingTableError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const cause = (error as Error & { cause?: { code?: string } }).cause;
+  return cause?.code === "42P01" || error.message.includes("does not exist");
+}
+
 export async function POST(req: Request) {
   const limit = rateLimit(`subscription:${clientIp(req)}`, { limit: 12, windowMs: 60 * 60_000 });
   if (!limit.ok) {
@@ -81,80 +87,91 @@ export async function POST(req: Request) {
   let expiresAt: Date | null = null;
   let freeMonths = 0;
 
-  if (method === "promo") {
-    if (!promoCode) return NextResponse.json({ error: "Promokodni kiriting" }, { status: 400 });
+  try {
+    if (method === "promo") {
+      if (!promoCode) return NextResponse.json({ error: "Promokodni kiriting" }, { status: 400 });
 
-    const [promo] = await db
-      .select()
-      .from(promoCodes)
-      .where(
-        and(
-          eq(promoCodes.code, promoCode),
-          eq(promoCodes.active, true),
-          or(eq(promoCodes.audience, "all"), eq(promoCodes.audience, audience)),
-        ),
-      )
-      .limit(1);
+      const [promo] = await db
+        .select()
+        .from(promoCodes)
+        .where(
+          and(
+            eq(promoCodes.code, promoCode),
+            eq(promoCodes.active, true),
+            or(eq(promoCodes.audience, "all"), eq(promoCodes.audience, audience)),
+          ),
+        )
+        .limit(1);
 
-    const promoExpired = promo?.expiresAt ? promo.expiresAt <= now : false;
-    const promoOverused = promo?.maxUses ? promo.usedCount >= promo.maxUses : false;
+      const promoExpired = promo?.expiresAt ? promo.expiresAt <= now : false;
+      const promoOverused = promo?.maxUses ? promo.usedCount >= promo.maxUses : false;
 
-    if (!promo || promoExpired || promoOverused) {
-      return NextResponse.json({ error: "Promokod faol emas yoki muddati tugagan" }, { status: 400 });
+      if (!promo || promoExpired || promoOverused) {
+        return NextResponse.json({ error: "Promokod faol emas yoki muddati tugagan" }, { status: 400 });
+      }
+
+      freeMonths = Math.max(1, Math.min(12, promo.freeMonths));
+      status = "active";
+      expiresAt = addMonths(now, freeMonths);
     }
 
-    freeMonths = Math.max(1, Math.min(12, promo.freeMonths));
-    status = "active";
-    expiresAt = addMonths(now, freeMonths);
-  }
+    const [subscription] = await db
+      .insert(subscriptions)
+      .values({
+        audience,
+        telegramUsername,
+        planKey,
+        status,
+        promoCode: promoCode || null,
+        startedAt: status === "active" ? now : null,
+        expiresAt,
+        updatedAt: now,
+      })
+      .returning({ id: subscriptions.id });
 
-  const [subscription] = await db
-    .insert(subscriptions)
-    .values({
+    if (audience === "community") {
+      await db.insert(communityAccessRequests).values({
+        fullName,
+        phone,
+        telegramUsername,
+        audience,
+        planKey,
+        status: status === "active" ? "approved" : "payment_required",
+        promoCode: promoCode || null,
+        approvedUntil: expiresAt,
+        updatedAt: now,
+      });
+    }
+
+    if (status === "active" && promoCode) {
+      await db
+        .update(promoCodes)
+        .set({ usedCount: sql`${promoCodes.usedCount} + 1` })
+        .where(eq(promoCodes.code, promoCode));
+    }
+
+    return NextResponse.json({
+      ok: true,
+      id: subscription.id,
       audience,
-      telegramUsername,
-      planKey,
       status,
-      promoCode: promoCode || null,
-      startedAt: status === "active" ? now : null,
-      expiresAt,
-      updatedAt: now,
-    })
-    .returning({ id: subscriptions.id });
-
-  if (audience === "community") {
-    await db.insert(communityAccessRequests).values({
-      fullName,
-      phone,
-      telegramUsername,
-      audience,
-      planKey,
-      status: status === "active" ? "approved" : "payment_required",
-      promoCode: promoCode || null,
-      approvedUntil: expiresAt,
-      updatedAt: now,
+      freeMonths,
+      expiresAt: expiresAt?.toISOString() ?? null,
+      nextStep:
+        status === "active" && audience === "specialist"
+          ? "Endi Telegram botga /start yuboring. Bot obunangizni tekshiradi va profilingizni saytga joylashga ruxsat beradi."
+          : status === "active"
+            ? "Endi BayCommunity yopiq guruhiga join request yuboring. Bot tekshiradi va tasdiqlaydi."
+            : "To'lov integratsiyasi orqali to'lov tasdiqlangach obuna active bo'ladi.",
     });
+  } catch (error) {
+    console.error("[api/subscriptions/intent] xato:", error);
+    if (isMissingTableError(error)) {
+      return NextResponse.json(
+        { error: "Production baza yangilanmagan. Admin migrationni ishga tushirishi kerak." },
+        { status: 503 },
+      );
+    }
+    return NextResponse.json({ error: "Server xatosi. Keyinroq urinib ko'ring." }, { status: 500 });
   }
-
-  if (status === "active" && promoCode) {
-    await db
-      .update(promoCodes)
-      .set({ usedCount: sql`${promoCodes.usedCount} + 1` })
-      .where(eq(promoCodes.code, promoCode));
-  }
-
-  return NextResponse.json({
-    ok: true,
-    id: subscription.id,
-    audience,
-    status,
-    freeMonths,
-    expiresAt: expiresAt?.toISOString() ?? null,
-    nextStep:
-      status === "active" && audience === "specialist"
-        ? "Endi Telegram botga /start yuboring. Bot obunangizni tekshiradi va profilingizni saytga joylashga ruxsat beradi."
-        : status === "active"
-          ? "Endi BayCommunity yopiq guruhiga join request yuboring. Bot tekshiradi va tasdiqlaydi."
-          : "To'lov integratsiyasi orqali to'lov tasdiqlangach obuna active bo'ladi.",
-  });
 }
