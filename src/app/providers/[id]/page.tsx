@@ -237,7 +237,14 @@ export default async function ProviderPage({
 
             <div className="mt-6 space-y-3 rounded-2xl bg-white/68 p-4 ring-1 ring-[#006b55]/10">
               <InfoRow label="Telefon" value={p.phone} />
-              <InfoRow label="Email" value={p.email} />
+              {/* Bot orqali ro'yxatdan o'tganda email ixtiyoriy — bo'lmasa
+                  "telegram-123@bayconnect.local" placeholder saqlanadi va uni
+                  ochiq ko'rsatmaymiz; o'rniga Telegram username ko'rsatamiz. */}
+              {p.email.endsWith("@bayconnect.local") ? (
+                p.telegramUsername ? <InfoRow label="Telegram" value={`@${p.telegramUsername}`} /> : null
+              ) : (
+                <InfoRow label="Email" value={p.email} />
+              )}
               <InfoRow label="Shahar" value={`${p.city}, ${p.country}`} />
             </div>
 

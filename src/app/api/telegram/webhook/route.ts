@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { providers, telegramRegistrations } from "@/db/schema";
 import { CACHE_TAGS } from "@/lib/queries";
-import { clean, cleanMultiline, isValidPhone } from "@/lib/validation";
+import { clean, cleanMultiline, isValidEmail, isValidPhone } from "@/lib/validation";
 import { telegramSendMessage } from "@/lib/telegram";
 
 export const runtime = "nodejs";
@@ -22,6 +22,9 @@ const categoryKeyboard = { inline_keyboard: [[
   { text: "🕌 Gid", callback_data: "register:category:guide" },
   { text: "✈️ Transfer", callback_data: "register:category:transfer" },
 ]] };
+
+// Email qadamini o'tkazib yuborish matni (tugma va /skip buyrug'i).
+const SKIP_EMAIL_TEXT = "⏭ O'tkazib yuborish";
 
 function commandOf(text: string): string {
   const first = text.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
@@ -93,14 +96,54 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
     reg.phone = message.contact.phone_number;
-    reg.step = "category";
+    reg.step = "fullName";
     await save(reg);
-    await telegramSendMessage(chatId, "Xizmat turini tanlang:", { reply_markup: categoryKeyboard });
+    await telegramSendMessage(
+      chatId,
+      "Rahmat! Endi to'liq ismingizni yozing — saytdagi profilingizda aynan shu ko'rinadi.\nMasalan: Sardor Karimov",
+      {
+        reply_markup: {
+          // Telegram'dagi ismini bir bosishda ishlatish imkoniyati
+          keyboard: reg.fullName ? [[{ text: reg.fullName }]] : [],
+          resize_keyboard: true,
+          one_time_keyboard: true,
+        },
+      },
+    );
     return NextResponse.json({ ok: true });
   }
 
   if (!text) return NextResponse.json({ ok: true });
-  if (reg.step === "city") {
+  if (reg.step === "fullName") {
+    const fullName = clean(text, 160);
+    if (fullName.length < 2) {
+      await telegramSendMessage(chatId, "Ism kamida 2 belgidan iborat bo'lsin. Qayta yozing.\nMasalan: Sardor Karimov");
+      return NextResponse.json({ ok: true });
+    }
+    reg.fullName = fullName;
+    reg.step = "email";
+    await save(reg);
+    await telegramSendMessage(
+      chatId,
+      "Email manzilingiz — faqat saytdagi aloqa bloki uchun ko'rinadi (ixtiyoriy).\nYozing yoki o'tkazib yuboring:",
+      { reply_markup: { keyboard: [[{ text: SKIP_EMAIL_TEXT }]], resize_keyboard: true, one_time_keyboard: true } },
+    );
+  } else if (reg.step === "email") {
+    if (text === SKIP_EMAIL_TEXT || text === "/skip") {
+      reg.data.email = "";
+    } else if (isValidEmail(clean(text, 160))) {
+      reg.data.email = clean(text, 160).toLowerCase();
+    } else {
+      await telegramSendMessage(
+        chatId,
+        "Email formati xato ko'rinmoqda. Qayta yozing yoki \"" + SKIP_EMAIL_TEXT + "\" tugmasini bosing.",
+      );
+      return NextResponse.json({ ok: true });
+    }
+    reg.step = "category";
+    await save(reg);
+    await telegramSendMessage(chatId, "Xizmat turini tanlang:", { reply_markup: categoryKeyboard });
+  } else if (reg.step === "city") {
     reg.data.city = clean(text, 80); reg.step = "languages";
     await save(reg); await telegramSendMessage(chatId, "Qaysi tillarda xizmat qilasiz? Vergul bilan yozing.\nMasalan: O'zbek, Rus, Ingliz");
   } else if (reg.step === "languages") {
@@ -120,7 +163,7 @@ export async function POST(req: Request) {
     const bio = cleanMultiline(text, 2000);
     if (bio.length < 20) { await telegramSendMessage(chatId, "Tavsif kamida 20 belgidan iborat bo'lsin. Qayta yozing."); return NextResponse.json({ ok: true }); }
     const languages = (reg.data.languages ?? "").split(",").map((x) => clean(x, 40)).filter(Boolean).slice(0, 12);
-    const [provider] = await db.insert(providers).values({ fullName: reg.fullName || "BayConnect mutaxassisi", category: reg.data.category, city: reg.data.city, languages, pricePerDay: Number(reg.data.pricePerDay), experienceYears: Number(reg.data.experienceYears), bio, phone: reg.phone, email: `telegram-${from.id}@bayconnect.local`, telegramChatId: chatId, telegramUsername: reg.username || null, avatarEmoji: reg.data.category === "transfer" ? "✈️" : "🕌", coverColor: reg.data.category === "transfer" ? "blue" : "orange" }).returning({ id: providers.id });
+    const [provider] = await db.insert(providers).values({ fullName: reg.fullName || "BayConnect mutaxassisi", category: reg.data.category, city: reg.data.city, languages, pricePerDay: Number(reg.data.pricePerDay), experienceYears: Number(reg.data.experienceYears), bio, phone: reg.phone, email: reg.data.email || `telegram-${from.id}@bayconnect.local`, telegramChatId: chatId, telegramUsername: reg.username || null, avatarEmoji: reg.data.category === "transfer" ? "✈️" : "🕌", coverColor: reg.data.category === "transfer" ? "blue" : "orange" }).returning({ id: providers.id });
     reg.step = "done"; await save(reg); revalidateTag(CACHE_TAGS.providers, "max");
     await telegramSendMessage(chatId, `✅ Ro'yxatdan o'tish yakunlandi! Profilingiz saytda e'lon qilindi:\n${process.env.NEXT_PUBLIC_SITE_URL ?? "https://bayconnect.uz"}/providers/${provider.id}`, { reply_markup: { remove_keyboard: true } });
   } else {

@@ -45,6 +45,7 @@ export type ProviderCardRow = {
   city: string;
   country: string;
   pricePerDay: number;
+  experienceYears: number;
   bio: string;
   coverColor: string;
   tags: string[];
@@ -67,6 +68,7 @@ const cardColumns = {
   city: providers.city,
   country: providers.country,
   pricePerDay: providers.pricePerDay,
+  experienceYears: providers.experienceYears,
   bio: providers.bio,
   coverColor: providers.coverColor,
   tags: providers.tags,

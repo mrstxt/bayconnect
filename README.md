@@ -176,10 +176,12 @@ Bot oqimi:
 
 1. Mutaxassis botga `/start` yoki `/register` yuboradi.
 2. Telefon raqamini Telegram contact tugmasi orqali yuboradi.
-3. Xizmat turini tanlaydi.
-4. Shahar, tillar, narx, tajriba va bio kiritadi.
-5. Profil `providers` jadvaliga yoziladi.
-6. Keyingi bookinglar shu Telegram chatga yuboriladi.
+3. To'liq ism-familiyasini yozadi (Telegram'dagi ismi bitta tugma bilan tanlanishi mumkin).
+4. Email yozadi yoki o'tkazib yuboradi (ixtiyoriy — yozilmasa profilda email qatori ko'rinmaydi, Telegram username ko'rsatiladi).
+5. Xizmat turini tanlaydi.
+6. Shahar, tillar, narx, tajriba va bio kiritadi.
+7. Profil `providers` jadvaliga yoziladi va sayt katalogida darhol ko'rinadi.
+8. Keyingi bookinglar shu Telegram chatga yuboriladi (`after()` orqali javobdan keyin ishonchli yuboriladi).
 
 Muhim: botdan ro'yxatdan o'tgan providerlarda `telegram_chat_id` saqlanadi. Web formadan ro'yxatdan o'tgan providerga bot xabari borishi uchun hozircha chat ID yo'q; buni keyin web profilni bot bilan bog'lash oqimi orqali kengaytirish mumkin.
 

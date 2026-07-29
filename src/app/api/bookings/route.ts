@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { db } from "@/db";
 import { bookings, providers } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -145,9 +145,14 @@ export async function POST(req: Request) {
 
     // Buyurtma bazaga muvaffaqiyatli tushgach, mutaxassis bot chatiga xabar jo'natamiz.
     // Telegram ishlamasa ham mijoz zayavkasi yo'qolmaydi.
+    //
+    // MUHIM: `void telegramSendMessage(...)` kabi floating promise serverless'da
+    // ISHLAMAYDI — lambda javob qaytargach muzlatiladi va xabar yuborishga ulgurmaydi.
+    // after() javobdan KEYIN bajarilishini kafolatlaydi.
     if (provider.telegramChatId) {
+      const chatId = provider.telegramChatId;
       const messageText = [
-        "🔔 Yangi buyurtma",
+        `🔔 Yangi buyurtma #${row.id}`,
         `Xizmat: ${categoryLabel(provider.category)}`,
         `Mijoz: ${clientName}`,
         `Telefon: ${clientPhone}`,
@@ -155,9 +160,13 @@ export async function POST(req: Request) {
         `Sana: ${startDate} — ${endDate}`,
         `Odamlar: ${Math.trunc(peopleCount)}`,
         message ? `Izoh: ${message}` : "",
-        `Buyurtma #${row.id}`,
       ].filter(Boolean).join("\n");
-      void telegramSendMessage(provider.telegramChatId, messageText);
+      after(async () => {
+        const sent = await telegramSendMessage(chatId, messageText);
+        if (!sent) console.error(`[api/bookings] Telegram xabari yetmadi (booking #${row.id})`);
+      });
+    } else {
+      console.warn(`[api/bookings] provider #${providerId} bot'ga ulanmagan — xabar yuborilmadi`);
     }
 
     return NextResponse.json({ ok: true, id: row.id }, { status: 201 });
