@@ -254,33 +254,42 @@ export function SubscribeButton({
               </Field>
 
               {status === "done" ? (
-                <>
-                  {result.status === "active" ? (
-                    <div className="rounded-2xl border border-[#006b55]/15 bg-[#f4fbf8] px-4 py-3 text-[13px] leading-relaxed text-[#123f34]">
-                      <b>BayCommunityga kirish arizasi.</b>{" "}
-                      Guruhga kirish uchun bot taklif havolasi orqali ariza yuboring. Bot Telegram
-                      profilingizni tekshiradi va username mos bo'lsa avtomatik tasdiqlaydi.
-                      {result.communityJoinUrl ? (
-                        <a
-                          href={result.communityJoinUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="btn-primary mt-3 w-full !py-3 text-center text-[13px]"
-                        >
-                          BayCommunityga ariza yuborish
-                        </a>
-                      ) : (
-                        <div className="mt-3 rounded-xl bg-white px-3 py-2 text-[12px] font-semibold text-[#006b55]">
-                          Taklif havolasi sozlanmoqda. Bot admin huquqlari va TELEGRAM_COMMUNITY_CHAT_ID env'ini tekshiring.
-                        </div>
-                      )}
+                result.status === "active" ? (
+                  <div className="rounded-2xl border border-[#006b55]/15 bg-[#eaf4ef] px-4 py-4 text-[#123f34]">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-[18px] font-black tracking-tight">Obuna bo'ldingiz</div>
+                        {verifiedUsername ? (
+                          <div className="mt-1 text-[13px] font-semibold text-[#006b55]">
+                            Profil tasdiqlandi: @{verifiedUsername}
+                          </div>
+                        ) : null}
+                      </div>
+                      <span className="rounded-full bg-white px-3 py-1 text-[12px] font-black text-[#006b55] ring-1 ring-[#006b55]/15">
+                        OK
+                      </span>
                     </div>
-                  ) : null}
-                  <div className="rounded-2xl border border-[#006b55]/15 bg-[#eaf4ef] px-4 py-3 text-[13px] leading-relaxed text-[#123f34]">
-                    <b>{result.status === "active" ? "Obuna bo'ldingiz. OK." : "So'rov qabul qilindi."}</b>{" "}
-                    {result.nextStep}
+
+                    {result.communityJoinUrl ? (
+                      <a
+                        href={result.communityJoinUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-primary mt-4 w-full !py-3 text-center text-[13px]"
+                      >
+                        Guruhga kirish
+                      </a>
+                    ) : (
+                      <div className="mt-4 rounded-xl bg-white px-3 py-2 text-[12px] font-semibold text-[#006b55]">
+                        Guruh havolasi sozlanmoqda. Bot admin huquqlari va TELEGRAM_COMMUNITY_CHAT_ID env'ini tekshiring.
+                      </div>
+                    )}
                   </div>
-                </>
+                ) : (
+                  <div className="rounded-2xl border border-[#006b55]/15 bg-[#eaf4ef] px-4 py-3 text-[13px] leading-relaxed text-[#123f34]">
+                    <b>So'rov qabul qilindi.</b> {result.nextStep}
+                  </div>
+                )
               ) : null}
 
               {paymentSoon ? (
@@ -295,23 +304,25 @@ export function SubscribeButton({
                 </div>
               ) : null}
 
-              <div className="grid gap-2 sm:grid-cols-2">
-                <button type="submit" disabled={status === "loading"} className="btn-primary !py-3.5 text-[14px]">
-                  {status === "loading" ? "Tekshirilmoqda..." : "Promokod bilan yoqish"}
-                </button>
-                <button
-                  type="button"
-                  disabled={status === "loading"}
-                  onClick={() => {
-                    setPaymentSoon(true);
-                    setStatus("idle");
-                    setResult({});
-                  }}
-                  className="btn-ghost !py-3.5 text-[14px]"
-                >
-                  To'lov qilish
-                </button>
-              </div>
+              {status === "done" && result.status === "active" ? null : (
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <button type="submit" disabled={status === "loading"} className="btn-primary !py-3.5 text-[14px]">
+                    {status === "loading" ? "Tekshirilmoqda..." : "Promokod bilan yoqish"}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={status === "loading"}
+                    onClick={() => {
+                      setPaymentSoon(true);
+                      setStatus("idle");
+                      setResult({});
+                    }}
+                    className="btn-ghost !py-3.5 text-[14px]"
+                  >
+                    To'lov qilish
+                  </button>
+                </div>
+              )}
             </form>
           </div>
         </div>
