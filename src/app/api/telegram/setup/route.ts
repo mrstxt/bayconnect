@@ -5,6 +5,11 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const API = "https://api.telegram.org";
+const BOT_COMMANDS = [
+  { command: "start", description: "Ro'yxatdan o'tishni boshlash" },
+  { command: "register", description: "Mutaxassis sifatida ro'yxatdan o'tish" },
+  { command: "delete", description: "Profilni sabab bilan o'chirish" },
+];
 
 type WebhookInfo = {
   url?: string;
@@ -81,24 +86,21 @@ export async function GET(req: Request) {
   const alreadySet = infoBefore.ok && infoBefore.result?.url === webhookUrl;
 
   if (alreadySet && !force) {
+    const commands = await telegramApi(token, "setMyCommands", { commands: BOT_COMMANDS });
     return NextResponse.json({
       ok: true,
       alreadyConfigured: true,
       webhookUrl,
       bot: me.result,
+      commands: commands.result,
       webhookInfo: infoBefore.result,
-      hint: "Webhook allaqachon to'g'ri o'rnatilgan — qayta sozlash shart emas. Botga /start yuborib sinang. Agar bot javob bermasa, sababini buyruqdan ko'ring: npm run bot:check. Secret'ni almashtirgan bo'lsangiz: ?force=1 qo'shib qayta chaqiring.",
+      hint: "Webhook allaqachon to'g'ri o'rnatilgan — buyruqlar menyusi yangilandi. Botga /delete yuborib sinang. Agar bot javob bermasa, sababini buyruqdan ko'ring: npm run bot:check. Secret'ni almashtirgan bo'lsangiz: ?force=1 qo'shib qayta chaqiring.",
     });
   }
 
   // 2. To'liq sozlash (webhook o'rnatilmagan yoki force rejimi)
   const [commands, webhook] = await Promise.all([
-    telegramApi(token, "setMyCommands", {
-      commands: [
-        { command: "start", description: "Ro'yxatdan o'tishni boshlash" },
-        { command: "register", description: "Mutaxassis sifatida ro'yxatdan o'tish" },
-      ],
-    }),
+    telegramApi(token, "setMyCommands", { commands: BOT_COMMANDS }),
     telegramApi(token, "setWebhook", {
       url: webhookUrl,
       secret_token: secret,

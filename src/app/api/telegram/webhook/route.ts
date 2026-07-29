@@ -25,6 +25,7 @@ const categoryKeyboard = { inline_keyboard: [[
 
 // Email qadamini o'tkazib yuborish matni (tugma va /skip buyrug'i).
 const SKIP_EMAIL_TEXT = "⏭ O'tkazib yuborish";
+const MIN_DELETE_REASON_LENGTH = 5;
 
 function commandOf(text: string): string {
   const first = text.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
@@ -78,6 +79,47 @@ export async function POST(req: Request) {
 
   const text = clean(message?.text, 2000);
   const command = commandOf(text);
+
+  if (command === "/delete") {
+    const [provider] = await db
+      .select({ id: providers.id, fullName: providers.fullName })
+      .from(providers)
+      .where(eq(providers.telegramChatId, chatId))
+      .limit(1);
+
+    if (!provider) {
+      reg.step = reg.step === "deleteReason" ? "done" : reg.step;
+      await save(reg);
+      await telegramSendMessage(chatId, "Sizda o'chiriladigan faol profil topilmadi. Yangi profil ochish uchun /start bosing.");
+      return NextResponse.json({ ok: true });
+    }
+
+    reg.step = "deleteReason";
+    reg.data = {
+      ...reg.data,
+      deleteProviderId: String(provider.id),
+      deleteProviderName: provider.fullName,
+    };
+    await save(reg);
+    await telegramSendMessage(
+      chatId,
+      `Profilingizni o'chirish uchun sababini yozing.\n\nProfil: ${provider.fullName}\nBekor qilish uchun /cancel yuboring.`,
+      { reply_markup: { remove_keyboard: true } },
+    );
+    return NextResponse.json({ ok: true });
+  }
+
+  if (command === "/cancel" && reg.step === "deleteReason") {
+    reg.step = "done";
+    const data = { ...reg.data };
+    delete data.deleteProviderId;
+    delete data.deleteProviderName;
+    reg.data = data;
+    await save(reg);
+    await telegramSendMessage(chatId, "Profilni o'chirish bekor qilindi.");
+    return NextResponse.json({ ok: true });
+  }
+
   if (command === "/start" || command === "/register" || text === "Ro'yxatdan o'tish") {
     if (reg.step === "done") {
       await telegramSendMessage(chatId, "Siz allaqachon ro'yxatdan o'tgansiz. Yangi buyurtmalar shu botga keladi.");
@@ -114,7 +156,37 @@ export async function POST(req: Request) {
   }
 
   if (!text) return NextResponse.json({ ok: true });
-  if (reg.step === "fullName") {
+  if (reg.step === "deleteReason") {
+    const reason = cleanMultiline(text, 1000);
+    if (reason.length < MIN_DELETE_REASON_LENGTH) {
+      await telegramSendMessage(chatId, "Sabab kamida 5 belgidan iborat bo'lsin. Iltimos, qisqacha sabab yozing.");
+      return NextResponse.json({ ok: true });
+    }
+
+    const deleted = await db
+      .delete(providers)
+      .where(eq(providers.telegramChatId, chatId))
+      .returning({ id: providers.id, fullName: providers.fullName });
+
+    if (deleted.length === 0) {
+      reg.step = "done";
+      await save(reg);
+      await telegramSendMessage(chatId, "Profil allaqachon o'chirilgan yoki topilmadi. Yangi profil ochish uchun /start bosing.");
+      return NextResponse.json({ ok: true });
+    }
+
+    reg.step = "deleted";
+    reg.data = {
+      ...reg.data,
+      deleteReason: reason,
+      deletedProviderId: String(deleted[0].id),
+      deletedProviderName: deleted[0].fullName,
+      deletedAt: new Date().toISOString(),
+    };
+    await save(reg);
+    revalidateTag(CACHE_TAGS.providers, "max");
+    await telegramSendMessage(chatId, "Profilingiz o'chirildi. Qayta ro'yxatdan o'tish uchun /start buyrug'ini yuboring.");
+  } else if (reg.step === "fullName") {
     const fullName = clean(text, 160);
     if (fullName.length < 2) {
       await telegramSendMessage(chatId, "Ism kamida 2 belgidan iborat bo'lsin. Qayta yozing.\nMasalan: Sardor Karimov");

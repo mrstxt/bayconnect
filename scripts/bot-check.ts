@@ -194,6 +194,7 @@ async function checkWebhook(token: string, siteUrlEnv: string, secret: string) {
       commands: [
         { command: "start", description: "Ro'yxatdan o'tishni boshlash" },
         { command: "register", description: "Mutaxassis sifatida ro'yxatdan o'tish" },
+        { command: "delete", description: "Profilni sabab bilan o'chirish" },
       ],
     });
     if (cmds.ok) ok("Bot buyruqlar menyusi yangilandi");
