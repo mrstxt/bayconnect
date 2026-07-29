@@ -13,7 +13,7 @@ Sana: 2026-07-28 · Tekshirilgan versiya: `mrstxt/bayconnect@main`
 
 ```env
 # ESKI — bu GitHub'da ochiq turgan!
-DATABASE_URL="postgresql://neondb_owner:npg_0MybFYS8xUJN@ep-summer-base-...neon.tech/bayconnect"
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require"
 ```
 
 Bu **eng jiddiy muammo**. Repozitoriya public bo'lsa, istalgan odam bazangizga to'liq kirish huquqiga ega bo'ladi — ma'lumotlarni o'qishi, o'zgartirishi yoki o'chirishi mumkin.
