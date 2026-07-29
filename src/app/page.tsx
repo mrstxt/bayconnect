@@ -42,6 +42,7 @@ const EXPERT_ICON_NODES = {
   translator: TranslatorIcon,
   photographer: PhotographerIcon,
   tour_agent: TourAgentIcon,
+  tourism_service: HandshakeIcon,
 } as const;
 
 export default async function HomePage() {

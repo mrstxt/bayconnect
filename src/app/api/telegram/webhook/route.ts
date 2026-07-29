@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
-import { eq } from "drizzle-orm";
+import { and, desc, eq, gt, or } from "drizzle-orm";
 import { db } from "@/db";
-import { providers, telegramRegistrations } from "@/db/schema";
+import { communityAccessRequests, providers, subscriptions, telegramRegistrations } from "@/db/schema";
 import { CACHE_TAGS } from "@/lib/queries";
 import { clean, cleanMultiline, isValidEmail, isValidPhone } from "@/lib/validation";
-import { telegramSendMessage } from "@/lib/telegram";
+import {
+  telegramApproveChatJoinRequest,
+  telegramDeclineChatJoinRequest,
+  telegramSendMessage,
+} from "@/lib/telegram";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,14 +18,38 @@ type TelegramUser = { id: number; first_name?: string; last_name?: string; usern
 type TelegramUpdate = {
   message?: { chat: { id: number }; from?: TelegramUser; text?: string; contact?: { phone_number: string; user_id?: number } };
   callback_query?: { id: string; data?: string; message?: { chat: { id: number } }; from: TelegramUser };
+  chat_join_request?: { chat: { id: number }; from: TelegramUser; date: number; bio?: string; invite_link?: unknown };
 };
 
 type Registration = { chatId: string; telegramUserId: string; fullName: string; username: string; phone: string; step: string; data: Record<string, string> };
 
-const categoryKeyboard = { inline_keyboard: [[
-  { text: "🕌 Gid", callback_data: "register:category:guide" },
-  { text: "✈️ Transfer", callback_data: "register:category:transfer" },
-]] };
+const categoryKeyboard = {
+  inline_keyboard: [
+    [
+      { text: "🕌 Gid", callback_data: "register:category:guide" },
+      { text: "✈️ Transfer", callback_data: "register:category:transfer" },
+    ],
+    [
+      { text: "🌍 Tur operator", callback_data: "register:category:tour_agent" },
+      { text: "🗣️ Tarjimon", callback_data: "register:category:translator" },
+    ],
+    [{ text: "🤝 Turizm xizmati", callback_data: "register:category:tourism_service" }],
+  ],
+};
+
+const transferKeyboard = {
+  inline_keyboard: [
+    [
+      { text: "🚗 Yengil avto", callback_data: "register:transfer:sedan" },
+      { text: "🚐 Minivan", callback_data: "register:transfer:minivan" },
+    ],
+    [
+      { text: "🚙 Yo'ltanlamas", callback_data: "register:transfer:suv" },
+      { text: "🚌 Avtobus", callback_data: "register:transfer:bus" },
+    ],
+    [{ text: "✈️ Aeroport transfer", callback_data: "register:transfer:airport" }],
+  ],
+};
 
 // Email qadamini o'tkazib yuborish matni (tugma va /skip buyrug'i).
 const SKIP_EMAIL_TEXT = "⏭ O'tkazib yuborish";
@@ -31,6 +59,39 @@ function commandOf(text: string): string {
   const first = text.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
   // Public/group botlarda Telegram commandni /start@BotUsername shaklida yuboradi.
   return first.replace(/@\w+$/, "");
+}
+
+function normalizeUsername(value: string | undefined): string {
+  return clean(value ?? "", 80).replace(/^@+/, "").toLowerCase();
+}
+
+async function findActiveSpecialistSubscription(userId: string, username: string) {
+  const now = new Date();
+  const normalizedUsername = normalizeUsername(username);
+  const [subscription] = await db
+    .select()
+    .from(subscriptions)
+    .where(
+      and(
+        eq(subscriptions.audience, "specialist"),
+        eq(subscriptions.status, "active"),
+        gt(subscriptions.expiresAt, now),
+        normalizedUsername
+          ? or(eq(subscriptions.telegramUserId, userId), eq(subscriptions.telegramUsername, normalizedUsername))
+          : eq(subscriptions.telegramUserId, userId),
+      ),
+    )
+    .orderBy(desc(subscriptions.createdAt))
+    .limit(1);
+
+  if (subscription && !subscription.telegramUserId) {
+    await db
+      .update(subscriptions)
+      .set({ telegramUserId: userId, updatedAt: now })
+      .where(eq(subscriptions.id, subscription.id));
+  }
+
+  return subscription;
 }
 
 async function save(reg: Registration) {
@@ -57,6 +118,61 @@ export async function POST(req: Request) {
   const update = await req.json().catch(() => null) as TelegramUpdate | null;
   if (!update) return NextResponse.json({ ok: true });
 
+  if (update.chat_join_request) {
+    const communityChatId = process.env.TELEGRAM_COMMUNITY_CHAT_ID;
+    const request = update.chat_join_request;
+    const joinChatId = String(request.chat.id);
+    const userId = String(request.from.id);
+    const username = normalizeUsername(request.from.username);
+
+    if (communityChatId && joinChatId === communityChatId) {
+      const now = new Date();
+      const [access] = username
+        ? await db
+            .select()
+            .from(communityAccessRequests)
+            .where(
+              and(
+                eq(communityAccessRequests.telegramUsername, username),
+                or(eq(communityAccessRequests.status, "approved"), eq(communityAccessRequests.status, "joined")),
+                gt(communityAccessRequests.approvedUntil, now),
+              ),
+            )
+            .orderBy(desc(communityAccessRequests.createdAt))
+            .limit(1)
+        : [];
+
+      const [providerSub] = await db
+        .select({ id: subscriptions.id })
+        .from(subscriptions)
+        .where(
+          and(
+            username
+              ? or(eq(subscriptions.telegramUserId, userId), eq(subscriptions.telegramUsername, username))
+              : eq(subscriptions.telegramUserId, userId),
+            eq(subscriptions.audience, "specialist"),
+            eq(subscriptions.status, "active"),
+            gt(subscriptions.expiresAt, now),
+          ),
+        )
+        .limit(1);
+
+      if (access || providerSub) {
+        const ok = await telegramApproveChatJoinRequest(joinChatId, userId);
+        if (ok && access) {
+          await db
+            .update(communityAccessRequests)
+            .set({ telegramUserId: userId, status: "joined", joinedAt: now, updatedAt: now })
+            .where(eq(communityAccessRequests.id, access.id));
+        }
+      } else {
+        await telegramDeclineChatJoinRequest(joinChatId, userId);
+      }
+    }
+
+    return NextResponse.json({ ok: true });
+  }
+
   const callback = update.callback_query;
   const message = update.message;
   const chatId = String(callback?.message?.chat.id ?? message?.chat.id ?? "");
@@ -70,10 +186,29 @@ export async function POST(req: Request) {
 
   if (callback?.data?.startsWith("register:category:")) {
     await answerCallback(callback.id);
-    reg.data.category = callback.data.split(":")[2] === "transfer" ? "transfer" : "guide";
-    reg.step = "city";
+    const category = callback.data.split(":")[2] ?? "guide";
+    reg.data.category = ["guide", "transfer", "tour_agent", "translator", "tourism_service"].includes(category)
+      ? category
+      : "guide";
+    reg.step = reg.data.category === "transfer" ? "transferType" : "city";
     await save(reg);
-    await telegramSendMessage(chatId, "Qaysi shaharda xizmat ko'rsatasiz?\nMasalan: Toshkent, Samarqand yoki Buxoro.");
+    await telegramSendMessage(
+      chatId,
+      reg.data.category === "transfer"
+        ? "Avtomobil turini tanlang:"
+        : "Qaysi shaharda xizmat ko'rsatasiz?\nMasalan: Toshkent, Samarqand yoki Buxoro.",
+      reg.data.category === "transfer" ? { reply_markup: transferKeyboard } : {},
+    );
+    return NextResponse.json({ ok: true });
+  }
+
+  if (callback?.data?.startsWith("register:transfer:")) {
+    await answerCallback(callback.id);
+    const type = callback.data.split(":")[2] ?? "";
+    reg.data.subCategory = ["sedan", "minivan", "suv", "bus", "airport"].includes(type) ? type : "sedan";
+    reg.step = "capacity";
+    await save(reg);
+    await telegramSendMessage(chatId, "Avtomobilingizda nechta yo'lovchi o'rni bor? Masalan: 4");
     return NextResponse.json({ ok: true });
   }
 
@@ -123,6 +258,15 @@ export async function POST(req: Request) {
   if (command === "/start" || command === "/register" || text === "Ro'yxatdan o'tish") {
     if (reg.step === "done") {
       await telegramSendMessage(chatId, "Siz allaqachon ro'yxatdan o'tgansiz. Yangi buyurtmalar shu botga keladi.");
+      return NextResponse.json({ ok: true });
+    }
+    const subscription = await findActiveSpecialistSubscription(String(from.id), from.username ?? reg.username);
+    if (!subscription) {
+      await telegramSendMessage(
+        chatId,
+        `Avval saytda mutaxassis tarifiga obuna bo'ling yoki promokod kiriting. Obuna active bo'lgandan keyin bot profilingizni saytga joylashga ruxsat beradi.\n\n${process.env.NEXT_PUBLIC_SITE_URL ?? "https://bayconnect.uz"}/register`,
+        { reply_markup: { remove_keyboard: true } },
+      );
       return NextResponse.json({ ok: true });
     }
     reg = { ...reg, step: "phone", data: {}, phone: "" };
@@ -218,6 +362,16 @@ export async function POST(req: Request) {
   } else if (reg.step === "city") {
     reg.data.city = clean(text, 80); reg.step = "languages";
     await save(reg); await telegramSendMessage(chatId, "Qaysi tillarda xizmat qilasiz? Vergul bilan yozing.\nMasalan: O'zbek, Rus, Ingliz");
+  } else if (reg.step === "capacity") {
+    const capacity = Number(text);
+    if (!Number.isInteger(capacity) || capacity < 1 || capacity > 100) {
+      await telegramSendMessage(chatId, "O'rindiqlar sonini 1 dan 100 gacha son bilan yozing.");
+      return NextResponse.json({ ok: true });
+    }
+    reg.data.capacity = String(capacity);
+    reg.step = "city";
+    await save(reg);
+    await telegramSendMessage(chatId, "Qaysi shaharda xizmat ko'rsatasiz?\nMasalan: Toshkent, Samarqand yoki Buxoro.");
   } else if (reg.step === "languages") {
     reg.data.languages = clean(text, 300); reg.step = "price";
     await save(reg); await telegramSendMessage(chatId, "Kunlik narxingizni AQSh dollarida yozing. Masalan: 50");
@@ -234,10 +388,25 @@ export async function POST(req: Request) {
   } else if (reg.step === "bio") {
     const bio = cleanMultiline(text, 2000);
     if (bio.length < 20) { await telegramSendMessage(chatId, "Tavsif kamida 20 belgidan iborat bo'lsin. Qayta yozing."); return NextResponse.json({ ok: true }); }
+    const subscription = await findActiveSpecialistSubscription(String(from.id), from.username ?? reg.username);
+    if (!subscription) {
+      reg.step = "start";
+      await save(reg);
+      await telegramSendMessage(
+        chatId,
+        `Obunangiz active emas. Avval saytda to'lov/promokodni yakunlang:\n${process.env.NEXT_PUBLIC_SITE_URL ?? "https://bayconnect.uz"}/register`,
+        { reply_markup: { remove_keyboard: true } },
+      );
+      return NextResponse.json({ ok: true });
+    }
     const languages = (reg.data.languages ?? "").split(",").map((x) => clean(x, 40)).filter(Boolean).slice(0, 12);
-    const [provider] = await db.insert(providers).values({ fullName: reg.fullName || "BayConnect mutaxassisi", category: reg.data.category, city: reg.data.city, languages, pricePerDay: Number(reg.data.pricePerDay), experienceYears: Number(reg.data.experienceYears), bio, phone: reg.phone, email: reg.data.email || `telegram-${from.id}@bayconnect.local`, telegramChatId: chatId, telegramUsername: reg.username || null, avatarEmoji: reg.data.category === "transfer" ? "✈️" : "🕌", coverColor: reg.data.category === "transfer" ? "blue" : "orange" }).returning({ id: providers.id });
+    const [provider] = await db.insert(providers).values({ fullName: reg.fullName || "BayConnect mutaxassisi", category: reg.data.category, subCategory: reg.data.category === "transfer" ? reg.data.subCategory ?? "sedan" : "", city: reg.data.city, languages, pricePerDay: Number(reg.data.pricePerDay), experienceYears: Number(reg.data.experienceYears), capacity: Number(reg.data.capacity ?? 0), bio, phone: reg.phone, email: reg.data.email || `telegram-${from.id}@bayconnect.local`, telegramChatId: chatId, telegramUserId: String(from.id), telegramUsername: reg.username || null, avatarEmoji: reg.data.category === "transfer" ? "✈️" : "🕌", coverColor: reg.data.category === "transfer" ? "blue" : "orange" }).returning({ id: providers.id });
+    await db
+      .update(subscriptions)
+      .set({ providerId: provider.id, telegramUserId: String(from.id), updatedAt: new Date() })
+      .where(eq(subscriptions.id, subscription.id));
     reg.step = "done"; await save(reg); revalidateTag(CACHE_TAGS.providers, "max");
-    await telegramSendMessage(chatId, `✅ Ro'yxatdan o'tish yakunlandi! Profilingiz saytda e'lon qilindi:\n${process.env.NEXT_PUBLIC_SITE_URL ?? "https://bayconnect.uz"}/providers/${provider.id}`, { reply_markup: { remove_keyboard: true } });
+    await telegramSendMessage(chatId, `✅ Ro'yxatdan o'tish yakunlandi! Profilingiz saytda e'lon qilindi:\n${process.env.NEXT_PUBLIC_SITE_URL ?? "https://bayconnect.uz"}/providers/${provider.id}\n\nBayCommunity guruhiga kirish uchun saytdagi obuna jarayonini yakunlang, keyin guruhga join request yuboring. Bot ruxsatingizni tekshiradi va avtomatik tasdiqlaydi.`, { reply_markup: { remove_keyboard: true } });
   } else {
     await telegramSendMessage(chatId, "Ro'yxatdan o'tish uchun /start buyrug'ini bosing.");
   }

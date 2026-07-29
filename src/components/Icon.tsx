@@ -405,6 +405,7 @@ const CATEGORY_ICONS: Record<
   translator: TranslatorIcon,
   photographer: PhotographerIcon,
   tour_agent: TourAgentIcon,
+  tourism_service: HandshakeIcon,
   transfer: TransferIcon,
   hotel: HotelIcon,
 };

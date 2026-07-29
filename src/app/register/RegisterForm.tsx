@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { CATEGORIES } from "@/lib/brand";
+import { CATEGORIES, SPECIALIST_PLANS, TRANSFER_TYPES } from "@/lib/brand";
 import { CategoryIcon } from "@/components/Icon";
 
 export function RegisterForm() {
@@ -11,6 +11,7 @@ export function RegisterForm() {
   const [error, setError] = useState("");
   const [step, setStep] = useState(1);
   const [draft, setDraft] = useState<Record<string, string>>({});
+  const [selectedCategory, setSelectedCategory] = useState(draft.category ?? "guide");
 
   function collect(form: HTMLFormElement) {
     const next = { ...draft };
@@ -18,6 +19,7 @@ export function RegisterForm() {
       next[key] = String(value);
     });
     setDraft(next);
+    if (next.category) setSelectedCategory(next.category);
     return next;
   }
 
@@ -56,16 +58,20 @@ export function RegisterForm() {
     const payload = {
       fullName: data.fullName ?? "",
       category: data.category ?? "",
+      subCategory: data.category === "transfer" ? data.subCategory ?? "" : "",
       city: data.city ?? "",
       country: data.country ?? "Uzbekistan",
       languages: toList(data.languages),
       pricePerDay: Number(data.pricePerDay ?? 0),
       experienceYears: Number(data.experienceYears ?? 0),
+      capacity: Number(data.capacity ?? 0),
       bio: data.bio ?? "",
       phone: data.phone ?? "",
       email: data.email ?? "",
       tags: toList(data.tags),
       coverColor: data.coverColor ?? "orange",
+      planKey: data.planKey ?? "start",
+      promoCode: data.promoCode ?? "",
     };
 
     try {
@@ -147,6 +153,36 @@ export function RegisterForm() {
               />
             </Field>
           </div>
+          <Field label="Tarif">
+            <div className="grid gap-2 sm:grid-cols-3">
+              {SPECIALIST_PLANS.map((plan) => (
+                <label
+                  key={plan.key}
+                  className="cursor-pointer rounded-2xl border border-[#123f34]/[0.08] bg-white/72 p-3 has-[:checked]:border-[#006b55] has-[:checked]:bg-[#eaf4ef] transition"
+                >
+                  <input
+                    type="radio"
+                    name="planKey"
+                    value={plan.key}
+                    className="sr-only"
+                    defaultChecked={(draft.planKey ?? "start") === plan.key}
+                  />
+                  <div className="text-[14px] font-black text-[#123f34]">{plan.label}</div>
+                  <div className="mt-1 text-[12px] font-semibold text-[#006b55]">
+                    {new Intl.NumberFormat("uz-UZ").format(plan.priceMonthly)} so'm / oy
+                  </div>
+                </label>
+              ))}
+            </div>
+          </Field>
+          <Field label="Promokod">
+            <input
+              name="promoCode"
+              defaultValue={draft.promoCode}
+              className="input-apple"
+              placeholder="1 yoki 3 oy bepul kod bo'lsa kiriting"
+            />
+          </Field>
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label="Shahar">
               <input
@@ -185,6 +221,7 @@ export function RegisterForm() {
                     required
                     className="sr-only"
                     defaultChecked={(draft.category ?? "guide") === c.key}
+                    onChange={() => setSelectedCategory(c.key)}
                   />
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#006b55] ring-1 ring-[#123f34]/5 shadow-sm">
                     <CategoryIcon category={c.key} size={20} strokeWidth={1.9} />
@@ -194,6 +231,44 @@ export function RegisterForm() {
               ))}
             </div>
           </Field>
+          {selectedCategory === "transfer" ? (
+            <div className="space-y-4 rounded-2xl border border-[#006b55]/10 bg-[#f4fbf8] p-4">
+              <Field label="Avtomobil turi">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {TRANSFER_TYPES.map((t) => (
+                    <label
+                      key={t.key}
+                      className="cursor-pointer rounded-2xl border border-[#123f34]/[0.08] bg-white/80 p-3 has-[:checked]:border-[#006b55] has-[:checked]:bg-[#eaf4ef] transition"
+                    >
+                      <input
+                        type="radio"
+                        name="subCategory"
+                        value={t.key}
+                        required={selectedCategory === "transfer"}
+                        className="sr-only"
+                        defaultChecked={(draft.subCategory ?? "sedan") === t.key}
+                      />
+                      <div className="text-[22px]">{t.emoji}</div>
+                      <div className="mt-1 text-[13px] font-semibold text-[#123f34]">{t.label}</div>
+                      <div className="mt-0.5 text-[11px] text-[#7b827f]">{t.capacity} joy</div>
+                    </label>
+                  ))}
+                </div>
+              </Field>
+              <Field label="O'rindiqlar soni">
+                <input
+                  name="capacity"
+                  type="number"
+                  min="1"
+                  max="100"
+                  required={selectedCategory === "transfer"}
+                  defaultValue={draft.capacity}
+                  className="input-apple"
+                  placeholder="4"
+                />
+              </Field>
+            </div>
+          ) : null}
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label="Kunlik narx ($)">
               <input

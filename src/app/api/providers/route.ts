@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
+import { and, eq, or, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { providers } from "@/db/schema";
-import { CATEGORIES, CITIES } from "@/lib/brand";
+import { promoCodes, providers, subscriptions } from "@/db/schema";
+import { CATEGORIES, CITIES, SPECIALIST_PLANS } from "@/lib/brand";
 import { CACHE_TAGS } from "@/lib/queries";
 import {
   clean,
@@ -34,9 +35,12 @@ type Body = {
   tags?: unknown;
   avatarEmoji?: unknown;
   coverColor?: unknown;
+  planKey?: unknown;
+  promoCode?: unknown;
 };
 
 const CATEGORY_KEYS = new Set<string>(CATEGORIES.map((c) => c.key));
+const PLAN_KEYS = new Set<string>(SPECIALIST_PLANS.map((p) => p.key));
 const ALLOWED_COLORS = new Set(["orange", "yellow", "blue", "dark"]);
 const TRANSFER_SUBS = new Set(["sedan", "minivan", "suv", "bus", "airport"]);
 
@@ -65,6 +69,8 @@ export async function POST(req: Request) {
   const pricePerDay = Number(body.pricePerDay ?? 0);
   const experienceYears = Number(body.experienceYears ?? 0);
   const capacity = Number(body.capacity ?? 0);
+  const planKey = clean(body.planKey, 40) || "start";
+  const promoCode = clean(body.promoCode, 40).replace(/\s+/g, "").toUpperCase();
 
   if (!fullName || !category || !city || !bio || !phone || !email) {
     return NextResponse.json(
@@ -86,6 +92,10 @@ export async function POST(req: Request) {
 
   if (!CATEGORY_KEYS.has(category)) {
     return NextResponse.json({ error: "Noto'g'ri kategoriya" }, { status: 400 });
+  }
+
+  if (!PLAN_KEYS.has(planKey)) {
+    return NextResponse.json({ error: "Noto'g'ri tarif" }, { status: 400 });
   }
 
   if (!isValidEmail(email)) {
@@ -116,7 +126,13 @@ export async function POST(req: Request) {
     CITIES.find((c) => c.toLowerCase() === city.toLowerCase()) ?? city;
 
   const rawSub = clean(body.subCategory, 40);
-  const subCategory = category === "transfer" && TRANSFER_SUBS.has(rawSub) ? rawSub : "";
+  if (category === "transfer" && !TRANSFER_SUBS.has(rawSub)) {
+    return NextResponse.json({ error: "Transfer uchun avtomobil turini tanlang" }, { status: 400 });
+  }
+  if (category === "transfer" && capacity < 1) {
+    return NextResponse.json({ error: "Transfer uchun o'rindiqlar sonini yozing" }, { status: 400 });
+  }
+  const subCategory = category === "transfer" ? rawSub : "";
 
   const rawColor = clean(body.coverColor, 20);
   const coverColor = ALLOWED_COLORS.has(rawColor) ? rawColor : "orange";
@@ -126,6 +142,36 @@ export async function POST(req: Request) {
   const avatarEmoji = rawEmoji ? Array.from(rawEmoji).slice(0, 2).join("") : "🌴";
 
   try {
+    const now = new Date();
+    let subscriptionStatus = "payment_required";
+    let subscriptionExpiresAt: Date | null = null;
+
+    if (promoCode) {
+      const [promo] = await db
+        .select()
+        .from(promoCodes)
+        .where(
+          and(
+            eq(promoCodes.code, promoCode),
+            eq(promoCodes.active, true),
+            or(eq(promoCodes.audience, "all"), eq(promoCodes.audience, "specialist")),
+          ),
+        )
+        .limit(1);
+
+      const promoExpired = promo?.expiresAt ? promo.expiresAt <= now : false;
+      const promoOverused = promo?.maxUses ? promo.usedCount >= promo.maxUses : false;
+
+      if (!promo || promoExpired || promoOverused) {
+        return NextResponse.json({ error: "Promokod faol emas yoki muddati tugagan" }, { status: 400 });
+      }
+
+      const expiresAt = new Date(now);
+      expiresAt.setMonth(expiresAt.getMonth() + Math.max(1, Math.min(12, promo.freeMonths)));
+      subscriptionStatus = "active";
+      subscriptionExpiresAt = expiresAt;
+    }
+
     const [row] = await db
       .insert(providers)
       .values({
@@ -146,6 +192,24 @@ export async function POST(req: Request) {
         coverColor,
       })
       .returning({ id: providers.id });
+
+    await db.insert(subscriptions).values({
+      audience: "specialist",
+      providerId: row.id,
+      planKey,
+      status: subscriptionStatus,
+      promoCode: promoCode || null,
+      startedAt: subscriptionStatus === "active" ? now : null,
+      expiresAt: subscriptionExpiresAt,
+      updatedAt: now,
+    });
+
+    if (subscriptionStatus === "active" && promoCode) {
+      await db
+        .update(promoCodes)
+        .set({ usedCount: sql`${promoCodes.usedCount} + 1` })
+        .where(eq(promoCodes.code, promoCode));
+    }
 
     // MUHIM: yangi profil qo'shilgach ro'yxat keshini bekor qilamiz,
     // aks holda u 2 daqiqagacha saytda ko'rinmaydi.

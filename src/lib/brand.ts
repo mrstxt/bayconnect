@@ -22,8 +22,9 @@ export const CATEGORIES = [
   { key: "guide", label: "Gid", emoji: "🕌", color: "orange", description: "Tarixiy va madaniy ekskursiyalar" },
   { key: "translator", label: "Tarjimon", emoji: "🗣️", color: "dark", description: "Sinxron va yo'riqnoma tarjima" },
   { key: "photographer", label: "Fotograf", emoji: "📸", color: "orange", description: "Sayohat va portret suratlar" },
-  { key: "tour_agent", label: "Tur agent", emoji: "🌍", color: "blue", description: "To'liq paket va viza yordami" },
+  { key: "tour_agent", label: "Tur operator", emoji: "🌍", color: "blue", description: "To'liq paket va viza yordami" },
   { key: "transfer", label: "Transfer", emoji: "✈️", color: "blue", description: "Aeroport va shaharlararo" },
+  { key: "tourism_service", label: "Turizm xizmati", emoji: "🤝", color: "green", description: "Turizm yo'nalishidagi boshqa xizmatlar" },
   { key: "hotel", label: "Mehmonxona", emoji: "🏨", color: "yellow", description: "Qulay joylashuv" },
 ] as const;
 
@@ -32,7 +33,8 @@ export const EXPERT_CATEGORIES = [
   { key: "guide", label: "Gidlar", emoji: "🕌", color: "orange", description: "Mahalliy tarix va madaniyat mutaxassislari" },
   { key: "translator", label: "Tarjimonlar", emoji: "🗣️", color: "dark", description: "Sinxron va ketma-ket tarjima" },
   { key: "photographer", label: "Fotograflar", emoji: "📸", color: "orange", description: "Sayohat va portret ustalar" },
-  { key: "tour_agent", label: "Tur agentlari", emoji: "🌍", color: "blue", description: "Kompleks paket va viza" },
+  { key: "tour_agent", label: "Tur operatorlar", emoji: "🌍", color: "blue", description: "Kompleks paket va viza" },
+  { key: "tourism_service", label: "Turizm xizmatlari", emoji: "🤝", color: "green", description: "Turizm yo'nalishidagi servis mutaxassislari" },
 ] as const;
 
 // Transport turlari — /transfer sahifasi uchun
@@ -46,6 +48,34 @@ export const TRANSFER_TYPES = [
 
 export type CategoryKey = (typeof CATEGORIES)[number]["key"];
 export type TransferKey = (typeof TRANSFER_TYPES)[number]["key"];
+
+export const SPECIALIST_PLANS = [
+  {
+    key: "start",
+    label: "Start",
+    priceMonthly: 99000,
+    features: ["Katalogda profil", "Telefon va Telegram kontakt", "BayCommunity kirish"],
+  },
+  {
+    key: "pro",
+    label: "Pro",
+    priceMonthly: 199000,
+    features: ["Yuqoriroq ko'rinish", "Buyurtma bildirishnomasi", "Statistika", "BayCommunity kirish"],
+  },
+  {
+    key: "premium",
+    label: "Premium",
+    priceMonthly: 399000,
+    features: ["Top joylashuv", "Verified badge", "Promo postlar", "Ustuvor support", "BayCommunity kirish"],
+  },
+] as const;
+
+export const COMMUNITY_PLAN = {
+  key: "baycommunity",
+  label: "BayCommunity",
+  priceMonthly: 49000,
+  features: ["Yopiq community guruh", "Hamkorlar va imkoniyatlar", "E'lonlar va yangiliklar", "Networking"],
+} as const;
 
 export function categoryLabel(key: string): string {
   return CATEGORIES.find((c) => c.key === key)?.label ?? key;

@@ -32,6 +32,7 @@ export const providers = pgTable(
     email: varchar("email", { length: 160 }).notNull(),
     // Telegram botdagi chat: buyurtmalar bevosita shu yerga yuboriladi.
     telegramChatId: varchar("telegram_chat_id", { length: 32 }).unique(),
+    telegramUserId: varchar("telegram_user_id", { length: 32 }),
     telegramUsername: varchar("telegram_username", { length: 80 }),
     avatarEmoji: varchar("avatar_emoji", { length: 8 }).notNull().default("🌴"),
     coverColor: varchar("cover_color", { length: 20 }).notNull().default("orange"),
@@ -54,6 +55,96 @@ export const providers = pgTable(
     index("providers_rank_idx").on(t.verified, t.rating, t.reviewsCount),
     // "Yangi" saralash.
     index("providers_created_idx").on(t.createdAt),
+    index("providers_telegram_user_idx").on(t.telegramUserId),
+  ],
+);
+
+export const subscriptionPlans = pgTable(
+  "subscription_plans",
+  {
+    id: serial("id").primaryKey(),
+    key: varchar("key", { length: 40 }).notNull().unique(),
+    audience: varchar("audience", { length: 30 }).notNull(),
+    // specialist | community
+    title: varchar("title", { length: 120 }).notNull(),
+    priceMonthly: integer("price_monthly").notNull(),
+    features: jsonb("features").$type<string[]>().notNull().default([]),
+    active: boolean("active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("subscription_plans_audience_idx").on(t.audience),
+    index("subscription_plans_active_idx").on(t.active),
+  ],
+);
+
+export const promoCodes = pgTable(
+  "promo_codes",
+  {
+    id: serial("id").primaryKey(),
+    code: varchar("code", { length: 40 }).notNull().unique(),
+    audience: varchar("audience", { length: 30 }).notNull().default("all"),
+    // all | specialist | community
+    freeMonths: integer("free_months").notNull().default(1),
+    maxUses: integer("max_uses").notNull().default(0),
+    usedCount: integer("used_count").notNull().default(0),
+    active: boolean("active").notNull().default(true),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("promo_codes_code_idx").on(t.code),
+    index("promo_codes_active_idx").on(t.active),
+  ],
+);
+
+export const subscriptions = pgTable(
+  "subscriptions",
+  {
+    id: serial("id").primaryKey(),
+    audience: varchar("audience", { length: 30 }).notNull(),
+    // specialist | community
+    providerId: integer("provider_id").references(() => providers.id, { onDelete: "cascade" }),
+    telegramUserId: varchar("telegram_user_id", { length: 32 }),
+    telegramUsername: varchar("telegram_username", { length: 80 }),
+    planKey: varchar("plan_key", { length: 40 }).notNull(),
+    status: varchar("status", { length: 30 }).notNull().default("pending"),
+    // pending | active | expired | canceled | payment_required
+    promoCode: varchar("promo_code", { length: 40 }),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("subscriptions_provider_idx").on(t.providerId),
+    index("subscriptions_telegram_user_idx").on(t.telegramUserId),
+    index("subscriptions_status_expires_idx").on(t.status, t.expiresAt),
+  ],
+);
+
+export const communityAccessRequests = pgTable(
+  "community_access_requests",
+  {
+    id: serial("id").primaryKey(),
+    fullName: varchar("full_name", { length: 160 }).notNull(),
+    phone: varchar("phone", { length: 40 }).notNull().default(""),
+    telegramUsername: varchar("telegram_username", { length: 80 }).notNull(),
+    telegramUserId: varchar("telegram_user_id", { length: 32 }),
+    audience: varchar("audience", { length: 30 }).notNull().default("community"),
+    planKey: varchar("plan_key", { length: 40 }).notNull().default("baycommunity"),
+    status: varchar("status", { length: 30 }).notNull().default("payment_required"),
+    // payment_required | approved | joined | expired | rejected
+    promoCode: varchar("promo_code", { length: 40 }),
+    approvedUntil: timestamp("approved_until", { withTimezone: true }),
+    joinedAt: timestamp("joined_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("community_access_username_idx").on(t.telegramUsername),
+    index("community_access_user_idx").on(t.telegramUserId),
+    index("community_access_status_idx").on(t.status),
   ],
 );
 
@@ -137,6 +228,10 @@ export const posts = pgTable(
 
 export type Provider = typeof providers.$inferSelect;
 export type NewProvider = typeof providers.$inferInsert;
+export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
+export type PromoCode = typeof promoCodes.$inferSelect;
+export type Subscription = typeof subscriptions.$inferSelect;
+export type CommunityAccessRequest = typeof communityAccessRequests.$inferSelect;
 export type Booking = typeof bookings.$inferSelect;
 export type NewBooking = typeof bookings.$inferInsert;
 export type TelegramRegistration = typeof telegramRegistrations.$inferSelect;

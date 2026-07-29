@@ -1,8 +1,8 @@
 # bayConnect
 
-bayConnect — O'zbekiston bo'ylab gid, tarjimon, fotograf, tur agent, transfer va mehmonxona xizmatlarini topish uchun Next.js marketplace.
+bayConnect — O'zbekiston bo'ylab gid, tarjimon, fotograf, tur operator, transfer, turizm xizmati va mehmonxona xizmatlarini topish uchun Next.js marketplace.
 
-Loyiha Vercel + Neon Postgres uchun tayyorlangan. Telegram bot orqali mutaxassis ro'yxatdan o'tishi va yangi buyurtmalarni bot chatida qabul qilishi mumkin.
+Loyiha Vercel + Neon Postgres uchun tayyorlangan. Mutaxassislar avval saytda tarifga obuna bo'ladi yoki promokod kiritadi, keyin Telegram bot active obunani tekshirgan holda profil yaratishga ruxsat beradi. BayCommunity yopiq guruhi ham obuna/promokod asosida bot orqali boshqariladi.
 
 ## Stack
 
@@ -26,6 +26,8 @@ src/
       bookings/            Buyurtma yaratish
       providers/           Mutaxassis yaratish
       providers/by-ids/    Sevimlilar uchun providerlarni olish
+      subscriptions/intent/ Obuna yoki promokod intent yaratish
+      community/access/    BayCommunity access so'rovi
       telegram/webhook/    Telegram bot webhook
       telegram/setup/      Telegram webhookni sozlash
       health/              DB health check
@@ -33,13 +35,16 @@ src/
     transfer/              Transfer katalogi
     hotels/                Mehmonxonalar katalogi
     providers/[id]/        Provider profili va booking forma
-    register/              Web orqali ro'yxatdan o'tish
+    register/              Hamkorlik tariflari va obuna modal
+    community/             BayCommunity obuna sahifasi
     blog/                  Blog
   components/              UI komponentlar
   db/                      Drizzle schema va DB client
   lib/                     Query, validation, brand, telegram, i18n helperlar
 scripts/
   seed.ts                  Demo ma'lumot yozish
+  upgrade-subscriptions-community.sql
+                           Mavjud bazani obuna/community jadvallariga yangilash
 ```
 
 ## Tez Boshlash
@@ -69,6 +74,7 @@ DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require"
 NEXT_PUBLIC_SITE_URL="http://localhost:3000"
 TELEGRAM_BOT_TOKEN=""
 TELEGRAM_WEBHOOK_SECRET=""
+TELEGRAM_COMMUNITY_CHAT_ID=""
 ```
 
 ### Vercel Envga Nima Joylanadi
@@ -81,6 +87,7 @@ Vercel dashboard: Project → Settings → Environment Variables.
 | `NEXT_PUBLIC_SITE_URL` | Deploy domain | `https://your-domain.uz` yoki Vercel production URL |
 | `TELEGRAM_BOT_TOKEN` | BotFather | `123456:ABC...` ko'rinishidagi token |
 | `TELEGRAM_WEBHOOK_SECRET` | O'zingiz yaratasiz | Uzun random matn, masalan `openssl rand -hex 32` |
+| `TELEGRAM_COMMUNITY_CHAT_ID` | BayCommunity yopiq guruhi | Masalan `-1001234567890`; bot guruhda admin bo'lishi kerak |
 
 Vercel preview muhitida ham alohida `NEXT_PUBLIC_SITE_URL` qo'ysangiz canonical URL va Telegram setup to'g'ri ishlaydi.
 
@@ -97,6 +104,10 @@ Asosiy jadvallar:
 | `reviews` | Provider sharhlari |
 | `posts` | Blog maqolalari |
 | `telegram_registrations` | Telegram ro'yxatdan o'tish sessiyasi |
+| `subscription_plans` | Start, Pro, Premium va BayCommunity tariflari |
+| `promo_codes` | 1 yoki 3 oy bepul access beruvchi promokodlar |
+| `subscriptions` | Mutaxassis va community obuna holatlari |
+| `community_access_requests` | BayCommunity guruhiga kirish so'rovlari |
 
 Jadvallarni yaratish yoki yangilash:
 
@@ -112,6 +123,46 @@ npm run db:seed
 
 Production bazada `db:seed` ishlatmang.
 
+Mavjud production bazaga yangi obuna/community jadvallarini qo'shish uchun:
+
+```bash
+psql "$DATABASE_URL" -f scripts/upgrade-subscriptions-community.sql
+```
+
+Yoki Drizzle orqali schema push qiling:
+
+```bash
+npm run db:push
+```
+
+Demo seed quyidagi promokodlarni ham yaratadi:
+
+| Promokod | Maqsad |
+| --- | --- |
+| `BAY1OY` | 1 oy bepul |
+| `BAY3OY` | 3 oy bepul |
+
+## Obuna Va Promokod Tizimi
+
+Mutaxassislar uchun 3 ta tarif bor:
+
+| Tarif | Maqsad |
+| --- | --- |
+| `Start` | Katalogda profil, kontakt va BayCommunity kirishi |
+| `Pro` | Ko'proq ko'rinish, buyurtma bildirishnomasi, statistika |
+| `Premium` | Top joylashuv, verified badge, promo va ustuvor support |
+
+Oddiy foydalanuvchilar va mijozlar uchun alohida `BayCommunity` obunasi bor.
+
+`/register` sahifasida har bir tarif kartasida `Obuna bo'lish` tugmasi bor. Modal ichida:
+
+- promokod kiritilsa, obuna darhol `active` bo'ladi;
+- `To'lov qilish` hozircha "tez kunda" xabarini chiqaradi;
+- active mutaxassis obunasi bo'lsa, bot profil yaratish jarayonini boshlaydi;
+- active community obunasi bo'lsa, bot yopiq guruh join requestini tasdiqlaydi.
+
+Promokod ishlatilganda `subscriptions.status = active`, `expires_at` esa promokod oyiga qarab 1 yoki 3 oy keyinga yoziladi.
+
 ## Telegram Botni Ishga Tushirish
 
 1. Telegramda `@BotFather`ga kiring.
@@ -124,7 +175,8 @@ openssl rand -hex 32
 ```
 
 5. Vercelga deploy qiling.
-6. Deploydan keyin webhookni bir marta sozlang:
+6. BayCommunity yopiq guruhini yarating, botni admin qiling va guruh ID'sini `TELEGRAM_COMMUNITY_CHAT_ID`ga yozing.
+7. Deploydan keyin webhookni bir marta sozlang:
 
 ```text
 https://YOUR_DOMAIN/api/telegram/setup?secret=TELEGRAM_WEBHOOK_SECRET_QIYMATI
@@ -152,7 +204,7 @@ Eng ko'p uchraydigan 5 ta sabab:
 | 1 | Webhook hech qachon o'rnatilmagan | Bot jimgina javob bermaydi | Deploydan keyin bir marta `https://DOMEN/api/telegram/setup?secret=SECRET` ni oching |
 | 2 | `NEXT_PUBLIC_SITE_URL` da `http://localhost:3000` qoldirilgan | Setup endpoint 400/502 qaytaradi | Telegram FAQAT HTTPS public domenni qabul qiladi — env'ga production domenni yozing, redeploy qiling, setup'ni qayta chaqiring |
 | 3 | Envlar faqat lokal `.env`da — Vercel'ga yozilmagan | GET `/api/telegram/webhook` `botTokenConfigured:false` ko'rsatadi | Vercel `Settings → Environment Variables` ga 4 tasini yozing + Redeploy |
-| 4 | `npm run db:push` bajarilmagan | Bot "vaqtincha sozlanmoqda" deb javob beradi | `npm run db:push` — `telegram_registrations` jadvali yaratilishi shart |
+| 4 | `npm run db:push` bajarilmagan | Bot "vaqtincha sozlanmoqda" deb javob beradi | `npm run db:push` — `telegram_registrations`, `subscriptions` va community jadvallari yaratilishi shart |
 | 5 | Lokalda (`npm run dev`) test qilinmoqda | Bot umuman sekin | Telegram localhost'ga update yubora olmaydi; ngrok/cloudflared tunnel bilan public https URL olib, webhookni shunga yo'naltiring |
 
 Qo'shimcha tekshiruvlar:
@@ -172,18 +224,31 @@ curl "https://api.telegram.org/bot<TOKEN>/getWebhookInfo"
 - `Connection refused` / DNS xatosı → domen yoki deploy ishlamayapti
 - hech qanday xato yo'q + `pending_update_count=0` → hammasi yaxshi, botga `/start` yuboring
 
-Bot oqimi:
+### Mutaxassis Bot Oqimi
 
-1. Mutaxassis botga `/start` yoki `/register` yuboradi.
-2. Telefon raqamini Telegram contact tugmasi orqali yuboradi.
-3. To'liq ism-familiyasini yozadi (Telegram'dagi ismi bitta tugma bilan tanlanishi mumkin).
-4. Email yozadi yoki o'tkazib yuboradi (ixtiyoriy — yozilmasa profilda email qatori ko'rinmaydi, Telegram username ko'rsatiladi).
-5. Xizmat turini tanlaydi.
-6. Shahar, tillar, narx, tajriba va bio kiritadi.
-7. Profil `providers` jadvaliga yoziladi va sayt katalogida darhol ko'rinadi.
-8. Keyingi bookinglar shu Telegram chatga yuboriladi (`after()` orqali javobdan keyin ishonchli yuboriladi).
+Bot hech qachon faqat `/start` bosilgani uchun mutaxassisni ro'yxatdan o'tkazmaydi. Avval saytda obuna yoki promokod active bo'lishi shart.
 
-Muhim: botdan ro'yxatdan o'tgan providerlarda `telegram_chat_id` saqlanadi. Web formadan ro'yxatdan o'tgan providerga bot xabari borishi uchun hozircha chat ID yo'q; buni keyin web profilni bot bilan bog'lash oqimi orqali kengaytirish mumkin.
+1. Mutaxassis `/register` sahifasida `Start`, `Pro` yoki `Premium` tarifini tanlaydi.
+2. `Obuna bo'lish` modalida ism, telefon, Telegram username va promokod kiritadi.
+3. Promokod to'g'ri bo'lsa `subscriptions.status = active` bo'ladi.
+4. Mutaxassis botga `/start` yoki `/register` yuboradi.
+5. Bot `telegram_user_id` yoki `telegram_username` bo'yicha active mutaxassis obunasini tekshiradi.
+6. Active obuna topilmasa, bot profil yaratishni boshlamaydi va saytga qaytaradi.
+7. Active obuna topilsa, bot telefon, ism, email, kategoriya, shahar, tillar, narx, tajriba va bio so'raydi.
+8. Kategoriya `Transfer` bo'lsa, avtomobil turi va o'rindiqlar soni majburiy so'raladi.
+9. Profil `providers` jadvaliga yoziladi, `subscriptions.provider_id` shu profilga ulanadi.
+10. Keyingi bookinglar shu Telegram chatga yuboriladi.
+
+### BayCommunity Bot Oqimi
+
+1. Foydalanuvchi `/register` yoki `/community` sahifasida community obunasini yoqadi.
+2. Promokod active bo'lsa `community_access_requests.status = approved` va/yoki `subscriptions.status = active` bo'ladi.
+3. Foydalanuvchi yopiq BayCommunity guruhiga join request yuboradi.
+4. Bot `chat_join_request` update oladi.
+5. Bot username/user ID bo'yicha active obuna yoki approved access borligini tekshiradi.
+6. Ruxsat bo'lsa `approveChatJoinRequest`, bo'lmasa `declineChatJoinRequest` qiladi.
+
+Telegram cheklovi: foydalanuvchini guruhdan chiqib ketolmaydigan qilish mumkin emas. To'g'ri model — yopiq guruh, join request, active obuna tekshiruvi va muddati tugaganda chiqarish/kelajakdagi requestni rad etish.
 
 ## Til Va Tarjima
 
@@ -195,7 +260,7 @@ Hozir tarjima qamrovi:
 | --- | --- |
 | Header, footer, tugmalar | UZ/RU/EN |
 | Katalog filtr va empty state matnlari | UZ/RU/EN |
-| Booking va register formadagi asosiy matnlar | UZ/RU/EN |
+| Booking formasi va obuna modalidagi asosiy matnlar | UZ/RU/EN |
 | API error javoblari | Hozircha Uzbek |
 | DBdagi bio, blog body, review matnlari | Avtomatik tarjima qilinmaydi |
 
@@ -208,6 +273,8 @@ Eski va yangi erkin matnlarni ham avtomatik tarjima qilish mumkin, lekin buning 
 | `/api/health` | GET | DB ulanishini tekshiradi |
 | `/api/providers` | POST | Mutaxassis yaratadi |
 | `/api/providers/by-ids` | POST | IDlar bo'yicha providerlarni qaytaradi |
+| `/api/subscriptions/intent` | POST | Tarif obunasi yoki promokod intent yaratadi |
+| `/api/community/access` | POST | BayCommunity access so'rovi yaratadi |
 | `/api/bookings` | POST | Buyurtma yaratadi va Telegramga xabar yuboradi |
 | `/api/telegram/webhook` | POST | Telegram update qabul qiladi |
 | `/api/telegram/setup?secret=...` | GET | Telegram webhookni o'rnatadi |
@@ -240,7 +307,10 @@ Vercelda lokal command ishlatmasangiz, `DATABASE_URL` bilan terminaldan Drizzle 
 - `.env` va real tokenlarni commit qilmang.
 - Agar `.env.example` yoki boshqa faylga real DB URL tushib qolgan bo'lsa, DB parolini rotate qiling.
 - `TELEGRAM_WEBHOOK_SECRET` kamida 32 random belgidan iborat bo'lsin.
+- `TELEGRAM_COMMUNITY_CHAT_ID` public link emas, yopiq guruh ID'si bo'lishi kerak.
+- Bot BayCommunity guruhida join requestlarni tasdiqlay oladigan admin bo'lishi kerak.
 - Booking va register endpointlarda oddiy rate limit va input validation bor.
+- Bot profil yaratishdan oldin `subscriptions.status = active` va `expires_at` hali o'tmaganini tekshiradi.
 - Serverless memory rate limit mutlaq himoya emas; katta trafficda Upstash Redis yoki Vercel Firewall ishlating.
 
 ### npm Audit Holati (2026-07-28)

@@ -1,6 +1,15 @@
 import "dotenv/config";
 import { db, getPool } from "../src/db";
-import { providers, reviews, posts, bookings } from "../src/db/schema";
+import {
+  bookings,
+  communityAccessRequests,
+  promoCodes,
+  providers,
+  reviews,
+  posts,
+  subscriptionPlans,
+  subscriptions,
+} from "../src/db/schema";
 
 /**
  * Demo ma'lumot to'ldiruvchi skript.
@@ -20,9 +29,49 @@ async function main() {
   console.log("Eski demo ma'lumotlar tozalanmoqda...");
   // Tartib muhim: foreign key bog'liqligi bo'lgan jadvallar avval o'chadi.
   await db.delete(bookings);
+  await db.delete(communityAccessRequests);
+  await db.delete(subscriptions);
+  await db.delete(promoCodes);
+  await db.delete(subscriptionPlans);
   await db.delete(reviews);
   await db.delete(providers);
   await db.delete(posts);
+
+  await db.insert(subscriptionPlans).values([
+    {
+      key: "start",
+      audience: "specialist",
+      title: "Start",
+      priceMonthly: 99_000,
+      features: ["Katalogda profil", "Telefon va Telegram kontakt", "BayCommunity kirish"],
+    },
+    {
+      key: "pro",
+      audience: "specialist",
+      title: "Pro",
+      priceMonthly: 199_000,
+      features: ["Yuqoriroq ko'rinish", "Buyurtma bildirishnomasi", "Statistika", "BayCommunity kirish"],
+    },
+    {
+      key: "premium",
+      audience: "specialist",
+      title: "Premium",
+      priceMonthly: 399_000,
+      features: ["Top joylashuv", "Verified badge", "Promo postlar", "Ustuvor support", "BayCommunity kirish"],
+    },
+    {
+      key: "baycommunity",
+      audience: "community",
+      title: "BayCommunity",
+      priceMonthly: 49_000,
+      features: ["Yopiq community guruh", "Hamkorlar va imkoniyatlar", "E'lonlar va yangiliklar", "Networking"],
+    },
+  ]);
+
+  await db.insert(promoCodes).values([
+    { code: "BAY1OY", audience: "all", freeMonths: 1, maxUses: 100 },
+    { code: "BAY3OY", audience: "all", freeMonths: 3, maxUses: 50 },
+  ]);
 
   // ===== PROVIDERS =====
   const inserted = await db
