@@ -13,6 +13,7 @@ import { CACHE_TAGS } from "@/lib/queries";
 import { clean, cleanMultiline, isValidEmail, isValidPhone } from "@/lib/validation";
 import {
   telegramApproveChatJoinRequest,
+  telegramDeleteMessage,
   telegramDeclineChatJoinRequest,
   telegramSendMessage,
 } from "@/lib/telegram";
@@ -22,7 +23,15 @@ export const dynamic = "force-dynamic";
 
 type TelegramUser = { id: number; first_name?: string; last_name?: string; username?: string };
 type TelegramUpdate = {
-  message?: { chat: { id: number }; from?: TelegramUser; text?: string; contact?: { phone_number: string; user_id?: number } };
+  message?: {
+    message_id?: number;
+    chat: { id: number };
+    from?: TelegramUser;
+    text?: string;
+    contact?: { phone_number: string; user_id?: number };
+    new_chat_members?: TelegramUser[];
+    left_chat_member?: TelegramUser;
+  };
   callback_query?: { id: string; data?: string; message?: { chat: { id: number } }; from: TelegramUser };
   chat_join_request?: { chat: { id: number }; from: TelegramUser; date: number; bio?: string; invite_link?: unknown };
 };
@@ -180,6 +189,19 @@ export async function POST(req: Request) {
       }
     }
 
+    return NextResponse.json({ ok: true });
+  }
+
+  const serviceMessage = update.message;
+  if (
+    serviceMessage?.message_id &&
+    (serviceMessage.new_chat_members?.length || serviceMessage.left_chat_member)
+  ) {
+    const communityChatId = process.env.TELEGRAM_COMMUNITY_CHAT_ID;
+    const serviceChatId = String(serviceMessage.chat.id);
+    if (communityChatId && serviceChatId === communityChatId) {
+      await telegramDeleteMessage(serviceChatId, serviceMessage.message_id);
+    }
     return NextResponse.json({ ok: true });
   }
 

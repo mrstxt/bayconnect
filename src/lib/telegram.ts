@@ -62,6 +62,23 @@ export async function telegramDeclineChatJoinRequest(
   }
 }
 
+export async function telegramDeleteMessage(chatId: string, messageId: number): Promise<boolean> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token || !chatId || !messageId) return false;
+  try {
+    const response = await fetch(`${API}/bot${token}/deleteMessage`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, message_id: messageId }),
+    });
+    if (!response.ok) console.error("[telegram] deleteMessage:", await response.text());
+    return response.ok;
+  } catch (error) {
+    console.error("[telegram] deleteMessage xatosi:", error);
+    return false;
+  }
+}
+
 type InviteLinkResponse = {
   ok?: boolean;
   result?: { invite_link?: string };

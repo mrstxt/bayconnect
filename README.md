@@ -182,7 +182,7 @@ openssl rand -hex 32
 ```
 
 5. Vercelga deploy qiling.
-6. BayCommunity yopiq guruhini yarating, botni admin qiling va guruh ID'sini `TELEGRAM_COMMUNITY_CHAT_ID`ga yozing.
+6. BayCommunity yopiq guruhini yarating, botni admin qiling va guruh ID'sini `TELEGRAM_COMMUNITY_CHAT_ID`ga yozing. Guruhdagi "qo'shildi/chiqdi" xabarlarini tozalashi uchun botda `Delete messages` ruxsati ham yoqilgan bo'lishi kerak.
 7. Deploydan keyin webhookni bir marta sozlang:
 
 ```text
