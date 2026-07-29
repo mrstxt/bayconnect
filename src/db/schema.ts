@@ -148,6 +148,24 @@ export const communityAccessRequests = pgTable(
   ],
 );
 
+export const telegramVerifications = pgTable(
+  "telegram_verifications",
+  {
+    token: varchar("token", { length: 80 }).primaryKey(),
+    telegramUserId: varchar("telegram_user_id", { length: 32 }),
+    telegramUsername: varchar("telegram_username", { length: 80 }),
+    status: varchar("status", { length: 30 }).notNull().default("pending"),
+    // pending | verified | expired
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("telegram_verifications_status_idx").on(t.status),
+    index("telegram_verifications_expires_idx").on(t.expiresAt),
+  ],
+);
+
 export const bookings = pgTable(
   "bookings",
   {
@@ -232,6 +250,7 @@ export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
 export type PromoCode = typeof promoCodes.$inferSelect;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type CommunityAccessRequest = typeof communityAccessRequests.$inferSelect;
+export type TelegramVerification = typeof telegramVerifications.$inferSelect;
 export type Booking = typeof bookings.$inferSelect;
 export type NewBooking = typeof bookings.$inferInsert;
 export type TelegramRegistration = typeof telegramRegistrations.$inferSelect;

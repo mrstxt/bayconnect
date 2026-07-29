@@ -28,6 +28,7 @@ src/
       providers/by-ids/    Sevimlilar uchun providerlarni olish
       subscriptions/intent/ Obuna yoki promokod intent yaratish
       community/access/    BayCommunity access so'rovi
+      telegram/verify/     Telegram username tasdiqlash
       telegram/webhook/    Telegram bot webhook
       telegram/setup/      Telegram webhookni sozlash
       health/              DB health check
@@ -73,6 +74,7 @@ curl http://localhost:3000/api/health
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require"
 NEXT_PUBLIC_SITE_URL="http://localhost:3000"
 TELEGRAM_BOT_TOKEN=""
+TELEGRAM_BOT_USERNAME=""
 TELEGRAM_WEBHOOK_SECRET=""
 TELEGRAM_COMMUNITY_CHAT_ID=""
 ```
@@ -86,6 +88,7 @@ Vercel dashboard: Project → Settings → Environment Variables.
 | `DATABASE_URL` | Neon/Supabase/Postgres connection string | Pooled Postgres URL, `sslmode=require` bilan |
 | `NEXT_PUBLIC_SITE_URL` | Deploy domain | `https://your-domain.uz` yoki Vercel production URL |
 | `TELEGRAM_BOT_TOKEN` | BotFather | `123456:ABC...` ko'rinishidagi token |
+| `TELEGRAM_BOT_USERNAME` | BotFather | `BayConnectBot` ko'rinishida, `@` belgisisiz |
 | `TELEGRAM_WEBHOOK_SECRET` | O'zingiz yaratasiz | Uzun random matn, masalan `openssl rand -hex 32` |
 | `TELEGRAM_COMMUNITY_CHAT_ID` | BayCommunity yopiq guruhi | Masalan `-1001234567890`; bot guruhda admin bo'lishi kerak |
 
@@ -108,6 +111,7 @@ Asosiy jadvallar:
 | `promo_codes` | 1 yoki 3 oy bepul access beruvchi promokodlar |
 | `subscriptions` | Mutaxassis va community obuna holatlari |
 | `community_access_requests` | BayCommunity guruhiga kirish so'rovlari |
+| `telegram_verifications` | Saytdan botga o'tib Telegram username tasdiqlash tokenlari |
 
 Jadvallarni yaratish yoki yangilash:
 
@@ -229,15 +233,18 @@ curl "https://api.telegram.org/bot<TOKEN>/getWebhookInfo"
 Bot hech qachon faqat `/start` bosilgani uchun mutaxassisni ro'yxatdan o'tkazmaydi. Avval saytda obuna yoki promokod active bo'lishi shart.
 
 1. Mutaxassis `/register` sahifasida `Start`, `Pro` yoki `Premium` tarifini tanlaydi.
-2. `Obuna bo'lish` modalida ism, telefon, Telegram username va promokod kiritadi.
-3. Promokod to'g'ri bo'lsa `subscriptions.status = active` bo'ladi.
-4. Mutaxassis botga `/start` yoki `/register` yuboradi.
-5. Bot `telegram_user_id` yoki `telegram_username` bo'yicha active mutaxassis obunasini tekshiradi.
-6. Active obuna topilmasa, bot profil yaratishni boshlamaydi va saytga qaytaradi.
-7. Active obuna topilsa, bot telefon, ism, email, kategoriya, shahar, tillar, narx, tajriba va bio so'raydi.
-8. Kategoriya `Transfer` bo'lsa, avtomobil turi va o'rindiqlar soni majburiy so'raladi.
-9. Profil `providers` jadvaliga yoziladi, `subscriptions.provider_id` shu profilga ulanadi.
-10. Keyingi bookinglar shu Telegram chatga yuboriladi.
+2. `Obuna bo'lish` modalida `Telegram orqali tasdiqlash` tugmasini bosadi.
+3. Sayt botga `?start=verify_<token>` deep-link bilan o'tkazadi.
+4. Bot tokenni `telegram_verifications` jadvalidan topib, Telegram username va user ID'ni tasdiqlaydi.
+5. Mutaxassis saytga qaytib, ism, telefon va promokodni kiritadi.
+6. Promokod to'g'ri bo'lsa `subscriptions.status = active` bo'ladi.
+7. Mutaxassis botga `/start` yoki `/register` yuboradi.
+8. Bot `telegram_user_id` yoki `telegram_username` bo'yicha active mutaxassis obunasini tekshiradi.
+9. Active obuna topilmasa, bot profil yaratishni boshlamaydi va saytga qaytaradi.
+10. Active obuna topilsa, bot telefon, ism, email, kategoriya, shahar, tillar, narx, tajriba va bio so'raydi.
+11. Kategoriya `Transfer` bo'lsa, avtomobil turi va o'rindiqlar soni majburiy so'raladi.
+12. Profil `providers` jadvaliga yoziladi, `subscriptions.provider_id` shu profilga ulanadi.
+13. Keyingi bookinglar shu Telegram chatga yuboriladi.
 
 ### BayCommunity Bot Oqimi
 
@@ -275,6 +282,8 @@ Eski va yangi erkin matnlarni ham avtomatik tarjima qilish mumkin, lekin buning 
 | `/api/providers/by-ids` | POST | IDlar bo'yicha providerlarni qaytaradi |
 | `/api/subscriptions/intent` | POST | Tarif obunasi yoki promokod intent yaratadi |
 | `/api/community/access` | POST | BayCommunity access so'rovi yaratadi |
+| `/api/telegram/verify/start` | POST | Bot orqali username tasdiqlash tokeni va link yaratadi |
+| `/api/telegram/verify/status` | GET | Telegram tasdiqlash statusini qaytaradi |
 | `/api/bookings` | POST | Buyurtma yaratadi va Telegramga xabar yuboradi |
 | `/api/telegram/webhook` | POST | Telegram update qabul qiladi |
 | `/api/telegram/setup?secret=...` | GET | Telegram webhookni o'rnatadi |

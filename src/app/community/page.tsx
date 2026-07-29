@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { COMMUNITY_PLAN } from "@/lib/brand";
 import { CheckIcon, UsersIcon } from "@/components/Icon";
-import { CommunityAccessForm } from "./CommunityAccessForm";
+import { SubscribeButton } from "../register/SubscribeButton";
 
 export const metadata: Metadata = {
   title: "BayCommunity",
@@ -50,9 +50,9 @@ export default function CommunityPage() {
               <div>
                 <div className="text-[15px] font-black text-[#123f34]">Tizim qanday ishlaydi?</div>
                 <p className="mt-1 text-[13px] leading-relaxed text-[#66716d]">
-                  Saytda username va promokod/to'lov tekshiriladi. Keyin foydalanuvchi
-                  yopiq Telegram guruhiga join request yuboradi. Bot ruxsatni bazadan
-                  tekshiradi va avtomatik tasdiqlaydi.
+                  Saytda Telegram profilingiz bot orqali tasdiqlanadi va promokod tekshiriladi.
+                  Keyin foydalanuvchi yopiq Telegram guruhiga join request yuboradi. Bot ruxsatni
+                  bazadan tekshiradi va avtomatik tasdiqlaydi.
                 </p>
               </div>
             </div>
@@ -77,7 +77,7 @@ export default function CommunityPage() {
           </div>
 
           <div className="mt-6">
-            <CommunityAccessForm />
+            <SubscribeButton audience="community" planKey={COMMUNITY_PLAN.key} label="Communityga qo'shilish" />
           </div>
         </aside>
       </div>

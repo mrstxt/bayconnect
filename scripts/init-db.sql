@@ -109,6 +109,16 @@ CREATE TABLE "community_access_requests" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "telegram_verifications" (
+	"token" varchar(80) PRIMARY KEY NOT NULL,
+	"telegram_user_id" varchar(32),
+	"telegram_username" varchar(80),
+	"status" varchar(30) DEFAULT 'pending' NOT NULL,
+	"expires_at" timestamp with time zone NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "reviews" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"provider_id" integer NOT NULL,
@@ -153,5 +163,7 @@ CREATE INDEX "subscriptions_status_expires_idx" ON "subscriptions" USING btree (
 CREATE INDEX "community_access_username_idx" ON "community_access_requests" USING btree ("telegram_username");--> statement-breakpoint
 CREATE INDEX "community_access_user_idx" ON "community_access_requests" USING btree ("telegram_user_id");--> statement-breakpoint
 CREATE INDEX "community_access_status_idx" ON "community_access_requests" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "telegram_verifications_status_idx" ON "telegram_verifications" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "telegram_verifications_expires_idx" ON "telegram_verifications" USING btree ("expires_at");--> statement-breakpoint
 CREATE INDEX "reviews_provider_created_idx" ON "reviews" USING btree ("provider_id","created_at");--> statement-breakpoint
 CREATE INDEX "telegram_registrations_updated_idx" ON "telegram_registrations" USING btree ("updated_at");

@@ -2,7 +2,13 @@ import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { and, desc, eq, gt, or } from "drizzle-orm";
 import { db } from "@/db";
-import { communityAccessRequests, providers, subscriptions, telegramRegistrations } from "@/db/schema";
+import {
+  communityAccessRequests,
+  providers,
+  subscriptions,
+  telegramRegistrations,
+  telegramVerifications,
+} from "@/db/schema";
 import { CACHE_TAGS } from "@/lib/queries";
 import { clean, cleanMultiline, isValidEmail, isValidPhone } from "@/lib/validation";
 import {
@@ -59,6 +65,10 @@ function commandOf(text: string): string {
   const first = text.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
   // Public/group botlarda Telegram commandni /start@BotUsername shaklida yuboradi.
   return first.replace(/@\w+$/, "");
+}
+
+function commandPayload(text: string): string {
+  return clean(text.trim().split(/\s+/).slice(1).join(" "), 120);
 }
 
 function normalizeUsername(value: string | undefined): string {
@@ -214,6 +224,55 @@ export async function POST(req: Request) {
 
   const text = clean(message?.text, 2000);
   const command = commandOf(text);
+  const payload = commandPayload(text);
+
+  if (command === "/start" && payload.startsWith("verify_")) {
+    const token = payload.replace(/^verify_/, "");
+    if (!/^[a-f0-9]{48}$/.test(token)) {
+      await telegramSendMessage(chatId, "Tasdiqlash havolasi noto'g'ri. Saytdan qayta urinib ko'ring.");
+      return NextResponse.json({ ok: true });
+    }
+    if (!from.username) {
+      await telegramSendMessage(
+        chatId,
+        "Telegram username topilmadi. Telegram sozlamalaridan username oching, keyin saytdan qayta tasdiqlang.",
+      );
+      return NextResponse.json({ ok: true });
+    }
+
+    const now = new Date();
+    const [verification] = await db
+      .select()
+      .from(telegramVerifications)
+      .where(eq(telegramVerifications.token, token))
+      .limit(1);
+
+    if (!verification || verification.expiresAt <= now) {
+      await telegramSendMessage(chatId, "Tasdiqlash muddati tugagan. Saytga qaytib, qayta tasdiqlang.");
+      return NextResponse.json({ ok: true });
+    }
+
+    await db
+      .update(telegramVerifications)
+      .set({
+        telegramUserId: String(from.id),
+        telegramUsername: normalizeUsername(from.username),
+        status: "verified",
+        updatedAt: now,
+      })
+      .where(eq(telegramVerifications.token, token));
+
+    await telegramSendMessage(
+      chatId,
+      `✅ Telegram profilingiz tasdiqlandi: @${from.username}\n\nEndi saytga qaytib, qolgan maydonlarni to'ldiring va obunani yoqing.`,
+      {
+        reply_markup: {
+          inline_keyboard: [[{ text: "Saytga qaytish", url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://bayconnect.uz"}/register` }]],
+        },
+      },
+    );
+    return NextResponse.json({ ok: true });
+  }
 
   if (command === "/delete") {
     const [provider] = await db

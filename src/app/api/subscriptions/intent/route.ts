@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { and, eq, or, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { communityAccessRequests, promoCodes, subscriptions } from "@/db/schema";
+import { communityAccessRequests, promoCodes, subscriptions, telegramVerifications } from "@/db/schema";
 import { COMMUNITY_PLAN, SPECIALIST_PLANS } from "@/lib/brand";
 import {
   clean,
@@ -20,6 +20,7 @@ type Body = {
   fullName?: unknown;
   phone?: unknown;
   telegramUsername?: unknown;
+  telegramVerificationToken?: unknown;
   promoCode?: unknown;
   method?: unknown;
 };
@@ -62,7 +63,8 @@ export async function POST(req: Request) {
   const planKey = clean(body.planKey, 40);
   const fullName = clean(body.fullName, 160);
   const phone = clean(body.phone, 40);
-  const telegramUsername = normalizeUsername(body.telegramUsername);
+  const telegramVerificationToken = clean(body.telegramVerificationToken, 80);
+  let telegramUsername = normalizeUsername(body.telegramUsername);
   const promoCode = normalizeCode(body.promoCode);
   const method = clean(body.method, 20) || "promo";
 
@@ -78,8 +80,34 @@ export async function POST(req: Request) {
 
   if (fullName.length < 2) return NextResponse.json({ error: "Ism juda qisqa" }, { status: 400 });
   if (!isValidPhone(phone)) return NextResponse.json({ error: "Telefon raqami noto'g'ri" }, { status: 400 });
+  if (!/^[a-f0-9]{48}$/.test(telegramVerificationToken)) {
+    return NextResponse.json({ error: "Avval Telegram profilingizni tasdiqlang" }, { status: 400 });
+  }
+
+  try {
+    const [verification] = await db
+      .select()
+      .from(telegramVerifications)
+      .where(eq(telegramVerifications.token, telegramVerificationToken))
+      .limit(1);
+
+    if (!verification || verification.status !== "verified" || verification.expiresAt <= new Date()) {
+      return NextResponse.json({ error: "Telegram tasdiqlanmagan yoki muddati tugagan" }, { status: 400 });
+    }
+    telegramUsername = normalizeUsername(verification.telegramUsername ?? "");
+  } catch (error) {
+    console.error("[api/subscriptions/intent] telegram verify xato:", error);
+    if (isMissingTableError(error)) {
+      return NextResponse.json(
+        { error: "Production baza yangilanmagan. Admin migrationni ishga tushirishi kerak." },
+        { status: 503 },
+      );
+    }
+    return NextResponse.json({ error: "Server xatosi. Keyinroq urinib ko'ring." }, { status: 500 });
+  }
+
   if (!/^[a-z0-9_]{5,32}$/.test(telegramUsername)) {
-    return NextResponse.json({ error: "Telegram username noto'g'ri. Masalan: bayconnect_user" }, { status: 400 });
+    return NextResponse.json({ error: "Telegram username topilmadi. Telegramda username ochib qayta tasdiqlang." }, { status: 400 });
   }
 
   const now = new Date();

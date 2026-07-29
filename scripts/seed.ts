@@ -9,6 +9,7 @@ import {
   posts,
   subscriptionPlans,
   subscriptions,
+  telegramVerifications,
 } from "../src/db/schema";
 
 /**
@@ -31,6 +32,7 @@ async function main() {
   await db.delete(bookings);
   await db.delete(communityAccessRequests);
   await db.delete(subscriptions);
+  await db.delete(telegramVerifications);
   await db.delete(promoCodes);
   await db.delete(subscriptionPlans);
   await db.delete(reviews);

@@ -15,6 +15,18 @@ type Result = {
   error?: string;
 };
 
+type VerifyStart = {
+  token?: string;
+  botUrl?: string;
+  error?: string;
+};
+
+type VerifyStatus = {
+  status?: string;
+  telegramUsername?: string | null;
+  error?: string;
+};
+
 export function SubscribeButton({
   audience,
   planKey,
@@ -25,9 +37,18 @@ export function SubscribeButton({
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [result, setResult] = useState<Result>({});
   const [paymentSoon, setPaymentSoon] = useState(false);
+  const [verificationToken, setVerificationToken] = useState("");
+  const [verifiedUsername, setVerifiedUsername] = useState("");
+  const [verifyStatus, setVerifyStatus] = useState<"idle" | "loading" | "pending" | "verified" | "error">("idle");
+  const [verifyError, setVerifyError] = useState("");
 
   async function submit(form: HTMLFormElement, method: "promo" | "payment") {
     if (status === "loading") return;
+    if (!verificationToken || !verifiedUsername) {
+      setStatus("error");
+      setResult({ error: "Avval Telegram profilingizni tasdiqlang" });
+      return;
+    }
     setStatus("loading");
     setResult({});
 
@@ -38,7 +59,8 @@ export function SubscribeButton({
       method,
       fullName: String(formData.get("fullName") ?? ""),
       phone: String(formData.get("phone") ?? ""),
-      telegramUsername: String(formData.get("telegramUsername") ?? ""),
+      telegramUsername: verifiedUsername,
+      telegramVerificationToken: verificationToken,
       promoCode: String(formData.get("promoCode") ?? ""),
     };
 
@@ -55,6 +77,56 @@ export function SubscribeButton({
     } catch (err) {
       setResult({ error: err instanceof Error ? err.message : "Xatolik" });
       setStatus("error");
+    }
+  }
+
+  async function startTelegramVerification() {
+    setVerifyStatus("loading");
+    setVerifyError("");
+    setVerifiedUsername("");
+
+    try {
+      const res = await fetch("/api/telegram/verify/start", { method: "POST" });
+      const json = (await res.json().catch(() => ({}))) as VerifyStart;
+      if (!res.ok || !json.token || !json.botUrl) {
+        throw new Error(json.error ?? "Telegram tasdiqlash ochilmadi");
+      }
+      setVerificationToken(json.token);
+      setVerifyStatus("pending");
+      window.open(json.botUrl, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      setVerifyStatus("error");
+      setVerifyError(err instanceof Error ? err.message : "Xatolik");
+    }
+  }
+
+  async function checkTelegramVerification() {
+    if (!verificationToken) {
+      setVerifyStatus("error");
+      setVerifyError("Avval tasdiqlashni boshlang");
+      return;
+    }
+
+    setVerifyStatus("loading");
+    setVerifyError("");
+
+    try {
+      const res = await fetch(`/api/telegram/verify/status?token=${encodeURIComponent(verificationToken)}`);
+      const json = (await res.json().catch(() => ({}))) as VerifyStatus;
+      if (!res.ok) throw new Error(json.error ?? "Tasdiqlash tekshirilmadi");
+      if (json.status === "verified" && json.telegramUsername) {
+        setVerifiedUsername(json.telegramUsername);
+        setVerifyStatus("verified");
+      } else if (json.status === "expired") {
+        setVerifyStatus("error");
+        setVerifyError("Tasdiqlash muddati tugagan. Qayta tasdiqlang.");
+      } else {
+        setVerifyStatus("pending");
+        setVerifyError("Hali tasdiqlanmadi. Botda /start bosib qayting.");
+      }
+    } catch (err) {
+      setVerifyStatus("error");
+      setVerifyError(err instanceof Error ? err.message : "Xatolik");
     }
   }
 
@@ -83,6 +155,10 @@ export function SubscribeButton({
                   setStatus("idle");
                   setResult({});
                   setPaymentSoon(false);
+                  setVerificationToken("");
+                  setVerifiedUsername("");
+                  setVerifyStatus("idle");
+                  setVerifyError("");
                 }}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-[#123f34]/[0.06] text-[20px] text-[#123f34]"
                 aria-label="Yopish"
@@ -104,9 +180,41 @@ export function SubscribeButton({
               <Field label="Telefon">
                 <input name="phone" required className="input-apple" placeholder="+998 90 123 45 67" />
               </Field>
-              <Field label="Telegram username">
-                <input name="telegramUsername" required className="input-apple" placeholder="username yoki @username" />
-              </Field>
+              <div>
+                <span className="mb-2 block text-[12px] font-semibold tracking-[0.08em] uppercase text-[#86868b]">
+                  Telegram
+                </span>
+                <div className="rounded-2xl border border-[#123f34]/[0.08] bg-[#f8fbfa] p-3">
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <button
+                      type="button"
+                      onClick={startTelegramVerification}
+                      disabled={verifyStatus === "loading"}
+                      className="btn-primary !px-4 !py-3 text-[13px]"
+                    >
+                      {verificationToken ? "Qayta tasdiqlash" : "Telegram orqali tasdiqlash"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={checkTelegramVerification}
+                      disabled={!verificationToken || verifyStatus === "loading"}
+                      className="btn-ghost !px-4 !py-3 text-[13px]"
+                    >
+                      Tasdiqlashni tekshirish
+                    </button>
+                  </div>
+                  {verifiedUsername ? (
+                    <div className="mt-3 rounded-xl bg-[#eaf4ef] px-3 py-2 text-[13px] font-semibold text-[#006b55]">
+                      Tasdiqlandi: @{verifiedUsername}
+                    </div>
+                  ) : null}
+                  {verifyError ? (
+                    <div className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-[13px] text-red-600">
+                      {verifyError}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
               <Field label="Promokod">
                 <input name="promoCode" className="input-apple" placeholder="Promokod bo'lsa kiriting" />
               </Field>
