@@ -195,6 +195,8 @@ Endpoint Telegramga quyidagi webhookni o'rnatadi:
 https://YOUR_DOMAIN/api/telegram/webhook
 ```
 
+Webhook `message`, `callback_query` va `chat_join_request` update turlarini yoqadi. BayCommunity arizalarini bot avtomatik ko'rishi uchun `chat_join_request` shart.
+
 ## Bot Ishlamayaptimi? (Troubleshooting)
 
 Avval diagnostikani ishga tushiring — muammoni o'zi topib, yechimni yozib beradi:

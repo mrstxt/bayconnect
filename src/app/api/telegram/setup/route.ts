@@ -13,10 +13,13 @@ const BOT_COMMANDS = [
 
 type WebhookInfo = {
   url?: string;
+  allowed_updates?: string[];
   pending_update_count?: number;
   last_error_message?: string;
   last_error_date?: number;
 };
+
+const ALLOWED_UPDATES = ["message", "callback_query", "chat_join_request"];
 
 async function telegramApi<T>(token: string, method: string, body?: Record<string, unknown>) {
   const response = await fetch(`${API}/bot${token}/${method}`, {
@@ -83,7 +86,9 @@ export async function GET(req: Request) {
   //    rate-limit qiladi va takroriy so'rovlar 429 bilan rad etilardi.
   //    (?force=1 bilan majburlash mumkin — masalan, secret almashtirilganda.)
   const force = url.searchParams.get("force") === "1";
-  const alreadySet = infoBefore.ok && infoBefore.result?.url === webhookUrl;
+  const currentAllowed = infoBefore.result?.allowed_updates ?? [];
+  const allowedUpdatesOk = ALLOWED_UPDATES.every((update) => currentAllowed.includes(update));
+  const alreadySet = infoBefore.ok && infoBefore.result?.url === webhookUrl && allowedUpdatesOk;
 
   if (alreadySet && !force) {
     const commands = await telegramApi(token, "setMyCommands", { commands: BOT_COMMANDS });
@@ -104,7 +109,7 @@ export async function GET(req: Request) {
     telegramApi(token, "setWebhook", {
       url: webhookUrl,
       secret_token: secret,
-      allowed_updates: ["message", "callback_query"],
+      allowed_updates: ALLOWED_UPDATES,
       drop_pending_updates: false,
     }),
   ]);

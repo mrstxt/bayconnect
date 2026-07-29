@@ -277,7 +277,7 @@ export function SubscribeButton({
                     </div>
                   ) : null}
                   <div className="rounded-2xl border border-[#006b55]/15 bg-[#eaf4ef] px-4 py-3 text-[13px] leading-relaxed text-[#123f34]">
-                    <b>{result.status === "active" ? "Obuna yoqildi." : "So'rov qabul qilindi."}</b>{" "}
+                    <b>{result.status === "active" ? "Obuna bo'ldingiz. OK." : "So'rov qabul qilindi."}</b>{" "}
                     {result.nextStep}
                   </div>
                 </>
