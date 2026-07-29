@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type SubscribeButtonProps = {
   audience: "specialist" | "community";
@@ -100,15 +100,17 @@ export function SubscribeButton({
     }
   }
 
-  async function checkTelegramVerification() {
+  const checkTelegramVerification = useCallback(async ({ silent = false }: { silent?: boolean } = {}) => {
     if (!verificationToken) {
       setVerifyStatus("error");
       setVerifyError("Avval tasdiqlashni boshlang");
       return;
     }
 
-    setVerifyStatus("loading");
-    setVerifyError("");
+    if (!silent) {
+      setVerifyStatus("loading");
+      setVerifyError("");
+    }
 
     try {
       const res = await fetch(`/api/telegram/verify/status?token=${encodeURIComponent(verificationToken)}`);
@@ -122,13 +124,34 @@ export function SubscribeButton({
         setVerifyError("Tasdiqlash muddati tugagan. Qayta tasdiqlang.");
       } else {
         setVerifyStatus("pending");
-        setVerifyError("Hali tasdiqlanmadi. Botda /start bosib qayting.");
+        if (!silent) setVerifyError("Hali tasdiqlanmadi. Botda /start bosib qayting.");
       }
     } catch (err) {
       setVerifyStatus("error");
       setVerifyError(err instanceof Error ? err.message : "Xatolik");
     }
-  }
+  }, [verificationToken]);
+
+  useEffect(() => {
+    if (!open || !verificationToken || verifiedUsername || verifyStatus !== "pending") return;
+
+    const check = () => {
+      if (document.visibilityState === "visible") {
+        void checkTelegramVerification({ silent: true });
+      }
+    };
+
+    const interval = window.setInterval(check, 2000);
+    window.addEventListener("focus", check);
+    document.addEventListener("visibilitychange", check);
+    check();
+
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", check);
+      document.removeEventListener("visibilitychange", check);
+    };
+  }, [checkTelegramVerification, open, verificationToken, verifiedUsername, verifyStatus]);
 
   return (
     <>
@@ -185,29 +208,39 @@ export function SubscribeButton({
                   Telegram
                 </span>
                 <div className="rounded-2xl border border-[#123f34]/[0.08] bg-[#f8fbfa] p-3">
-                  <div className="flex flex-col gap-2 sm:flex-row">
-                    <button
-                      type="button"
-                      onClick={startTelegramVerification}
-                      disabled={verifyStatus === "loading"}
-                      className="btn-primary !px-4 !py-3 text-[13px]"
-                    >
-                      {verificationToken ? "Qayta tasdiqlash" : "Telegram orqali tasdiqlash"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={checkTelegramVerification}
-                      disabled={!verificationToken || verifyStatus === "loading"}
-                      className="btn-ghost !px-4 !py-3 text-[13px]"
-                    >
-                      Tasdiqlashni tekshirish
-                    </button>
-                  </div>
                   {verifiedUsername ? (
-                    <div className="mt-3 rounded-xl bg-[#eaf4ef] px-3 py-2 text-[13px] font-semibold text-[#006b55]">
-                      Tasdiqlandi: @{verifiedUsername}
+                    <div className="rounded-xl bg-[#eaf4ef] px-3 py-2 text-[13px] font-semibold text-[#006b55]">
+                      Profil tasdiqlandi: @{verifiedUsername}
                     </div>
-                  ) : null}
+                  ) : (
+                    <>
+                      <div className="flex flex-col gap-2 sm:flex-row">
+                        <button
+                          type="button"
+                          onClick={startTelegramVerification}
+                          disabled={verifyStatus === "loading"}
+                          className="btn-primary !px-4 !py-3 text-[13px]"
+                        >
+                          {verificationToken ? "Qayta tasdiqlash" : "Telegram orqali tasdiqlash"}
+                        </button>
+                        {verificationToken ? (
+                          <button
+                            type="button"
+                            onClick={() => checkTelegramVerification()}
+                            disabled={verifyStatus === "loading"}
+                            className="btn-ghost !px-4 !py-3 text-[13px]"
+                          >
+                            Tasdiqlashni tekshirish
+                          </button>
+                        ) : null}
+                      </div>
+                      {verifyStatus === "pending" && !verifyError ? (
+                        <div className="mt-3 rounded-xl bg-[#f4fbf8] px-3 py-2 text-[13px] font-semibold text-[#006b55]">
+                          Botda /start bosing. Sayt avtomatik tekshiradi.
+                        </div>
+                      ) : null}
+                    </>
+                  )}
                   {verifyError ? (
                     <div className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-[13px] text-red-600">
                       {verifyError}
