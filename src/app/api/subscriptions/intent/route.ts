@@ -10,6 +10,7 @@ import {
   rateLimit,
   readJson,
 } from "@/lib/validation";
+import { telegramCreateJoinRequestInviteLink } from "@/lib/telegram";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -178,6 +179,11 @@ export async function POST(req: Request) {
         .where(eq(promoCodes.code, promoCode));
     }
 
+    const communityJoinUrl =
+      status === "active"
+        ? await telegramCreateJoinRequestInviteLink(`BayCommunity ${subscription.id}`)
+        : null;
+
     return NextResponse.json({
       ok: true,
       id: subscription.id,
@@ -185,12 +191,11 @@ export async function POST(req: Request) {
       status,
       freeMonths,
       expiresAt: expiresAt?.toISOString() ?? null,
+      communityJoinUrl,
       nextStep:
-        status === "active" && audience === "specialist"
-          ? "Endi Telegram botga /start yuboring. Bot obunangizni tekshiradi va profilingizni saytga joylashga ruxsat beradi."
-          : status === "active"
-            ? "Endi BayCommunity yopiq guruhiga join request yuboring. Bot tekshiradi va tasdiqlaydi."
-            : "To'lov integratsiyasi orqali to'lov tasdiqlangach obuna active bo'ladi.",
+        status === "active"
+          ? "BayCommunity guruhiga kirish uchun bot taklif havolasi orqali ariza yuboring. Bot profilingizni tekshiradi va mos bo'lsa tasdiqlaydi."
+          : "To'lov integratsiyasi orqali to'lov tasdiqlangach obuna active bo'ladi.",
     });
   } catch (error) {
     console.error("[api/subscriptions/intent] xato:", error);

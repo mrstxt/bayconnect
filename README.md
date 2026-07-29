@@ -77,6 +77,7 @@ TELEGRAM_BOT_TOKEN=""
 TELEGRAM_BOT_USERNAME=""
 TELEGRAM_WEBHOOK_SECRET=""
 TELEGRAM_COMMUNITY_CHAT_ID=""
+TELEGRAM_COMMUNITY_INVITE_URL=""
 ```
 
 ### Vercel Envga Nima Joylanadi
@@ -91,6 +92,7 @@ Vercel dashboard: Project → Settings → Environment Variables.
 | `TELEGRAM_BOT_USERNAME` | BotFather | `BayConnectBot` ko'rinishida, `@` belgisisiz |
 | `TELEGRAM_WEBHOOK_SECRET` | O'zingiz yaratasiz | Uzun random matn, masalan `openssl rand -hex 32` |
 | `TELEGRAM_COMMUNITY_CHAT_ID` | BayCommunity yopiq guruhi | Masalan `-1001234567890`; bot guruhda admin bo'lishi kerak |
+| `TELEGRAM_COMMUNITY_INVITE_URL` | Telegram invite link | Ixtiyoriy fallback; bo'sh bo'lsa bot join-request link yaratishga urinadi |
 
 Vercel preview muhitida ham alohida `NEXT_PUBLIC_SITE_URL` qo'ysangiz canonical URL va Telegram setup to'g'ri ishlaydi.
 
@@ -164,6 +166,7 @@ Oddiy foydalanuvchilar va mijozlar uchun alohida `BayCommunity` obunasi bor.
 - `To'lov qilish` hozircha "tez kunda" xabarini chiqaradi;
 - active mutaxassis obunasi bo'lsa, bot profil yaratish jarayonini boshlaydi;
 - active community obunasi bo'lsa, bot yopiq guruh join requestini tasdiqlaydi.
+- active obunadan keyin modal BayCommunity join-request taklif havolasini chiqaradi.
 
 Promokod ishlatilganda `subscriptions.status = active`, `expires_at` esa promokod oyiga qarab 1 yoki 3 oy keyinga yoziladi.
 

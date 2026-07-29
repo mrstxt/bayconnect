@@ -61,3 +61,39 @@ export async function telegramDeclineChatJoinRequest(
     return false;
   }
 }
+
+type InviteLinkResponse = {
+  ok?: boolean;
+  result?: { invite_link?: string };
+  description?: string;
+};
+
+export async function telegramCreateJoinRequestInviteLink(name = "BayCommunity"): Promise<string | null> {
+  const configured = process.env.TELEGRAM_COMMUNITY_INVITE_URL?.trim();
+  if (configured) return configured;
+
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_COMMUNITY_CHAT_ID;
+  if (!token || !chatId) return null;
+
+  try {
+    const response = await fetch(`${API}/bot${token}/createChatInviteLink`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        name: name.slice(0, 32),
+        creates_join_request: true,
+      }),
+    });
+    const json = (await response.json().catch(() => null)) as InviteLinkResponse | null;
+    if (!response.ok || !json?.result?.invite_link) {
+      console.error("[telegram] createChatInviteLink:", json?.description ?? response.statusText);
+      return null;
+    }
+    return json.result.invite_link;
+  } catch (error) {
+    console.error("[telegram] createChatInviteLink xatosi:", error);
+    return null;
+  }
+}

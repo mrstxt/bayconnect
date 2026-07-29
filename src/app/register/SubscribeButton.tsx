@@ -12,6 +12,7 @@ type SubscribeButtonProps = {
 type Result = {
   status?: string;
   nextStep?: string;
+  communityJoinUrl?: string | null;
   error?: string;
 };
 
@@ -253,10 +254,33 @@ export function SubscribeButton({
               </Field>
 
               {status === "done" ? (
-                <div className="rounded-2xl border border-[#006b55]/15 bg-[#eaf4ef] px-4 py-3 text-[13px] leading-relaxed text-[#123f34]">
-                  <b>{result.status === "active" ? "Obuna yoqildi." : "So'rov qabul qilindi."}</b>{" "}
-                  {result.nextStep}
-                </div>
+                <>
+                  {result.status === "active" ? (
+                    <div className="rounded-2xl border border-[#006b55]/15 bg-[#f4fbf8] px-4 py-3 text-[13px] leading-relaxed text-[#123f34]">
+                      <b>BayCommunityga kirish arizasi.</b>{" "}
+                      Guruhga kirish uchun bot taklif havolasi orqali ariza yuboring. Bot Telegram
+                      profilingizni tekshiradi va username mos bo'lsa avtomatik tasdiqlaydi.
+                      {result.communityJoinUrl ? (
+                        <a
+                          href={result.communityJoinUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-primary mt-3 w-full !py-3 text-center text-[13px]"
+                        >
+                          BayCommunityga ariza yuborish
+                        </a>
+                      ) : (
+                        <div className="mt-3 rounded-xl bg-white px-3 py-2 text-[12px] font-semibold text-[#006b55]">
+                          Taklif havolasi sozlanmoqda. Bot admin huquqlari va TELEGRAM_COMMUNITY_CHAT_ID env'ini tekshiring.
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
+                  <div className="rounded-2xl border border-[#006b55]/15 bg-[#eaf4ef] px-4 py-3 text-[13px] leading-relaxed text-[#123f34]">
+                    <b>{result.status === "active" ? "Obuna yoqildi." : "So'rov qabul qilindi."}</b>{" "}
+                    {result.nextStep}
+                  </div>
+                </>
               ) : null}
 
               {paymentSoon ? (
